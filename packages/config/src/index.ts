@@ -4,6 +4,7 @@ import * as path from "path";
 const ENV_VARIABLES = [
     "SUPABASE_URL",
     "SUPABASE_KEY", // TODO figure out RLS or how to get the correct permissions to access the database
+    "SUPABASE_CONNECTION_STRING",
     "DISCORD_TOKEN",
     "NODE_ENV",
     "BROADCASTER_CHANNELS",

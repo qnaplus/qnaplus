@@ -5646,6 +5646,11 @@ postcss@^8.3.11, postcss@^8.4.23, postcss@^8.4.39, postcss@^8.4.43, postcss@^8.4
     picocolors "^1.1.0"
     source-map-js "^1.2.1"
 
+postgres@^3.4.5:
+  version "3.4.5"
+  resolved "https://mirrors.garmin.com/repository/npm/postgres/-/postgres-3.4.5.tgz#1ef99e51b0ba9b53cbda8a215dd406725f7d15f9"
+  integrity sha512-cDWgoah1Gez9rN3H4165peY9qfpEo+SA61oQv65O3cRUE1pOEoJWwddwcqKE8XZYjbblOJlYDlLV4h67HrEVDg==
+
 prebuild-install@^7.1.1:
   version "7.1.2"
   resolved "https://registry.npmjs.org/prebuild-install/-/prebuild-install-7.1.2.tgz#a5fd9986f5a6251fbc47e1e5c65de71e68c0a056"

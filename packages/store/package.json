@@ -12,15 +12,17 @@
   "scripts": {
     "build": "tsc --build",
     "populate": "node dist/populate.js",
-    "populate_with_metadata": "node dist/populate_with_metadata.js"
+    "populate_with_metadata": "node dist/populate_with_metadata.js",
+    "create_tables": "node dist/create_tables.js"
   },
   "dependencies": {
     "@qnaplus/config": "1.0.0",
+    "@qnaplus/scraper": "^1.0.0",
     "@supabase/supabase-js": "^2.45.4",
     "diff": "^5.1.0",
     "pino": "^8.17.2",
-    "tus-js-client": "^4.1.0",
-    "@qnaplus/scraper": "^1.0.0"
+    "postgres": "^3.4.5",
+    "tus-js-client": "^4.1.0"
   },
   "devDependencies": {
     "@types/diff": "^5.0.9"
