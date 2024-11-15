@@ -4,6 +4,7 @@ import { LogLevel, SapphireClient, container } from "@sapphire/framework";
 import { ActivityType, GatewayIntentBits, Partials } from "discord.js";
 import { startBroadcaster } from "./broadcaster";
 import { PinoLoggerAdapter } from "./logger_adapter";
+import { doQueueCheck } from "./queue_check";
 
 const pinoLogger = getLoggerInstance("qnabot");
 
@@ -31,6 +32,7 @@ const client = new SapphireClient({
 
 const start = async () => {
     await client.login(config.getenv("DISCORD_TOKEN"));
+    await doQueueCheck(container.logger as PinoLoggerAdapter)
     startBroadcaster(pinoLogger);
 }
 

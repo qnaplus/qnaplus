@@ -38,7 +38,7 @@ const handleProgramBroadcast = async (program: string, questions: ChangeQuestion
     }
 }
 
-const handleOnChange = async (docs: ChangeQuestion[]) => {
+export const handleOnChange = async (docs: ChangeQuestion[]) => {
     const logger = (container.logger as PinoLoggerAdapter).child({ label: "handleOnChange" });
     logger.info(`${docs.length} changes detected`);
     const grouped = groupby(docs, q => q.program);

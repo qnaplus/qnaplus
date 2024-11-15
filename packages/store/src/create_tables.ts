@@ -45,5 +45,12 @@ import postgres from "postgres";
         constraint renotify_queue_id_fkey foreign key (id) references "questions" (id) on update cascade on delete cascade
     ) tablespace pg_default;
    `;
+   await sql`
+   create table public.answer_queue (
+       id text not null,
+       constraint answer_queue_pkey primary key (id),
+       constraint answer_queue_id_fkey foreign key (id) references "questions" (id) on update cascade on delete cascade
+   ) tablespace pg_default;
+  `;
     await sql.end()
 })();

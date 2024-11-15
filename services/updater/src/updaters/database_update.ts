@@ -1,5 +1,5 @@
 import { Logger } from "pino";
-import { getFailures, getMetadata, getQuestion, removeFailures, saveMetadata, updateFailures, upsertQuestions } from "qnaplus";
+import { getFailures, getMetadata, getQuestion, getSupabaseInstance, QnaplusTables, removeFailures, saveMetadata, updateFailures, upsertQuestions } from "qnaplus";
 import { ITERATIVE_BATCH_COUNT, Question, Season, fetchQuestionRange, fetchQuestionsIterative, getOldestUnansweredQuestion, handleIterativeBatch, sleep } from "@qnaplus/scraper";
 
 // TODO: remove once utils are refactored into a package
@@ -43,15 +43,40 @@ const handleFailureUpdate = async (season: Season, logger?: Logger): Promise<Fai
     return { oldest, failures };
 }
 
-export const doDatabaseUpdate = async (_logger?: Logger) => {
+const updateAnswerQueue = async (questions: Question[], logger: Logger) => {
+    const answeredIds = questions.filter(q => q.answered).map(q => q.id);
+    const supabase = getSupabaseInstance();
+    const newAnsweredQuestions = await supabase
+        .from(QnaplusTables.Questions)
+        .select("id")
+        .eq("answered", false)
+        .in("id", answeredIds);
+    if (newAnsweredQuestions.error) {
+        logger.error({ error: newAnsweredQuestions.error }, "An error occurred while trying to find newly answered questions.")
+        return;
+    }
+    if (newAnsweredQuestions.data.length === 0) {
+        logger.info("No new answers detected.");
+        return;
+    }
+    logger.info(`${newAnsweredQuestions.data.length} new answers detected.`);
+    const answerQueueUpsert = await supabase
+        .from(QnaplusTables.AnswerQueue)
+        .upsert(newAnsweredQuestions.data);
+    if (answerQueueUpsert.error) {
+        logger.error({ error: answerQueueUpsert.error }, "An error occurred while updating the answer queue.")
+    }
+}
+
+export const doDatabaseUpdate = async (_logger: Logger) => {
     const logger = _logger?.child({ label: "doDatabaseUpdate" });
-    const { error: metadataError, data } = await getMetadata();
-    if (metadataError) {
-        logger?.error({ error: metadataError }, "Error retrieving question metadata, exiting");
+    const metadata = await getMetadata();
+    if (metadata.error) {
+        logger?.error({ error: metadata.error }, "Error retrieving question metadata, exiting");
         return;
     }
 
-    const { current_season, oldest_unanswered_question } = data;
+    const { current_season, oldest_unanswered_question } = metadata.data;
     const failureUpdateResult = await handleFailureUpdate(current_season as Season, logger);
     logger?.info(`Oldest failure question: ${failureUpdateResult.oldest}`);
     logger?.info(`Stored oldest unanswered question: ${oldest_unanswered_question}`);
@@ -62,9 +87,10 @@ export const doDatabaseUpdate = async (_logger?: Logger) => {
 
     logger?.info(`Starting update from Q&A ${start}`);
     const { questions, failures } = await fetchQuestionsIterative({ logger, start });
+    await updateAnswerQueue(questions, logger);
     const success = await upsertQuestions(questions, { logger });
     if (success) {
-        logger?.info(`Updated ${questions.length} questions.`);
+        logger?.info(`Upserted ${questions.length} questions.`);
     }
 
     const allFailures = unique([...failureUpdateResult.failures, ...failures])
@@ -98,7 +124,7 @@ export const doDatabaseUpdate = async (_logger?: Logger) => {
         return;
     }
 
-    const { error, status, statusText } = await saveMetadata({ ...data, oldest_unanswered_question: `${oldest.id}` });
+    const { error, status, statusText } = await saveMetadata({ ...metadata.data, oldest_unanswered_question: `${oldest.id}` });
     if (error) {
         logger?.error({ error, status, statusText, oldest_unanswered_id: oldest.id }, `Unable to save oldest unanswered question (${oldest.id}) to metadata`);
     } else {

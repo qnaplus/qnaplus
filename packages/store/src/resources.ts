@@ -3,13 +3,15 @@ interface IQnaplusTables {
     Metadata: "metadata";
     RenotifyQueue: "renotify_queue";
     Failures: "failures";
+    AnswerQueue: "answer_queue";
 }
 
 export const QnaplusTables: IQnaplusTables = {
     Questions: "questions",
     Metadata: "metadata",
     RenotifyQueue: "renotify_queue",
-    Failures: "failures"
+    Failures: "failures",
+    AnswerQueue: "answer_queue"
 }
 
 export const QnaplusBuckets = {
