@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import ProgressSpinner from 'primevue/progressspinner';
 import { provide, ref } from 'vue';
-import { database, setupDatabase, getAppData, QnaplusAppData } from "./database"
-import { loadMinisearch } from "./composable/useSearch"
+import { loadOrama } from "./composable/useSearch";
+import { database, getAppData, QnaplusAppData, setupDatabase } from "./database";
 
 const loading = ref<boolean>(true);
 const appdata = ref<QnaplusAppData>();
@@ -18,7 +18,8 @@ const startup = async () => {
         appdata.value = data;
 
         const questions = await database.questions.toArray();
-        await loadMinisearch(questions);
+        // await loadMinisearch(questions);
+        await loadOrama(questions);
 
         loading.value = false
     } catch (e) {
