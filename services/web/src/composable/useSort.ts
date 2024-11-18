@@ -1,4 +1,4 @@
-import { Question } from 'vex-qna-archiver';
+import { Question } from "@qnaplus/scraper";
 import { MaybeRefOrGetter, reactive, ref, toValue, watchEffect } from 'vue';
 import { SortFunction, multisortrules } from '../util/sorting';
 import { Option } from "./types";

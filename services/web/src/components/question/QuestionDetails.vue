@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Question } from 'vex-qna-archiver';
+import { Question } from "@qnaplus/scraper";
 import { isEmpty } from "../../util/strings";
 
 const { question } = defineProps<{ question: Question }>();
