@@ -2,7 +2,7 @@
 import ProgressSpinner from 'primevue/progressspinner';
 import { provide, ref } from 'vue';
 import { database, setupDatabase, getAppData, QnaplusAppData } from "./database"
-import { loadMinisearch } from "./composable/useSearch"
+import { loadIndex, loadMinisearch } from "./composable/useSearch"
 
 const loading = ref<boolean>(true);
 const appdata = ref<QnaplusAppData>();
@@ -18,6 +18,7 @@ const startup = async () => {
         appdata.value = data;
 
         const questions = await database.questions.toArray();
+        loadIndex(questions);
         await loadMinisearch(questions);
 
         loading.value = false
