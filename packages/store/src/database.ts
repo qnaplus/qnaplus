@@ -6,8 +6,12 @@ import { ChangeQuestion, classifyChanges } from "./change_classifier";
 import { PayloadQueue, RenotifyPayload, UpdatePayload } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents, QnaplusTables } from "./resources";
 import { Database } from "./supabase";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { questions } from "./schema";
 
 const supabase = createClient<Database>(config.getenv("SUPABASE_URL"), config.getenv("SUPABASE_KEY"))
+const db = drizzle(config.getenv("SUPABASE_CONNECTION_STRING"));
+
 const METADATA_ROW_ID = 0;
 
 export type StoreOptions = {
@@ -90,8 +94,9 @@ export const insertQuestion = async (data: Question, opts?: StoreOptions) => {
     logger?.trace({ error, status });
 }
 
-export const insertQuestions = async (data: Question[], opts?: StoreOptions) => {
+export const insertQuestions = async (data: typeof questions.$inferInsert[], opts?: StoreOptions) => {
     const logger = opts?.logger?.child({ label: "insertQuestions" });
+    await db.insert(questions).values(data);
     const { error, status } = await supabase.from(QnaplusTables.Questions).insert(data);
     logger?.trace({ error, status });
 }

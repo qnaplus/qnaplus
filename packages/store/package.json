@@ -20,11 +20,13 @@
     "@qnaplus/scraper": "^1.0.0",
     "@supabase/supabase-js": "^2.45.4",
     "diff": "^5.1.0",
+    "drizzle-orm": "^0.39.1",
     "pino": "^8.17.2",
     "postgres": "^3.4.5",
     "tus-js-client": "^4.1.0"
   },
   "devDependencies": {
-    "@types/diff": "^5.0.9"
+    "@types/diff": "^5.0.9",
+    "drizzle-kit": "^0.30.4"
   }
 }
