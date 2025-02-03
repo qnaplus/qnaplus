@@ -28,12 +28,12 @@ type FailureUpdateResult = {
 const handleFailureUpdate = async (season: Season, logger?: Logger): Promise<FailureUpdateResult> => {
     const { error: failuresError, data: storedFailures } = await getFailures();
     if (failuresError) {
-        logger?.error({ error: failuresError }, "Error retrieving failures, continuing based on oldest unanswered question");
+        logger?.error({ error: failuresError }, "Error retrieving failures, continuing based on oldest unanswered question metadata.");
         return { oldest: undefined, failures: [] };
     }
 
     if (storedFailures.length === 0) {
-        logger?.info("No failures found for this update.");
+        logger?.info("No failures found during this failure update.");
         return { oldest: undefined, failures: [] };
     }
 
@@ -51,19 +51,17 @@ const handleFailureUpdate = async (season: Season, logger?: Logger): Promise<Fai
     }
 
     if (questions.length === 0) {
-        logger?.info("No new questions found during failure update.");
+        logger?.info("No new questions resolved during this failure update.");
         return { oldest: undefined, failures };
     }
 
     const newIds = questions.map(q => q.id);
-    logger?.info({ newIds }, `${questions.length} new questions found.`);
+    logger?.info({ newIds }, `${questions.length} new questions resolved from failures.`);
 
-    const success = await upsertQuestions(questions, { logger });
-    if (!success) {
-        // TODO: draw this entire flow out and figure out if this is ok
-        return { oldest: undefined, failures };
-    }
-
+    // TODO: upsertQuestions and removeFailures should be an atomic operation
+    // transactions are not supported by supabse directly, so we may shift to something
+    // like drizzle
+    await upsertQuestions(questions, { logger });
     logger?.info(`Updated failure list.`);
     await removeFailures(newIds);
     logger?.info(`Removed new questions from failure list.`);
@@ -92,9 +90,11 @@ export const doDatabaseUpdate = async (_logger?: Logger) => {
     logger?.info(`Starting update from Q&A ${start}`);
     const { questions, failures } = await fetchQuestionsIterative({ logger, start });
     const success = await upsertQuestions(questions, { logger });
-    if (success) {
-        logger?.info(`Updated ${questions.length} questions.`);
+    if (!success) {
+        logger?.warn(`Failed to upsert ${questions.length}, retrying on next run.`);
+        return;
     }
+    logger?.info(`Updated ${questions.length} questions.`);
 
     const allFailures = unique([...failureUpdateResult.failures, ...failures]);
 
@@ -113,6 +113,9 @@ export const doDatabaseUpdate = async (_logger?: Logger) => {
         logger?.error({ error: failureError }, "Error while updating failures list.");
     }
 
+    /*
+        If the starting question fails, we should consider it as unanswered, giving it a chance to succeed on the next run.
+    */
     const oldestUnansweredFromUpdate = validFailures.includes(`${start}`)
         ? await getQuestion(`${start}`)
         : getOldestUnansweredQuestion(questions, current_season as Season);
@@ -133,7 +136,7 @@ export const doDatabaseUpdate = async (_logger?: Logger) => {
     const { error, status, statusText } = await saveMetadata({ ...metadata.data, oldest_unanswered_question: `${oldest.id}` });
     if (error) {
         logger?.error({ error, status, statusText, oldest_unanswered_id: oldest.id }, `Unable to save oldest unanswered question (${oldest.id}) to metadata`);
-    } else {
-        logger?.info({ oldest_unanswered_id: oldest.id }, `Successfully updated metadata with oldest unanswered question (${oldest.id})`);
+        return;
     }
+    logger?.info({ oldest_unanswered_id: oldest.id }, `Successfully updated metadata with oldest unanswered question (${oldest.id})`);
 }
