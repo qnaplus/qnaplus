@@ -1,22 +1,28 @@
-FROM node:20.11.0-alpine3.19 as base
+FROM node:22.13.1-alpine3.20 as base
 
 WORKDIR /app
 
-# We only copy the dependencies we need
 COPY packages packages
-
 COPY services/bot services/bot
 
-# The global package.json only contains build dependencies
 COPY package.json .
 COPY yarn.lock .
 COPY tsconfig.json .
 COPY tsconfig.base.json .
+
+RUN yarn install && yarn workspace @qnaplus/bot run build
+
+# =======================================================
+
+FROM node:22.13.1-alpine3.20 as production
+
+WORKDIR /app
+
+COPY --from=base /app/yarn.lock .
+COPY --from=base /app/package.json .
+COPY --from=base /app/dist dist
 COPY .env.vault .
 
-RUN yarn install \
-&& yarn workspace @qnaplus/bot run build \
-&& rm -rf node_modules \
-&& yarn install --production
+RUN yarn install --production
 
 CMD yarn bot:start
