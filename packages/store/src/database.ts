@@ -29,7 +29,7 @@ export const getSupabaseInstance = () => {
 
 export const populate = async (logger?: Logger) => {
     const { questions } = await archiverGetAllQuestions({ logger, trySessionRefresh: true });
-    return insertQuestions(questions, { logger });
+    return insertQuestions(questions);
 }
 
 export const populateWithMetadata = async (logger?: Logger) => {
@@ -45,22 +45,16 @@ export const populateWithMetadata = async (logger?: Logger) => {
         ? oldestUnansweredQuestion.id
         : oldestQuestion!.id;
 
-    await insertQuestions(questions, { logger });
+    await db.transaction(async tx => {
+        await tx
+            .insert(schema.questions)
+            .values(questions);
+        await tx
+            .insert(schema.metadata)
+            .values({ id: METADATA_ROW_ID, currentSeason, oldestUnansweredQuestion: oldestQuestionId })
+            .onConflictDoNothing();
+    })
     logger?.info("Successfully populated database");
-
-    await db
-        .insert(schema.metadata)
-        .values({ id: METADATA_ROW_ID, currentSeason, oldestUnansweredQuestion: oldestQuestionId })
-        .onConflictDoNothing();
-    // const { error } = await supabase
-    //     .from(QnaplusTables.Metadata)
-    //     .upsert({ id: METADATA_ROW_ID, current_season: currentSeason, oldest_unanswered_question: oldestQuestionId });
-
-    // if (error) {
-    //     logger?.error({ error }, "Unable to populate question metadata");
-    // } else {
-    //     logger?.info({ oldest_question_id: oldestQuestionId, current_season: currentSeason }, "Successfully populated metadata")
-    // }
 }
 
 export const getQuestion = async (id: Question["id"]): Promise<Question | null> => {
