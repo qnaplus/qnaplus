@@ -1,16 +1,7 @@
 import { ITERATIVE_BATCH_COUNT, Question, Season, fetchQuestionRange, fetchQuestionsIterative, getOldestUnansweredQuestion, handleIterativeBatch, sleep } from "@qnaplus/scraper";
+import { chunk, unique } from "@qnaplus/utils";
 import { Logger } from "pino";
 import { doFailureQuestionUpdate, getFailures, getMetadata, getQuestion, saveMetadata, updateFailures, upsertQuestions } from "qnaplus";
-
-// TODO: remove once utils are refactored into a package
-const chunk = <T>(items: T[], size: number): T[][] => {
-    return items.reduce<T[][]>((chunks, item, i) => {
-        (chunks[Math.floor(i / size)] ??= []).push(item);
-        return chunks;
-    }, []);
-}
-
-const unique = <T>(items: T[]) => items.filter((item, idx, arr) => arr.indexOf(item) === idx);
 
 type FailureUpdateResult = {
     oldest: Question | undefined;

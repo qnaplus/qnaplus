@@ -1,10 +1,10 @@
 import { config } from "@qnaplus/config";
 import { Question } from "@qnaplus/scraper";
+import { trycatch } from "@qnaplus/utils";
 import { createClient } from "@supabase/supabase-js";
 import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";
-import { trycatch } from "./trycatch";
 
 export const supabase = createClient(config.getenv("SUPABASE_URL"), config.getenv("SUPABASE_KEY"))
 export const db = drizzle({

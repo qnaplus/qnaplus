@@ -1,7 +1,7 @@
+import { getAllQuestions as archiverGetAllQuestions, fetchCurrentSeason, getOldestQuestion, getOldestUnansweredQuestion } from "@qnaplus/scraper";
+import { trycatch } from "@qnaplus/utils";
 import pino, { Logger } from "pino";
 import { db, insertQuestions, METADATA_ROW_ID, testConnection } from "../database";
-import { getAllQuestions as archiverGetAllQuestions, fetchCurrentSeason, getOldestUnansweredQuestion, getOldestQuestion } from "@qnaplus/scraper";
-import { trycatch } from "../trycatch";
 import * as schema from "../schema";
 
 export const populate = async (logger?: Logger) => {

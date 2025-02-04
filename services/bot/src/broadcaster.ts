@@ -1,12 +1,11 @@
 import { config } from "@qnaplus/config"
 import { ChangeQuestion, onChange } from "@qnaplus/store"
+import { chunk, groupby } from "@qnaplus/utils"
 import { container } from "@sapphire/framework"
 import { ChannelType, channelMention } from "discord.js"
-import { buildQuestionEmbed } from "./formatting"
-import { PinoLoggerAdapter } from "./logger_adapter"
-import { chunk } from "./util/chunk"
-import { groupby } from "./util/groupby"
 import { Logger } from "pino"
+import { buildQuestionEmbed } from "./formatting"
+import { PinoLoggerAdapter } from "./utils/logger_adapter"
 
 const channels = JSON.parse(config.getenv("BROADCASTER_CHANNELS"));
 

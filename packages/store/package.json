@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@qnaplus/config": "1.0.0",
+    "@qnaplus/utils": "1.0.0",
     "@qnaplus/scraper": "^1.0.0",
     "@supabase/supabase-js": "^2.45.4",
     "diff": "^5.1.0",

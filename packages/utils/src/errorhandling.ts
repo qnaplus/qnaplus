@@ -1,16 +1,16 @@
-type TryResultSuccess<T> = {
+export type TryResultSuccess<T> = {
     ok: true;
     result: T;
     error: null;
 }
 
-type TryResultFailure = {
+export type TryResultFailure = {
     ok: false;
     result: null;
     error: unknown;
 }
 
-type TryResult<T> = TryResultSuccess<T> | TryResultFailure;
+export type TryResult<T> = TryResultSuccess<T> | TryResultFailure;
 
 export const trycatch = async <T>(promise: Promise<T>): Promise<TryResult<T>> => {
     try {

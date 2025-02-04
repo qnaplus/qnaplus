@@ -8,6 +8,9 @@
   "references": [
     {
       "path": "../config"
+    },
+    {
+      "path": "../utils"
     }
   ],
   "include": ["src/**/*"]

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@qnaplus/logger": "1.0.0",
+    "@qnaplus/utils": "1.0.0",
     "@sapphire/decorators": "^6.1.0",
     "@sapphire/discord.js-utilities": "^7.3.0",
     "@sapphire/framework": "^5.2.1",

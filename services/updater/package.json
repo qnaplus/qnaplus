@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@qnaplus/logger": "1.0.0",
+    "@qnaplus/utils": "1.0.0",
     "@qnaplus/scraper": "^1.0.0",
     "croner": "^8.0.2",
     "qnaplus": "1.0.0"

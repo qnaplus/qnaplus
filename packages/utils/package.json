@@ -1,0 +1,15 @@
+{
+    "name": "@qnaplus/utils",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/index.js",
+    "author": "battlesqui_d",
+    "license": "ISC",
+    "scripts": {
+        "build": "tsc --build"
+    },
+    "volta": {
+        "node": "20.11.0",
+        "yarn": "1.22.22"
+    }
+}
