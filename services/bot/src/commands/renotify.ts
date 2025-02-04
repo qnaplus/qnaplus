@@ -1,15 +1,15 @@
+import { Question } from "@qnaplus/scraper";
+import { formatDDMMMYYYY, isValidDate, mmmToMonthNumber } from "@qnaplus/utils";
 import { ApplyOptions } from "@sapphire/decorators";
 import { PaginatedFieldMessageEmbed } from "@sapphire/discord.js-utilities";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import Cron from "croner";
 import { EmbedBuilder, hyperlink, inlineCode } from "discord.js";
-import { QnaplusTables, config, getQuestion, getRenotifyQueue, getSupabaseInstance } from "qnaplus";
-import { Question } from "@qnaplus/scraper";
-import { renotify } from "../interactions";
-import { PinoLoggerAdapter } from "../logger_adapter";
-import { formatDDMMMYYYY, isValidDate, mmmToMonthNumber } from "../util/date";
-import { LoggerSubcommand } from "../util/logger_subcommand";
+import { clearRenotifyQueue, config, getAnsweredQuestionsNewerThanDate, getQuestion, getRenotifyQueue, insertRenotifyQueue } from "qnaplus";
 import { buildQuestionUrl } from "../formatting";
+import { renotify } from "../interactions";
+import { PinoLoggerAdapter } from "../utils/logger_adapter";
+import { LoggerSubcommand } from "../utils/logger_subcommand";
 
 
 @ApplyOptions<Subcommand.Options>({
@@ -53,10 +53,18 @@ export class Renotify extends LoggerSubcommand {
     public async renotifyId(interaction: Subcommand.ChatInputCommandInteraction) {
         const logger = (this.container.logger as PinoLoggerAdapter).child({ label: "renotifyId" });
         const id = interaction.options.getString("id", true);
-        const db = getSupabaseInstance();
 
-        const question = await getQuestion(id);
-        if (question === null) {
+        const { ok, error, result } = await getQuestion(id);
+        if (!ok) {
+            this.logErrorAndReply(
+                logger,
+                interaction,
+                `An error occurred while attempting to retreive question with id ${id}, exiting.`,
+                { error }
+            );
+            return;
+        }
+        if (result === undefined) {
             this.logWarnAndReply(
                 logger,
                 interaction,
@@ -65,14 +73,13 @@ export class Renotify extends LoggerSubcommand {
             return;
         }
 
-        const { error, status, statusText } = await db.from(QnaplusTables.RenotifyQueue)
-            .upsert({ id });
-        if (error) {
+        const { ok: insertOk, error: insertError } = await insertRenotifyQueue([{ id }]);
+        if (!insertOk) {
             this.logErrorAndReply(
                 logger,
                 interaction,
                 `Unable to queue question with id '${id}' for renotification`,
-                { error, status, statusText }
+                { error: insertError }
             );
             return;
         }
@@ -86,8 +93,17 @@ export class Renotify extends LoggerSubcommand {
     public async renotifyBulkId(interaction: Subcommand.ChatInputCommandInteraction) {
         const logger = (this.container.logger as PinoLoggerAdapter).child({ label: "renotifyBulkId" });
         const id = interaction.options.getString("id", true);
-        const question = await getQuestion(id);
-        if (question === null) {
+        const { ok, error, result: question } = await getQuestion(id);
+        if (!ok) {
+            this.logErrorAndReply(
+                logger,
+                interaction,
+                `An error occurred while attempting to retreive question with id ${id}, exiting.`,
+                { error }
+            );
+            return;
+        }
+        if (question === undefined) {
             this.logWarnAndReply(
                 logger,
                 interaction,
@@ -155,17 +171,17 @@ export class Renotify extends LoggerSubcommand {
 
     public async renotifyList(interaction: Subcommand.ChatInputCommandInteraction) {
         const logger = (this.container.logger as PinoLoggerAdapter).child({ label: "renotifyList" });
-        const { data: questions, error, status, statusText } = await getRenotifyQueue();
-        if (error !== null) {
+        const { ok, error, result } = await getRenotifyQueue();
+        if (!ok) {
             this.logErrorAndReply(
                 logger,
                 interaction,
                 "Error retreiving renotify queue.",
-                { error, status, statusText }
+                { error }
             );
             return;
         }
-
+        const questions = result.map(r => r.question);
         if (questions.length === 0) {
             this.logInfoAndReply(
                 logger,
@@ -194,55 +210,41 @@ export class Renotify extends LoggerSubcommand {
 
     public async renotifyCancel(interaction: Subcommand.ChatInputCommandInteraction) {
         const logger = (this.container.logger as PinoLoggerAdapter).child({ label: "renotifyCancel" });
-        const db = getSupabaseInstance();
-        const { count, error, status, statusText } = await db.from(QnaplusTables.RenotifyQueue)
-            .delete({ count: "exact" })
-            .neq("id", "0");
-        if (error) {
+        const { ok, error, result } = await clearRenotifyQueue();
+        if (!ok) {
             this.logErrorAndReply(
                 logger,
                 interaction,
                 "An error occurred while clearing renotify queue.",
-                { error, status, statusText }
+                { error }
             );
             return;
         }
         this.logInfoAndReply(
             logger,
             interaction,
-            `Successfully cleared ${count ?? 0} questions from the renotify queue.`
+            `Successfully cleared ${result.length} questions from the renotify queue.`
         );
     }
 
     private async doRenotifyBulkDate(dateMs: number) {
-        const db = getSupabaseInstance();
-        const {
-            data: ids,
-            error: questionsError,
-            status: questionsStatus,
-            statusText: questionStatusText
-        } = await db.from(QnaplusTables.Questions)
-            .select("id")
-            .eq("answered", true)
-            .gte("askedTimestampMs", dateMs)
-        if (questionsError) {
-            throw { error: questionsError, status: questionsStatus, statusText: questionStatusText };
+        const { ok, error, result } = await getAnsweredQuestionsNewerThanDate(dateMs)
+        if (!ok) {
+            throw { error };
         }
+        const ids = result.map(r => ({ id: r.id }));
         if (ids.length === 0) {
             return 0;
         }
         const {
-            count,
+            ok: renotifyOk,
             error: renotifyError,
-            status: renotifyStatus,
-            statusText: renotifyStatusText
-        } = await db.from(QnaplusTables.RenotifyQueue)
-            .upsert(ids, { count: "exact", ignoreDuplicates: true });
-        if (renotifyError) {
-            throw { error: renotifyError, status: renotifyStatus, statusText: renotifyStatusText };
+            result: renotifyResult
+        } = await insertRenotifyQueue(ids)
+        if (!renotifyOk) {
+            throw { error: renotifyError };
         }
-        // TODO figure out what a count of 'null' means
-        return count ?? 0;
+        return renotifyResult.length;
     }
 
     private getNextRuntimeString() {

@@ -13,10 +13,11 @@
     "build": "tsc --build",
     "start": "node dist/index.js",
     "dev": "node dist/index.js | pino-pretty",
-    "update_storage": "node dist/update_storage.js"
+    "update_storage": "node dist/scripts/update_storage.js | pino-pretty"
   },
   "dependencies": {
     "@qnaplus/logger": "1.0.0",
+    "@qnaplus/utils": "1.0.0",
     "@qnaplus/scraper": "^1.0.0",
     "croner": "^8.0.2",
     "qnaplus": "1.0.0"

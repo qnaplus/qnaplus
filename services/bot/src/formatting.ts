@@ -1,6 +1,6 @@
 import { ChangeEvent, ChangeQuestion, ChangeTypeMap } from "@qnaplus/store";
+import { chunk } from "@qnaplus/utils";
 import { ColorResolvable, EmbedBuilder, bold, codeBlock, hyperlink } from "discord.js";
-import { chunk } from "./util/chunk";
 import { config } from "qnaplus";
 
 const ProgramColorMap: Record<string, ColorResolvable> = {

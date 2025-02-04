@@ -23,6 +23,7 @@
     "updater:start": "yarn workspace @qnaplus/updater run start",
     "updater:dev": "yarn workspace @qnaplus/updater run dev",
     "store:populate": "yarn workspace @qnaplus/store run populate",
+    "store:populate_metadata": "yarn workspace @qnaplus/store run populate_metadata",
     "web:dev": "yarn workspace @qnaplus/web run dev"
   },
   "volta": {

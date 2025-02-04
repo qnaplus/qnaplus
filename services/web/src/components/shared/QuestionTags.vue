@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Question } from 'vex-qna-archiver';
+import { Question } from '@qnaplus/scraper';
 import Tag from 'primevue/tag';
 import ProgramTag from './ProgramTag.vue';
 const { tags, program } = defineProps<Pick<Question, "tags" | "program">>()
