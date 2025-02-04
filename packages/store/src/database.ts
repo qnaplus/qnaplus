@@ -1,16 +1,21 @@
 import { config } from "@qnaplus/config";
-import { createClient } from "@supabase/supabase-js";
-import { Logger } from "pino";
 import { Question, getAllQuestions as archiverGetAllQuestions, fetchCurrentSeason, getOldestQuestion, getOldestUnansweredQuestion } from "@qnaplus/scraper";
+import { createClient } from "@supabase/supabase-js";
+import { eq, inArray } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { Logger } from "pino";
 import { ChangeQuestion, classifyChanges } from "./change_classifier";
 import { PayloadQueue, RenotifyPayload, UpdatePayload } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents, QnaplusTables } from "./resources";
-import { Database } from "./supabase";
-import { drizzle } from "drizzle-orm/postgres-js";
+import * as schema from "./schema";
 import { questions } from "./schema";
+import { Database } from "./supabase";
 
 const supabase = createClient<Database>(config.getenv("SUPABASE_URL"), config.getenv("SUPABASE_KEY"))
-const db = drizzle(config.getenv("SUPABASE_CONNECTION_STRING"));
+const db = drizzle({
+    schema,
+    connection: config.getenv("SUPABASE_CONNECTION_STRING")
+});
 
 const METADATA_ROW_ID = 0;
 
@@ -43,24 +48,23 @@ export const populateWithMetadata = async (logger?: Logger) => {
     await insertQuestions(questions, { logger });
     logger?.info("Successfully populated database");
 
-    const { error } = await supabase
-        .from(QnaplusTables.Metadata)
-        .upsert({ id: METADATA_ROW_ID, current_season: currentSeason, oldest_unanswered_question: oldestQuestionId });
+    await db
+        .insert(schema.metadata)
+        .values({ id: METADATA_ROW_ID, currentSeason, oldestUnansweredQuestion: oldestQuestionId })
+        .onConflictDoNothing();
+    // const { error } = await supabase
+    //     .from(QnaplusTables.Metadata)
+    //     .upsert({ id: METADATA_ROW_ID, current_season: currentSeason, oldest_unanswered_question: oldestQuestionId });
 
-    if (error) {
-        logger?.error({ error }, "Unable to populate question metadata");
-    } else {
-        logger?.info({ oldest_question_id: oldestQuestionId, current_season: currentSeason }, "Successfully populated metadata")
-    }
+    // if (error) {
+    //     logger?.error({ error }, "Unable to populate question metadata");
+    // } else {
+    //     logger?.info({ oldest_question_id: oldestQuestionId, current_season: currentSeason }, "Successfully populated metadata")
+    // }
 }
 
-export const getQuestion = async (id: Question["id"], opts?: StoreOptions): Promise<Question | null> => {
-    const logger = opts?.logger?.child({ label: "getQuestion" });
-    const row = await supabase.from(QnaplusTables.Questions).select().eq("id", id).single();
-    if (row.error !== null) {
-        logger?.trace(`No question with id '${id}' found.`);
-    }
-    return row.data;
+export const getQuestion = async (id: Question["id"]): Promise<Question | null> => {
+    return await db.query.questions.findFirst({ where: eq(questions.id, id) }) ?? null;
 }
 
 export const getAllQuestions = async (opts?: StoreOptions): Promise<Question[]> => {
@@ -88,20 +92,15 @@ export const getAllQuestions = async (opts?: StoreOptions): Promise<Question[]> 
     return data;
 }
 
-export const insertQuestion = async (data: Question, opts?: StoreOptions) => {
-    const logger = opts?.logger?.child({ label: "insertQuestion" });
-    const { error, status } = await supabase.from(QnaplusTables.Questions).insert(data);
-    logger?.trace({ error, status });
+export const insertQuestion = async (data: Question) => {
+    await supabase.from(QnaplusTables.Questions).insert(data);
 }
 
-export const insertQuestions = async (data: typeof questions.$inferInsert[], opts?: StoreOptions) => {
-    const logger = opts?.logger?.child({ label: "insertQuestions" });
+export const insertQuestions = async (data: typeof questions.$inferInsert[]) => {
     await db.insert(questions).values(data);
-    const { error, status } = await supabase.from(QnaplusTables.Questions).insert(data);
-    logger?.trace({ error, status });
 }
 
-export const upsertQuestions = async (data: Question[], opts?: StoreOptions) => {
+export const upsertQuestions = async (data: Question[]) => {
     const logger = opts?.logger?.child({ label: "upsertQuestions" });
     logger?.info(`Upserting ${data.length} questions`)
     const { error, status } = await supabase.from(QnaplusTables.Questions).upsert(data, { ignoreDuplicates: false });
@@ -112,38 +111,27 @@ export const upsertQuestions = async (data: Question[], opts?: StoreOptions) => 
 }
 
 export const getMetadata = async () => {
-    return await supabase.from(QnaplusTables.Metadata)
-        .select("*")
-        .eq("id", METADATA_ROW_ID)
-        .single();
+    return await db.query.metadata.findFirst({ where: eq(schema.metadata.id, METADATA_ROW_ID) })
 }
 
-export const saveMetadata = async (metadata: Database["public"]["Tables"]["metadata"]["Insert"]) => {
-    return await supabase.from(QnaplusTables.Metadata)
-        .upsert({ id: METADATA_ROW_ID, ...metadata });
+export const saveMetadata = async (data: typeof schema.metadata.$inferInsert) => {
+    return await db.insert(schema.metadata).values({ ...data, id: METADATA_ROW_ID }).onConflictDoNothing();
 }
 
 export const getRenotifyQueue = async () => {
-    return await supabase.from(QnaplusTables.RenotifyQueue)
-        .select(`*, ..."${QnaplusTables.Questions}" (*)`)
-        .returns<Question[]>(); // TODO remove once spread is fixed (https://github.com/supabase/postgrest-js/pull/531)
+    return await db.select().from(schema.renotifyQueue);
 }
 
 export const getFailures = async () => {
-    return await supabase.from(QnaplusTables.Failures)
-        .select("*")
-        .returns<{ id: string }[]>();
+    return await db.select().from(schema.failures);
 }
 
-export const updateFailures = async (failures: Database["public"]["Tables"]["failures"]["Insert"][]) => {
-    return await supabase.from(QnaplusTables.Failures)
-        .upsert(failures, { ignoreDuplicates: false });
+export const updateFailures = async (data: typeof schema.failures.$inferInsert[]) => {
+    return await db.insert(schema.failures).values(data).onConflictDoNothing();
 }
 
-export const removeFailures = async (failures: string[]) => {
-    return await supabase.from(QnaplusTables.Failures)
-        .delete()
-        .in("id", failures);
+export const removeFailures = async (ids: string[]) => {
+    return await db.delete(schema.failures).where(inArray(schema.failures.id, ids));
 }
 
 export type ChangeCallback = (items: ChangeQuestion[]) => void | Promise<void>;
