@@ -1,31 +1,22 @@
 import { config } from "@qnaplus/config";
 import { Question, getAllQuestions as archiverGetAllQuestions, fetchCurrentSeason, getOldestQuestion, getOldestUnansweredQuestion } from "@qnaplus/scraper";
 import { createClient } from "@supabase/supabase-js";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { Logger } from "pino";
 import { ChangeQuestion, classifyChanges } from "./change_classifier";
 import { PayloadQueue, RenotifyPayload, UpdatePayload } from "./payload_queue";
-import { QnaplusChannels, QnaplusEvents, QnaplusTables } from "./resources";
+import { QnaplusChannels, QnaplusEvents } from "./resources";
 import * as schema from "./schema";
-import { questions } from "./schema";
-import { Database } from "./supabase";
+import { trycatch } from "./trycatch";
 
-const supabase = createClient<Database>(config.getenv("SUPABASE_URL"), config.getenv("SUPABASE_KEY"))
+export const supabase = createClient(config.getenv("SUPABASE_URL"), config.getenv("SUPABASE_KEY"))
 const db = drizzle({
     schema,
     connection: config.getenv("SUPABASE_CONNECTION_STRING")
 });
 
 const METADATA_ROW_ID = 0;
-
-export type StoreOptions = {
-    logger?: Logger;
-}
-
-export const getSupabaseInstance = () => {
-    return supabase;
-}
 
 export const populate = async (logger?: Logger) => {
     const { questions } = await archiverGetAllQuestions({ logger, trySessionRefresh: true });
@@ -45,7 +36,7 @@ export const populateWithMetadata = async (logger?: Logger) => {
         ? oldestUnansweredQuestion.id
         : oldestQuestion!.id;
 
-    await db.transaction(async tx => {
+    const { ok, error } = await trycatch(db.transaction(async tx => {
         await tx
             .insert(schema.questions)
             .values(questions);
@@ -53,79 +44,80 @@ export const populateWithMetadata = async (logger?: Logger) => {
             .insert(schema.metadata)
             .values({ id: METADATA_ROW_ID, currentSeason, oldestUnansweredQuestion: oldestQuestionId })
             .onConflictDoNothing();
-    })
+    }));
+    if (!ok) {
+        logger?.error({ error }, "An error occurred while attempting to populate the database.");
+        return;
+    }
     logger?.info("Successfully populated database");
 }
 
-export const getQuestion = async (id: Question["id"]): Promise<Question | null> => {
-    return await db.query.questions.findFirst({ where: eq(questions.id, id) }) ?? null;
+export const getQuestion = async (id: Question["id"]) => {
+    return trycatch(db.query.questions.findFirst({ where: eq(schema.questions.id, id) }));
 }
 
-export const getAllQuestions = async (opts?: StoreOptions): Promise<Question[]> => {
-    const logger = opts?.logger?.child({ label: "getAllQuestions" });
-    let hasRows = true;
-    let page = 0;
-    const LIMIT = 1000;
-    const data: Question[] = [];
-    while (hasRows) {
-        const from = page * LIMIT;
-        const to = from + LIMIT;
-        const rows = await supabase
-            .from(QnaplusTables.Questions)
-            .select("*", { count: "exact" })
-            .range(from, to);
-        if (rows.error !== null) {
-            logger?.error(rows.error);
-            continue;
-        }
-        data.push(...rows.data);
-        page++;
-        hasRows = rows.data.length === LIMIT;
-    }
-    logger?.info(`Retreived all questions (${data.length}) from database.`);
-    return data;
+export const getAllQuestions = async () => {
+    return trycatch(db.select().from(schema.questions));
 }
 
-export const insertQuestion = async (data: Question) => {
-    await supabase.from(QnaplusTables.Questions).insert(data);
+export const getAnsweredQuestionsNewerThanDate = async (ms: number) => {
+    return trycatch(
+        db
+            .select()
+            .from(schema.questions)
+            .where(
+                and(
+                    gte(schema.questions.answeredTimestampMs, ms),
+                    eq(schema.questions.answered, true)
+                )
+            )
+    )
 }
 
-export const insertQuestions = async (data: typeof questions.$inferInsert[]) => {
-    await db.insert(questions).values(data);
+export const insertQuestions = async (data: Question[]) => {
+    return trycatch(db.insert(schema.questions).values(data));
 }
 
 export const upsertQuestions = async (data: Question[]) => {
-    const logger = opts?.logger?.child({ label: "upsertQuestions" });
-    logger?.info(`Upserting ${data.length} questions`)
-    const { error, status } = await supabase.from(QnaplusTables.Questions).upsert(data, { ignoreDuplicates: false });
-    if (error !== null) {
-        logger?.warn({ error, status })
-    }
-    return error === null;
+    return trycatch(db.insert(schema.questions).values(data).onConflictDoNothing());
 }
 
 export const getMetadata = async () => {
-    return await db.query.metadata.findFirst({ where: eq(schema.metadata.id, METADATA_ROW_ID) })
+    return trycatch(db.query.metadata.findFirst({ where: eq(schema.metadata.id, METADATA_ROW_ID) }))
 }
 
 export const saveMetadata = async (data: typeof schema.metadata.$inferInsert) => {
-    return await db.insert(schema.metadata).values({ ...data, id: METADATA_ROW_ID }).onConflictDoNothing();
-}
-
-export const getRenotifyQueue = async () => {
-    return await db.select().from(schema.renotifyQueue);
+    return trycatch(db.insert(schema.metadata).values({ ...data, id: METADATA_ROW_ID }).onConflictDoNothing());
 }
 
 export const getFailures = async () => {
-    return await db.select().from(schema.failures);
+    return trycatch(db.select().from(schema.failures));
 }
 
 export const updateFailures = async (data: typeof schema.failures.$inferInsert[]) => {
-    return await db.insert(schema.failures).values(data).onConflictDoNothing();
+    return trycatch(db.insert(schema.failures).values(data).onConflictDoNothing());
 }
 
-export const removeFailures = async (ids: string[]) => {
-    return await db.delete(schema.failures).where(inArray(schema.failures.id, ids));
+export const doFailureQuestionUpdate = async (questions: Question[]) => {
+    const oldFailures = questions.map(q => q.id);
+    return trycatch(
+        db.transaction(async tx => {
+            await tx.insert(schema.questions).values(questions).onConflictDoNothing();
+            await tx.delete(schema.failures).where(inArray(schema.failures.id, oldFailures));
+        })
+    )
+}
+
+export const getRenotifyQueue = async () => {
+    return trycatch(db.select({ question: schema.questions }).from(schema.renotify_queue).innerJoin(schema.questions, eq(schema.renotify_queue.id, schema.questions.id)));
+}
+
+export const clearRenotifyQueue = async () => {
+    return trycatch(db.delete(schema.renotify_queue));
+}
+
+export const insertRenotifyQueue = async (ids: { id: string }[]) => {
+    return trycatch(db.insert(schema.renotify_queue).values(ids).onConflictDoNothing());
 }
 
 export type ChangeCallback = (items: ChangeQuestion[]) => void | Promise<void>;
@@ -149,7 +141,7 @@ export const onChange = (callback: ChangeCallback, logger?: Logger) => {
             {
                 event: "UPDATE",
                 schema: "public",
-                table: QnaplusTables.Questions,
+                table: schema.questions._.name,
             },
             payload => queue.push({ old: payload.old, new: payload.new })
         )

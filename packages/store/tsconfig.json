@@ -9,5 +9,6 @@
     {
       "path": "../config"
     }
-  ]
+  ],
+  "include": ["src/**/*"]
 }

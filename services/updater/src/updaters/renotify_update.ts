@@ -1,24 +1,21 @@
 import { Logger } from "pino";
-import { QnaplusChannels, QnaplusEvents, QnaplusTables, getRenotifyQueue, getSupabaseInstance } from "qnaplus";
+import { QnaplusChannels, QnaplusEvents, clearRenotifyQueue, getRenotifyQueue, supabase } from "qnaplus";
 
 export const onRenotifyQueueFlushAck = (_logger: Logger) => {
     const logger = _logger.child({ label: "renotifyQueueAck" });
     logger.info("Registering listener for RenotifyQueueFlushAck");
 
-    const supabase = getSupabaseInstance();
     supabase.channel(QnaplusChannels.RenotifyQueue)
         .on(
             "broadcast",
             { event: QnaplusEvents.RenotifyQueueFlushAck },
             async () => {
-                const { count, error, status, statusText } = await supabase.from(QnaplusTables.RenotifyQueue)
-                    .delete({ count: "exact" })
-                    .neq("id", "0");
-                if (error) {
-                    logger.error({ error, status, statusText });
+                const { ok, error, result } = await clearRenotifyQueue();
+                if (!ok) {
+                    logger.error({ error }, "An error occurred while clearing renotify queue.");
                     return;
                 }
-                logger.info(`Successfully cleared ${count ?? 0} questions from the renotify queue.`);
+                logger.info(`Successfully cleared ${result.length} questions from the renotify queue.`);
             }
         )
         .subscribe();
@@ -26,10 +23,9 @@ export const onRenotifyQueueFlushAck = (_logger: Logger) => {
 
 export const doRenotifyUpdate = async (_logger: Logger) => {
     const logger = _logger.child({ label: "doRenotifyUpdate" });
-    const supabase = getSupabaseInstance();
-    const { data: payload, error, status, statusText } = await getRenotifyQueue();
-    if (error !== null) {
-        logger.error({ error, status, statusText }, "Unable to process renotify queue, skipping.");
+    const { ok, error, result: payload } = await getRenotifyQueue();
+    if (!ok) {
+        logger.error({ error }, "Unable to process renotify queue, skipping.");
         return;
     }
     if (payload.length === 0) {

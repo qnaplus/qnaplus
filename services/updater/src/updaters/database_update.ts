@@ -1,6 +1,6 @@
-import { Logger } from "pino";
-import { getFailures, getMetadata, getQuestion, removeFailures, saveMetadata, updateFailures, upsertQuestions } from "qnaplus";
 import { ITERATIVE_BATCH_COUNT, Question, Season, fetchQuestionRange, fetchQuestionsIterative, getOldestUnansweredQuestion, handleIterativeBatch, sleep } from "@qnaplus/scraper";
+import { Logger } from "pino";
+import { doFailureQuestionUpdate, getFailures, getMetadata, getQuestion, saveMetadata, updateFailures, upsertQuestions } from "qnaplus";
 
 // TODO: remove once utils are refactored into a package
 const chunk = <T>(items: T[], size: number): T[][] => {
@@ -26,18 +26,18 @@ type FailureUpdateResult = {
  * @returns Object indicating the oldest unanswered question and the remaining failures
  */
 const handleFailureUpdate = async (season: Season, logger?: Logger): Promise<FailureUpdateResult> => {
-    const { error: failuresError, data: storedFailures } = await getFailures();
-    if (failuresError) {
-        logger?.error({ error: failuresError }, "Error retrieving failures, continuing based on oldest unanswered question metadata.");
+    const dbFailures = await getFailures();
+    if (!dbFailures.ok) {
+        logger?.error({ error: dbFailures.error }, "Error retrieving failures, continuing based on oldest unanswered question metadata.");
         return { oldest: undefined, failures: [] };
     }
 
-    if (storedFailures.length === 0) {
+    if (dbFailures.result.length === 0) {
         logger?.info("No failures found during this failure update.");
         return { oldest: undefined, failures: [] };
     }
 
-    const failureNumbers = storedFailures.map(failure => parseInt(failure.id));
+    const failureNumbers = dbFailures.result.map(failure => parseInt(failure.id));
     const chunks = chunk(failureNumbers, ITERATIVE_BATCH_COUNT);
     const questions: Question[] = [];
     const failures: string[] = [];
@@ -55,16 +55,15 @@ const handleFailureUpdate = async (season: Season, logger?: Logger): Promise<Fai
         return { oldest: undefined, failures };
     }
 
-    const newIds = questions.map(q => q.id);
-    logger?.info({ newIds }, `${questions.length} new questions resolved from failures.`);
+    const ids = questions.map(q => q.id);
+    logger?.info({ questions: ids }, `${questions.length} new questions resolved from failures.`);
 
-    // TODO: upsertQuestions and removeFailures should be an atomic operation
-    // transactions are not supported by supabse directly, so we may shift to something
-    // like drizzle
-    await upsertQuestions(questions, { logger });
-    logger?.info(`Updated failure list.`);
-    await removeFailures(newIds);
-    logger?.info(`Removed new questions from failure list.`);
+    const { ok, error } = await doFailureQuestionUpdate(questions);
+    if (!ok) {
+        logger?.error({ error }, "Unable to perform failure-question update.");
+        return { oldest: undefined, failures };
+    }
+    logger?.info(`Updated failure list. Removed new questions from failure list.`);
 
     const oldest = getOldestUnansweredQuestion(questions, season);
     return { oldest, failures };
@@ -73,25 +72,29 @@ const handleFailureUpdate = async (season: Season, logger?: Logger): Promise<Fai
 export const doDatabaseUpdate = async (_logger?: Logger) => {
     const logger = _logger?.child({ label: "doDatabaseUpdate" });
     const metadata = await getMetadata();
-    if (metadata.error) {
+    if (!metadata.ok) {
         logger?.error({ error: metadata.error }, "Error retrieving question metadata, exiting");
         return;
     }
+    if (metadata.result === undefined) {
+        logger?.error("No data found for metadata, exiting.");
+        return;
+    }
 
-    const { current_season, oldest_unanswered_question } = metadata.data;
-    const failureUpdateResult = await handleFailureUpdate(current_season as Season, logger);
+    const { currentSeason, oldestUnansweredQuestion } = metadata.result;
+    const failureUpdateResult = await handleFailureUpdate(currentSeason as Season, logger);
     logger?.info(`Oldest resolved question from failure update: ${failureUpdateResult.oldest}`);
-    logger?.info(`Stored oldest unanswered question: ${oldest_unanswered_question}`);
+    logger?.info(`Stored oldest unanswered question: ${oldestUnansweredQuestion}`);
 
     const start = failureUpdateResult.oldest !== undefined
-        ? Math.min(parseInt(failureUpdateResult.oldest.id), parseInt(oldest_unanswered_question))
-        : parseInt(oldest_unanswered_question);
+        ? Math.min(parseInt(failureUpdateResult.oldest.id), parseInt(oldestUnansweredQuestion))
+        : parseInt(oldestUnansweredQuestion);
 
     logger?.info(`Starting update from Q&A ${start}`);
     const { questions, failures } = await fetchQuestionsIterative({ logger, start });
-    const success = await upsertQuestions(questions, { logger });
-    if (!success) {
-        logger?.warn(`Failed to upsert ${questions.length}, retrying on next run.`);
+    const { ok, error: updateError } = await upsertQuestions(questions);
+    if (!ok) {
+        logger?.error({ error: updateError }, `Failed to upsert ${questions.length}, retrying on next run.`);
         return;
     }
     logger?.info(`Updated ${questions.length} questions.`);
@@ -108,34 +111,43 @@ export const doDatabaseUpdate = async (_logger?: Logger) => {
         `${failureUpdateResult.failures.length} failures in database, ${failures.length} failures found for this update, ${validFailures.length} questions extracted from failures.`
     );
     const finalFailures = validFailures.map(id => ({ id }));
-    const { error: failureError } = await updateFailures(finalFailures);
-    if (failureError) {
+    const { ok: failureOk, error: failureError } = await updateFailures(finalFailures);
+    if (!failureOk) {
         logger?.error({ error: failureError }, "Error while updating failures list.");
+        return;
     }
 
     /*
         If the starting question fails, we should consider it as unanswered, giving it a chance to succeed on the next run.
     */
-    const oldestUnansweredFromUpdate = validFailures.includes(`${start}`)
-        ? await getQuestion(`${start}`)
-        : getOldestUnansweredQuestion(questions, current_season as Season);
+    let oldestUnansweredFromUpdate: Question | undefined;
+    if (validFailures.includes(`${start}`)) {
+        const { ok, error, result } = await getQuestion(`${start}`)
+        if (!ok) {
+            logger?.error({ error }, "Valid failures in this update include the starting question, but an error occurred while retreiving it.");
+            return;
+        }
+        oldestUnansweredFromUpdate = result;
+    } else {
+        oldestUnansweredFromUpdate = getOldestUnansweredQuestion(questions, currentSeason as Season);
+    }
 
-    if (oldestUnansweredFromUpdate === undefined || oldestUnansweredFromUpdate === null) {
+    if (oldestUnansweredFromUpdate === undefined) {
         logger?.info("Oldest unanswered question from update not found, skipping metadata update.")
         return;
     }
 
     const oldest = failureUpdateResult.oldest !== undefined
-        ? getOldestUnansweredQuestion([failureUpdateResult.oldest, oldestUnansweredFromUpdate], current_season as Season)
+        ? getOldestUnansweredQuestion([failureUpdateResult.oldest, oldestUnansweredFromUpdate], currentSeason as Season)
         : oldestUnansweredFromUpdate;
     if (oldest === undefined) {
         logger?.info("Unable to resolve an oldest unanswered question, skipping metadata update")
         return;
     }
 
-    const { error, status, statusText } = await saveMetadata({ ...metadata.data, oldest_unanswered_question: `${oldest.id}` });
-    if (error) {
-        logger?.error({ error, status, statusText, oldest_unanswered_id: oldest.id }, `Unable to save oldest unanswered question (${oldest.id}) to metadata`);
+    const { ok: saveMetadataOk, error } = await saveMetadata({ ...metadata.result, oldestUnansweredQuestion: `${oldest.id}` });
+    if (!saveMetadataOk) {
+        logger?.error({ error, oldest_unanswered_id: oldest.id }, `Unable to save oldest unanswered question (${oldest.id}) to metadata`);
         return;
     }
     logger?.info({ oldest_unanswered_id: oldest.id }, `Successfully updated metadata with oldest unanswered question (${oldest.id})`);

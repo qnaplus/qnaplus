@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, integer, numeric, pgTable, text } from "drizzle-orm/pg-core";
+import { bigint, boolean, integer, pgTable, text } from "drizzle-orm/pg-core";
 
 export const questions = pgTable("questions", {
     id: text().primaryKey(),
@@ -20,8 +20,6 @@ export const questions = pgTable("questions", {
     tags: text().array().notNull()
 });
 
-export type Question = typeof questions.$inferInsert;
-
 export const metadata = pgTable("metadata", {
     id: integer().primaryKey(),
     currentSeason: text().notNull(),
@@ -32,6 +30,6 @@ export const failures = pgTable("failures", {
     id: text().primaryKey()
 });
 
-export const renotifyQueue = pgTable("renotify_queue", {
+export const renotify_queue = pgTable("renotify_queue", {
     id: text().primaryKey().references(() => questions.id, { onDelete: "cascade" })
 });
