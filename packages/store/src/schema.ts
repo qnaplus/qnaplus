@@ -33,3 +33,7 @@ export const failures = pgTable("failures", {
 export const renotify_queue = pgTable("renotify_queue", {
     id: text().primaryKey().references(() => questions.id, { onDelete: "cascade" })
 });
+
+export const answer_queue = pgTable("answer_queue", {
+    id: text().primaryKey().references(() => questions.id, { onDelete: "cascade" })
+});

@@ -40,6 +40,21 @@ export const getAnsweredQuestionsNewerThanDate = async (ms: number) => {
     )
 }
 
+export const findNewAnsweredQuestions = async (questions: Question[]) => {
+    const ids = questions.filter(q => q.answered).map(q => q.id);
+    return trycatch(
+        db
+            .select()
+            .from(schema.questions)
+            .where(
+                and(
+                    eq(schema.questions.answered, false),
+                    inArray(schema.questions.id, ids)
+                )
+            )
+    )
+}
+
 export const insertQuestions = async (data: Question[]) => {
     return trycatch(db.insert(schema.questions).values(data));
 }
@@ -84,4 +99,23 @@ export const clearRenotifyQueue = async () => {
 
 export const insertRenotifyQueue = async (ids: { id: string }[]) => {
     return trycatch(db.insert(schema.renotify_queue).values(ids).onConflictDoNothing());
+}
+
+export const getAnswerQueue = async () => {
+    return trycatch(db.select({ question: schema.questions }).from(schema.answer_queue).innerJoin(schema.questions, eq(schema.renotify_queue.id, schema.questions.id)))
+}
+
+export const doDatabaseAnswerQueueUpdate = async (questions: Question[], answeredIds: typeof schema.answer_queue.$inferInsert[]) => {
+    return trycatch(
+        db.transaction(async tx => {
+            await tx.insert(schema.questions).values(questions).onConflictDoNothing();
+            if (answeredIds.length !== 0) {
+                await tx.insert(schema.answer_queue).values(answeredIds).onConflictDoNothing();
+            }
+        })
+    );
+}
+
+export const clearAnswerQueue = async () => {
+    return trycatch(db.delete(schema.answer_queue));
 }
