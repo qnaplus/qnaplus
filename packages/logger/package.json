@@ -9,8 +9,8 @@
         "build": "tsc --build"
     },
     "volta": {
-        "node": "20.11.0",
-        "yarn": "1.22.19"
+        "node": "22.13.1",
+        "yarn": "1.22.22"
     },
     "dependencies": {
         "@qnaplus/config": "1.0.0",

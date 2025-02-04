@@ -27,7 +27,7 @@
     "web:dev": "yarn workspace @qnaplus/web run dev"
   },
   "volta": {
-    "node": "20.15.1",
-    "yarn": "1.22.19"
+    "node": "22.13.1",
+    "yarn": "1.22.22"
   }
 }
