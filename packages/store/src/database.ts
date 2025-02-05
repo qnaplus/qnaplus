@@ -5,12 +5,11 @@ import { createClient } from "@supabase/supabase-js";
 import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";
+import postgres from "postgres";
 
-export const supabase = createClient(config.getenv("SUPABASE_URL"), config.getenv("SUPABASE_KEY"))
-export const db = drizzle({
-    schema,
-    connection: config.getenv("SUPABASE_CONNECTION_STRING")
-});
+const client = postgres(config.getenv("SUPABASE_CONNECTION_STRING"), { prepare: false });
+export const db = drizzle({ schema, client });
+export const supabase = createClient(config.getenv("SUPABASE_URL"), config.getenv("SUPABASE_KEY"));
 
 export const METADATA_ROW_ID = 0;
 
