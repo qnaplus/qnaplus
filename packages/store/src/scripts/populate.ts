@@ -1,17 +1,19 @@
-import { getAllQuestions as archiverGetAllQuestions, fetchCurrentSeason, getOldestQuestion, getOldestUnansweredQuestion } from "@qnaplus/scraper";
+import { getAllQuestions as archiverGetAllQuestions, FetchClient, FetchClientResponse, fetchCurrentSeason, getOldestQuestion, getOldestUnansweredQuestion } from "@qnaplus/scraper";
 import { trycatch } from "@qnaplus/utils";
 import pino, { Logger } from "pino";
 import { db, insertQuestions, METADATA_ROW_ID, testConnection } from "../database";
+import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import * as schema from "../schema";
 
-export const populate = async (logger?: Logger) => {
-    const { questions } = await archiverGetAllQuestions({ logger, trySessionRefresh: true });
+
+export const populate = async (client: FetchClient<FetchClientResponse>, logger?: Logger) => {
+    const { questions } = await archiverGetAllQuestions({ client, logger });
     return insertQuestions(questions);
 }
 
-export const populateWithMetadata = async (logger?: Logger) => {
-    const { questions } = await archiverGetAllQuestions({ logger, trySessionRefresh: true });
-    const currentSeason = await fetchCurrentSeason({ logger, trySessionRefresh: true });
+export const populateWithMetadata = async (client: FetchClient<FetchClientResponse>, logger?: Logger) => {
+    const { questions } = await archiverGetAllQuestions({ client, logger });
+    const currentSeason = await fetchCurrentSeason({ client, logger });
 
     const oldestUnansweredQuestion = getOldestUnansweredQuestion(questions, currentSeason);
     const oldestQuestion = getOldestQuestion(questions, currentSeason);
@@ -40,6 +42,7 @@ export const populateWithMetadata = async (logger?: Logger) => {
 
 (async () => {
     const logger = pino({ errorKey: "error" });
+    const client = new CurlImpersonateScrapingClient(logger);
     logger.info("Running populate script.");
     logger.info("Testing database connection...");
     const { ok, error } = await testConnection();
@@ -49,10 +52,10 @@ export const populateWithMetadata = async (logger?: Logger) => {
     }
     if (process.argv[2] === "--metadata") {
         logger.info("Starting database population (with metadata).");
-        await populateWithMetadata(logger);
+        await populateWithMetadata(client, logger);
     } else {
         logger.info("Starting database population (without metadata).");
-        await populate(logger)
+        await populate(client, logger)
     }
     logger.info("Database population completed.");
 })();

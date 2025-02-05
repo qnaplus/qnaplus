@@ -1,4 +1,5 @@
-import { ITERATIVE_BATCH_COUNT, Question, Season, fetchQuestionRange, fetchQuestionsIterative, getOldestUnansweredQuestion, handleIterativeBatch, sleep } from "@qnaplus/scraper";
+import { FetchClient, FetchClientResponse, ITERATIVE_BATCH_COUNT, Question, Season, fetchQuestionRange, fetchQuestionsIterative, getOldestUnansweredQuestion, sleep } from "@qnaplus/scraper";
+import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import { chunk, unique } from "@qnaplus/utils";
 import { Logger } from "pino";
 import { doDatabaseAnswerQueueUpdate, doFailureQuestionUpdate, findNewAnsweredQuestions, getFailures, getMetadata, getQuestion, saveMetadata, updateFailures } from "qnaplus";
@@ -16,7 +17,7 @@ type FailureUpdateResult = {
  * @param logger Optional logger
  * @returns Object indicating the oldest unanswered question and the remaining failures
  */
-const handleFailureUpdate = async (season: Season, logger?: Logger): Promise<FailureUpdateResult> => {
+const handleFailureUpdate = async (client: FetchClient<FetchClientResponse>, season: Season, logger?: Logger): Promise<FailureUpdateResult> => {
     logger?.info("Starting failure update.");
     const dbFailures = await getFailures();
     if (!dbFailures.ok) {
@@ -35,8 +36,8 @@ const handleFailureUpdate = async (season: Season, logger?: Logger): Promise<Fai
     const failures: string[] = [];
 
     for (const chunk of chunks) {
-        const results = await Promise.allSettled(fetchQuestionRange(chunk));
-        const { questions: batchQuestions, failures: batchFailures } = handleIterativeBatch(chunk, results);
+        const results = await fetchQuestionRange(chunk, { client });
+        const { questions: batchQuestions, failures: batchFailures } = results;
         questions.push(...batchQuestions);
         failures.push(...batchFailures);
         await sleep(1500);
@@ -64,6 +65,7 @@ const handleFailureUpdate = async (season: Season, logger?: Logger): Promise<Fai
 
 export const doDatabaseUpdate = async (_logger: Logger) => {
     const logger = _logger?.child({ label: "doDatabaseUpdate" });
+    const client = new CurlImpersonateScrapingClient(logger);
     logger.info("Starting database update.");
     const metadata = await getMetadata();
     if (!metadata.ok) {
@@ -76,7 +78,7 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
     }
 
     const { currentSeason, oldestUnansweredQuestion } = metadata.result;
-    const failureUpdateResult = await handleFailureUpdate(currentSeason as Season, logger);
+    const failureUpdateResult = await handleFailureUpdate(client, currentSeason as Season, logger);
     logger?.info(`Oldest resolved question from failure update: ${failureUpdateResult.oldest}`);
     logger?.info(`Stored oldest unanswered question: ${oldestUnansweredQuestion}`);
 
@@ -85,7 +87,7 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
         : parseInt(oldestUnansweredQuestion);
 
     logger?.info(`Starting update from Q&A ${start}`);
-    const { questions, failures } = await fetchQuestionsIterative({ logger, start });
+    const { questions, failures } = await fetchQuestionsIterative({ client, logger, start });
     const newAnsweredQuestions = await findNewAnsweredQuestions(questions);
     if (!newAnsweredQuestions.ok) {
         logger.error({ error: newAnsweredQuestions.error }, "Unable to find newly answered questions from update, retrying on next run.");

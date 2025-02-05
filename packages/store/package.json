@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "@qnaplus/config": "1.0.0",
+    "@qnaplus/scraper": "^2.0.2",
     "@qnaplus/utils": "1.0.0",
-    "@qnaplus/scraper": "^1.0.0",
     "@supabase/supabase-js": "^2.45.4",
     "diff": "^5.1.0",
     "drizzle-orm": "^0.39.1",
@@ -27,6 +27,7 @@
     "tus-js-client": "^4.1.0"
   },
   "devDependencies": {
+    "@qnaplus/scraper-strategies": "^2.0.0",
     "@types/diff": "^5.0.9",
     "drizzle-kit": "^0.30.4",
     "pino-pretty": "^13.0.0"
