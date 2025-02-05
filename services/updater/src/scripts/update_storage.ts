@@ -1,6 +1,6 @@
 import pino from "pino";
 import { doStorageUpdate } from "../updaters/storage_update";
-import { testConnection } from "qnaplus";
+import { disconnectPgClient, testConnection } from "qnaplus";
 
 (async () => {
     const logger = pino({ errorKey: "error" });
@@ -14,4 +14,5 @@ import { testConnection } from "qnaplus";
     logger.info("Starting storage update.");
     await doStorageUpdate(logger);
     logger.info("Storage update completed.");
+    await disconnectPgClient();
 })();

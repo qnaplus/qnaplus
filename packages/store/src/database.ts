@@ -7,8 +7,22 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";
 import postgres from "postgres";
 
-const client = postgres(config.getenv("SUPABASE_CONNECTION_STRING"), { prepare: false });
-export const db = drizzle({ schema, client });
+let PG_CLIENT: postgres.Sql<{}> | null = null;
+
+export const getPgClient = () => {
+    if (PG_CLIENT === null) {
+        PG_CLIENT = postgres(config.getenv("SUPABASE_CONNECTION_STRING"), { prepare: false });
+    }
+    return PG_CLIENT;
+}
+
+export const disconnectPgClient = async () => {
+    if (PG_CLIENT !== null) {
+        await PG_CLIENT.end();
+    }
+}
+
+export const db = drizzle({ schema, client: getPgClient() });
 export const supabase = createClient(config.getenv("SUPABASE_URL"), config.getenv("SUPABASE_KEY"));
 
 export const METADATA_ROW_ID = 0;

@@ -1,7 +1,7 @@
 import { getAllQuestions as archiverGetAllQuestions, FetchClient, FetchClientResponse, fetchCurrentSeason, getOldestQuestion, getOldestUnansweredQuestion } from "@qnaplus/scraper";
 import { trycatch } from "@qnaplus/utils";
 import pino, { Logger } from "pino";
-import { db, insertQuestions, METADATA_ROW_ID, testConnection } from "../database";
+import { db, disconnectPgClient, insertQuestions, METADATA_ROW_ID, testConnection } from "../database";
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import * as schema from "../schema";
 
@@ -58,4 +58,5 @@ export const populateWithMetadata = async (client: FetchClient<FetchClientRespon
         await populate(client, logger)
     }
     logger.info("Database population completed.");
+    await disconnectPgClient();
 })();
