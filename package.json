@@ -5,7 +5,7 @@
 	"private": true,
 	"workspaces": ["packages/*", "services/*"],
 	"author": "battlesqui_d",
-	"license": "ISC",
+	"license": "GPL-3.0",
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"dotenv-vault": "^1.26.0",
