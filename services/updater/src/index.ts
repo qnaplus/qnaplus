@@ -2,9 +2,9 @@ import { getLoggerInstance } from "@qnaplus/logger";
 import Cron from "croner";
 import { Logger } from "pino";
 import { config } from "@qnaplus/dotenv";
-import { doDatabaseUpdate } from "./updaters/database_update";
-import { doRenotifyUpdate, onRenotifyQueueFlushAck } from "./updaters/renotify_update";
-import { doStorageUpdate } from "./updaters/storage_update";
+import { doDatabaseUpdate } from "./database_update";
+import { doRenotifyUpdate, onRenotifyQueueFlushAck } from "./renotify_update";
+import { doStorageUpdate } from "./storage_update";
 
 const startDatabaseJob = async (logger: Logger) => {
     await doRenotifyUpdate(logger);

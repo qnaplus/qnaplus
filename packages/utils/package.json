@@ -9,6 +9,9 @@
         "build": "tsc",
         "check-types": "tsc --noEmit"
     },
+    "devDependencies": {
+        "@qnaplus/typescript-config": "*"
+    },
     "volta": {
         "node": "22.13.1",
         "yarn": "1.22.22"

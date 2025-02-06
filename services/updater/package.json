@@ -13,18 +13,20 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "node dist/index.js | pino-pretty",
-    "update_storage": "node dist/scripts/update_storage.js | pino-pretty"
+    "update_storage": "tsx scripts/update_storage.ts | pino-pretty"
   },
   "dependencies": {
-    "@qnaplus/logger": "1.0.0",
+    "@qnaplus/logger": "*",
     "@qnaplus/scraper": "^2.0.2",
     "@qnaplus/scraper-strategies": "^2.0.0",
     "@qnaplus/utils": "1.0.0",
-    "croner": "^8.0.2",
-    "qnaplus": "1.0.0"
+    "croner": "^8.0.2"
   },
   "devDependencies": {
+    "@qnaplus/typescript-config": "*",
     "pino": "^9.0.0",
-    "pino-pretty": "^10.3.1"
+    "pino-pretty": "^10.3.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.2.2"
   }
 }

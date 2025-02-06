@@ -1,5 +1,5 @@
 import { config } from "@qnaplus/dotenv"
-import pino, { LoggerOptions } from "pino"
+import { pino, LoggerOptions } from "pino"
 import os from "os";
 
 export const getLoggerInstance = (stream: string, options?: LoggerOptions) => {

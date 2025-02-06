@@ -11,8 +11,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "populate": "node dist/scripts/populate.js | pino-pretty",
-    "populate_metadata": "node dist/scripts/populate.js --metadata | pino-pretty",
+    "populate": "tsx scripts/populate.ts | pino-pretty",
+    "populate_metadata": "tsx scripts/populate.ts --metadata | pino-pretty",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -28,8 +28,10 @@
   },
   "devDependencies": {
     "@qnaplus/scraper-strategies": "^2.0.0",
+    "@qnaplus/typescript-config": "*",
     "@types/diff": "^5.0.9",
     "drizzle-kit": "^0.30.4",
-    "pino-pretty": "^13.0.0"
+    "pino-pretty": "^13.0.0",
+    "tsx": "^4.19.2"
   }
 }

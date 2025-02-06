@@ -1,2 +1,2 @@
-# @qnaplus/env
+# @qnaplus/dotenv
 

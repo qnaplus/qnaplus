@@ -1,5 +1,5 @@
 import pino from "pino";
-import { doStorageUpdate } from "../updaters/storage_update";
+import { doStorageUpdate } from "../src/storage_update";
 import { disconnectPgClient, testConnection } from "@qnaplus/store";
 
 (async () => {

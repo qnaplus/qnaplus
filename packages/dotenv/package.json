@@ -15,6 +15,9 @@
     "dependencies": {
         "dotenv": "^16.3.1"
     },
+    "devDependencies": {
+        "@qnaplus/typescript-config": "*"
+    },
     "exports": {
         ".": {
             "default": "./dist/index.js",

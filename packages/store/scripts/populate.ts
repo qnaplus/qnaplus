@@ -1,9 +1,9 @@
 import { getAllQuestions as archiverGetAllQuestions, FetchClient, FetchClientResponse, fetchCurrentSeason, getOldestQuestion, getOldestUnansweredQuestion } from "@qnaplus/scraper";
 import { trycatch } from "@qnaplus/utils";
 import pino, { Logger } from "pino";
-import { db, disconnectPgClient, insertQuestions, METADATA_ROW_ID, testConnection } from "../database";
+import { db, disconnectPgClient, insertQuestions, METADATA_ROW_ID, testConnection } from "../src/database";
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
-import * as schema from "../schema";
+import * as schema from "../src/schema";
 
 
 export const populate = async (client: FetchClient<FetchClientResponse>, logger?: Logger) => {

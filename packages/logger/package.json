@@ -17,6 +17,9 @@
         "pino": "^9.0.0",
         "pino-parseable": "^1.0.3"
     },
+    "devDependencies": {
+        "@qnaplus/typescript-config": "*"
+    },
     "exports": {
         ".": {
             "default": "./dist/index.js",
