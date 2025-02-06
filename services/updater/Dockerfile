@@ -1,30 +1,23 @@
+FROM node:22.13.1-alpine3.20 AS base
+
+WORKDIR /app
+
+RUN yarn global add turbo@2.4.0
+
+COPY . .
+
+RUN turbo prune @qnaplus/updater --docker
+
+# =======================================================
+
 FROM node:22.13.1-alpine3.20 AS build
 
 WORKDIR /app
 
-COPY packages packages
-COPY services/updater services/updater
+COPY --from=base /app/out/json/ .
+RUN yarn install --frozen-lockfile
+ 
+COPY --from=base /app/out/full/ .
+RUN yarn turbo run build
 
-COPY package.json .
-COPY yarn.lock .
-COPY tsconfig.json .
-COPY tsconfig.base.json .
-
-RUN yarn install && yarn workspace @qnaplus/updater run build
-
-# =======================================================
-
-# TODO: try and find a slimmer image that still supports ts-curl-impersonate linked libraries
-FROM node:22.13.1 AS production
-
-WORKDIR /app
-
-COPY --from=build /app/yarn.lock .
-COPY --from=build /app/package.json .
-COPY --from=build /app/services/updater/dist services/updater/dist
-COPY --from=build /app/packages/**/dist services/updater/dist
-COPY .env.vault .
-
-RUN yarn install --production
-
-CMD yarn updater:start
+CMD ["yarn", "updater:start"]

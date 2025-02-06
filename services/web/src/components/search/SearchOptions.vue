@@ -50,14 +50,14 @@ const removeSelectedAdvancedOption = (index: number) => {
 
 <template>
 
-    <Accordion :value="null">
-        <AccordionPanel>
+    <Accordion :value="0">
+        <AccordionPanel :value="0">
             <AccordionHeader>Search Options</AccordionHeader>
             <AccordionContent>
                 <Tabs value="0">
                     <TabList>
                         <Tab class="flex gap-3" value="0">Filter
-                            <Badge :value="filterOptions.appliedFilterCount" />
+                            <Badge :value="filterOptions.appliedFilterCount.value" />
                         </Tab>
                         <Tab value="1">Sort</Tab>
                     </TabList>

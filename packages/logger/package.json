@@ -6,7 +6,8 @@
     "author": "battlesqui_d",
     "license": "ISC",
     "scripts": {
-        "build": "tsc --build"
+        "build": "tsc",
+        "check-types": "tsc --noEmit"
     },
     "volta": {
         "node": "22.13.1",

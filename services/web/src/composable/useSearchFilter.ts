@@ -1,4 +1,4 @@
-import { Question } from 'vex-qna-archiver';
+import { Question } from "@qnaplus/scraper";
 import { MaybeRefOrGetter, Ref, reactive, ref, toValue, watchEffect } from 'vue';
 import { Option } from './types';
 

@@ -15,7 +15,7 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "tsc --build",
+    "build": "yarn turbo build",
     "clean:dist": "rm -rf ./packages/**/dist packages/**/tsconfig.tsbuildinfo packages/**/.turbo .turbo",
     "clean:packages": "rm -rf packages/**/node_modules node_modules",
     "clean:all": "yarn clean:dist && yarn clean:packages",

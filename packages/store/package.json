@@ -10,10 +10,10 @@
     "yarn": "1.22.22"
   },
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc",
     "populate": "node dist/scripts/populate.js | pino-pretty",
     "populate_metadata": "node dist/scripts/populate.js --metadata | pino-pretty",
-    "create_tables": "node dist/create_tables.js"
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@qnaplus/config": "1.0.0",
