@@ -11,13 +11,14 @@
   "license": "ISC",
   "devDependencies": {
     "dotenv-vault": "^1.26.0",
+    "rimraf": "^6.0.1",
     "turbo": "^2.4.0",
     "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "turbo run build",
-    "clean:dist": "rm -rf ./packages/**/dist packages/**/tsconfig.tsbuildinfo packages/**/.turbo .turbo",
-    "clean:packages": "rm -rf packages/**/node_modules node_modules",
+    "clean:dist": "rimraf ./packages/**/dist packages/**/tsconfig.tsbuildinfo packages/**/.turbo .turbo",
+    "clean:packages": "rimraf packages/**/node_modules node_modules",
     "clean:all": "yarn clean:dist && yarn clean:packages",
     "bot:start": "yarn workspace @qnaplus/bot run start",
     "bot:dev": "yarn workspace @qnaplus/bot run dev",

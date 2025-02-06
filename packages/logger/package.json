@@ -2,7 +2,6 @@
     "name": "@qnaplus/logger",
     "version": "1.0.0",
     "description": "",
-    "main": "dist/index.js",
     "author": "battlesqui_d",
     "license": "ISC",
     "scripts": {
@@ -17,5 +16,11 @@
         "@qnaplus/dotenv": "*",
         "pino": "^9.0.0",
         "pino-parseable": "^1.0.3"
+    },
+    "exports": {
+        ".": {
+            "default": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
     }
 }
