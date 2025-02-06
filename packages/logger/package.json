@@ -14,7 +14,7 @@
         "yarn": "1.22.22"
     },
     "dependencies": {
-        "@qnaplus/config": "1.0.0",
+        "@qnaplus/dotenv": "*",
         "pino": "^9.0.0",
         "pino-parseable": "^1.0.3"
     }

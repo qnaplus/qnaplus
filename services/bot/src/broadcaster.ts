@@ -1,4 +1,4 @@
-import { config } from "@qnaplus/config"
+import { config } from "@qnaplus/dotenv"
 import { ChangeQuestion, onChange } from "@qnaplus/store"
 import { chunk, groupby } from "@qnaplus/utils"
 import { container } from "@sapphire/framework"

@@ -1,4 +1,4 @@
-import { config } from '@qnaplus/config';
+import { config } from '@qnaplus/dotenv';
 import 'dotenv/config';
 import { defineConfig } from 'drizzle-kit';
 export default defineConfig({

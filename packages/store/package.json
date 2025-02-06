@@ -16,9 +16,9 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@qnaplus/config": "1.0.0",
+    "@qnaplus/dotenv": "*",
     "@qnaplus/scraper": "^2.0.2",
-    "@qnaplus/utils": "1.0.0",
+    "@qnaplus/utils": "*",
     "@supabase/supabase-js": "^2.45.4",
     "diff": "^5.1.0",
     "drizzle-orm": "^0.39.1",

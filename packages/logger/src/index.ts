@@ -1,4 +1,4 @@
-import { config } from "@qnaplus/config"
+import { config } from "@qnaplus/dotenv"
 import pino, { LoggerOptions } from "pino"
 import os from "os";
 

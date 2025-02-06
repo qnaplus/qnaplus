@@ -1,4 +1,4 @@
-import { config } from "@qnaplus/config";
+import { config } from "@qnaplus/dotenv";
 import { Question } from "@qnaplus/scraper";
 import { trycatch } from "@qnaplus/utils";
 import { createClient } from "@supabase/supabase-js";

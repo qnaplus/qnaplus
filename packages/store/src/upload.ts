@@ -1,4 +1,4 @@
-import { config } from "@qnaplus/config";
+import { config } from "@qnaplus/dotenv";
 import { Logger } from "pino";
 import * as tus from "tus-js-client"
 
