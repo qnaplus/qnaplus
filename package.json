@@ -15,8 +15,8 @@
 	},
 	"scripts": {
 		"build": "turbo run build",
-		"clean:dist": "rimraf ./packages/**/dist packages/**/tsconfig.tsbuildinfo packages/**/.turbo .turbo",
-		"clean:packages": "rimraf packages/**/node_modules node_modules",
+		"clean:dist": "rimraf -g ./packages/**/dist packages/**/tsconfig.tsbuildinfo packages/**/.turbo .turbo",
+		"clean:packages": "rimraf -g packages/**/node_modules node_modules",
 		"clean:all": "yarn clean:dist && yarn clean:packages",
 		"format-and-lint": "biome check .",
 		"format-and-lint:fix": "biome check . --write",
