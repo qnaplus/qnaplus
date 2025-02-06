@@ -1,36 +1,38 @@
 {
-  "name": "@qnaplus/root",
-  "version": "1.0.0",
-  "description": "",
-  "private": true,
-  "workspaces": [
-    "packages/*",
-    "services/*"
-  ],
-  "author": "battlesqui_d",
-  "license": "ISC",
-  "devDependencies": {
-    "dotenv-vault": "^1.26.0",
-    "rimraf": "^6.0.1",
-    "turbo": "^2.4.0",
-    "typescript": "^5.2.2"
-  },
-  "scripts": {
-    "build": "turbo run build",
-    "clean:dist": "rimraf ./packages/**/dist packages/**/tsconfig.tsbuildinfo packages/**/.turbo .turbo",
-    "clean:packages": "rimraf packages/**/node_modules node_modules",
-    "clean:all": "yarn clean:dist && yarn clean:packages",
-    "bot:start": "yarn workspace @qnaplus/bot run start",
-    "bot:dev": "yarn workspace @qnaplus/bot run dev",
-    "updater:start": "yarn workspace @qnaplus/updater run start",
-    "updater:dev": "yarn workspace @qnaplus/updater run dev",
-    "store:populate": "yarn workspace @qnaplus/store run populate",
-    "store:populate_metadata": "yarn workspace @qnaplus/store run populate_metadata",
-    "web:dev": "yarn workspace @qnaplus/web run dev"
-  },
-  "volta": {
-    "node": "22.13.1",
-    "yarn": "1.22.22"
-  },
-  "packageManager": "yarn@1.22.22"
+	"name": "@qnaplus/root",
+	"version": "1.0.0",
+	"description": "",
+	"private": true,
+	"workspaces": ["packages/*", "services/*"],
+	"author": "battlesqui_d",
+	"license": "ISC",
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"dotenv-vault": "^1.26.0",
+		"rimraf": "^6.0.1",
+		"turbo": "^2.4.0",
+		"typescript": "^5.2.2"
+	},
+	"scripts": {
+		"build": "turbo run build",
+		"clean:dist": "rimraf ./packages/**/dist packages/**/tsconfig.tsbuildinfo packages/**/.turbo .turbo",
+		"clean:packages": "rimraf packages/**/node_modules node_modules",
+		"clean:all": "yarn clean:dist && yarn clean:packages",
+		"format-and-lint": "biome check .",
+		"format-and-lint:fix": "biome check . --write",
+		"neat": "turbo run format-and-lint",
+		"neat:fix": "turbo run format-and-lint:fix",
+		"bot:start": "yarn workspace @qnaplus/bot run start",
+		"bot:dev": "yarn workspace @qnaplus/bot run dev",
+		"updater:start": "yarn workspace @qnaplus/updater run start",
+		"updater:dev": "yarn workspace @qnaplus/updater run dev",
+		"store:populate": "yarn workspace @qnaplus/store run populate",
+		"store:populate_metadata": "yarn workspace @qnaplus/store run populate_metadata",
+		"web:dev": "yarn workspace @qnaplus/web run dev"
+	},
+	"volta": {
+		"node": "22.13.1",
+		"yarn": "1.22.22"
+	},
+	"packageManager": "yarn@1.22.22"
 }

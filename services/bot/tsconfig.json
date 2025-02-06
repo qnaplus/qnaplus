@@ -1,23 +1,23 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "Node16",
-    "declaration": true,
-    "declarationMap": true,
-    "rootDir": "src",
-    "outDir": "dist",
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "experimentalDecorators": true
-  }
+	"compilerOptions": {
+		"target": "ES2020",
+		"module": "Node16",
+		"declaration": true,
+		"declarationMap": true,
+		"rootDir": "src",
+		"outDir": "dist",
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true,
+		"strictBindCallApply": true,
+		"strictPropertyInitialization": true,
+		"noImplicitThis": true,
+		"alwaysStrict": true,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"experimentalDecorators": true
+	}
 }

@@ -1,25 +1,24 @@
 <script setup lang="ts">
 import { useEventListener } from "@vueuse/core";
-import Button from 'primevue/button';
-import { onMounted, ref } from 'vue';
+import Button from "primevue/button";
+import { onMounted, ref } from "vue";
 const header = ref<HTMLDivElement | null>(null);
 const filler = ref<HTMLDivElement | null>(null);
 const update = () => {
-    console.log("called")
-    if (window.scrollY !== 0) {
-        header.value?.classList.add("header-sticky");
-        header.value?.classList.remove("border-transparent")
-        filler.value?.classList.remove("hidden")
-    } else {
-        header.value?.classList.remove("header-sticky");
-        header.value?.classList.add("border-transparent")
-        filler.value?.classList.add("hidden")
-    }
-}
+	console.log("called");
+	if (window.scrollY !== 0) {
+		header.value?.classList.add("header-sticky");
+		header.value?.classList.remove("border-transparent");
+		filler.value?.classList.remove("hidden");
+	} else {
+		header.value?.classList.remove("header-sticky");
+		header.value?.classList.add("border-transparent");
+		filler.value?.classList.add("hidden");
+	}
+};
 onMounted(() => update());
 useEventListener(document, "scroll", () => update());
 const appname = import.meta.env.VITE_APP_NAME;
-
 </script>
 
 <template>

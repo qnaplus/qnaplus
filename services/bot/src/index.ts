@@ -9,32 +9,32 @@ import { PinoLoggerAdapter } from "./utils/logger_adapter";
 const pinoLogger = getLoggerInstance("qnabot");
 
 const client = new SapphireClient({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ],
-    logger: {
-        level: getenv("NODE_ENV") === 'development' ? LogLevel.Debug : LogLevel.Info,
-        instance: new PinoLoggerAdapter(pinoLogger)
-    },
-    partials: [Partials.Message, Partials.Channel],
-    presence: {
-        status: "online",
-        activities: [
-            {
-                type: ActivityType.Watching,
-                name: 'for Q&A changes 👀',
-            },
-        ],
-    },
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+	],
+	logger: {
+		level:
+			getenv("NODE_ENV") === "development" ? LogLevel.Debug : LogLevel.Info,
+		instance: new PinoLoggerAdapter(pinoLogger),
+	},
+	partials: [Partials.Message, Partials.Channel],
+	presence: {
+		status: "online",
+		activities: [
+			{
+				type: ActivityType.Watching,
+				name: "for Q&A changes 👀",
+			},
+		],
+	},
 });
 
 const start = async () => {
-    await client.login(getenv("DISCORD_TOKEN"));
-    await doQueueCheck(container.logger as PinoLoggerAdapter)
-    startBroadcaster(pinoLogger);
-}
+	await client.login(getenv("DISCORD_TOKEN"));
+	await doQueueCheck(container.logger as PinoLoggerAdapter);
+	startBroadcaster(pinoLogger);
+};
 
-start()
-    .catch(e => container.logger.error(e));
+start().catch((e) => container.logger.error(e));

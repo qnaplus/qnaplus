@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import Card from 'primevue/card';
-import { Question } from "@qnaplus/scraper";
+import type { Question } from "@qnaplus/scraper";
+import Card from "primevue/card";
 import { RouterLink } from "vue-router";
 import { applyWordLimit } from "../../util/strings";
-import QuestionDetails from '../question/QuestionDetails.vue';
-import QuestionTags from '../shared/QuestionTags.vue';
+import QuestionDetails from "../question/QuestionDetails.vue";
+import QuestionTags from "../shared/QuestionTags.vue";
 
 const question = defineProps<Question>();
 
 const WORD_LIMIT = 75;
 const limitedQuestion = applyWordLimit(question.question, WORD_LIMIT);
 const limitedAnswer = applyWordLimit(question.answer, WORD_LIMIT);
-
 </script>
 
 <template>

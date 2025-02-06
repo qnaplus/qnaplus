@@ -1,27 +1,27 @@
 {
-    "name": "@qnaplus/dotenv",
-    "version": "1.0.0",
-    "description": "",
-    "author": "battlesqui_d",
-    "license": "ISC",
-    "scripts": {
-        "build": "tsc",
-        "check-types": "tsc --noEmit"
-    },
-    "volta": {
-        "node": "22.13.1",
-        "yarn": "1.22.22"
-    },
-    "dependencies": {
-        "dotenv": "^16.3.1"
-    },
-    "devDependencies": {
-        "@qnaplus/typescript-config": "*"
-    },
-    "exports": {
-        ".": {
-            "default": "./dist/index.js",
-            "types": "./dist/index.d.ts"
-        }
-    }
+	"name": "@qnaplus/dotenv",
+	"version": "1.0.0",
+	"description": "",
+	"author": "battlesqui_d",
+	"license": "ISC",
+	"scripts": {
+		"build": "tsc",
+		"check-types": "tsc --noEmit"
+	},
+	"volta": {
+		"node": "22.13.1",
+		"yarn": "1.22.22"
+	},
+	"dependencies": {
+		"dotenv": "^16.3.1"
+	},
+	"devDependencies": {
+		"@qnaplus/typescript-config": "*"
+	},
+	"exports": {
+		".": {
+			"default": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	}
 }

@@ -1,13 +1,13 @@
 export const QnaplusBuckets = {
-    Data: "data"
-}
+	Data: "data",
+};
 
 export const QnaplusEvents = {
-    RenotifyQueueFlush: "renotify_queue_flush",
-    RenotifyQueueFlushAck: "renotify_queue_flush_ack"
-}
+	RenotifyQueueFlush: "renotify_queue_flush",
+	RenotifyQueueFlushAck: "renotify_queue_flush_ack",
+};
 
 export const QnaplusChannels = {
-    DbChanges: "db-changes",
-    RenotifyQueue: "renotify-queue"
-}
+	DbChanges: "db-changes",
+	RenotifyQueue: "renotify-queue",
+};

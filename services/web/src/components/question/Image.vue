@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Image from 'primevue/image';
+import Image from "primevue/image";
 
 defineProps<{
-    src: string;
-    height: number;
-    preview: boolean;
+	src: string;
+	height: number;
+	preview: boolean;
 }>();
 </script>
 

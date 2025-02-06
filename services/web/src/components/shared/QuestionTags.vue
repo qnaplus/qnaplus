@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Question } from '@qnaplus/scraper';
-import Tag from 'primevue/tag';
-import ProgramTag from './ProgramTag.vue';
-const { tags, program } = defineProps<Pick<Question, "tags" | "program">>()
+import type { Question } from "@qnaplus/scraper";
+import Tag from "primevue/tag";
+import ProgramTag from "./ProgramTag.vue";
+const { tags, program } = defineProps<Pick<Question, "tags" | "program">>();
 </script>
 
 <template>

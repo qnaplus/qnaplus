@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import ProgressSpinner from 'primevue/progressspinner';
-import { provide, ref } from 'vue';
-import { database, setupDatabase, getAppData, QnaplusAppData } from "./database"
-import { loadMinisearch } from "./composable/useSearch"
+import ProgressSpinner from "primevue/progressspinner";
+import { provide, ref } from "vue";
+import { loadMinisearch } from "./composable/useSearch";
+import {
+	type QnaplusAppData,
+	database,
+	getAppData,
+	setupDatabase,
+} from "./database";
 
 const loading = ref<boolean>(true);
 const appdata = ref<QnaplusAppData>();
@@ -11,23 +16,22 @@ provide("appdata", appdata);
 const appname = import.meta.env.VITE_APP_NAME;
 
 const startup = async () => {
-    try {
-        await setupDatabase();
+	try {
+		await setupDatabase();
 
-        const data = await getAppData();
-        appdata.value = data;
+		const data = await getAppData();
+		appdata.value = data;
 
-        const questions = await database.questions.toArray();
-        await loadMinisearch(questions);
+		const questions = await database.questions.toArray();
+		await loadMinisearch(questions);
 
-        loading.value = false
-    } catch (e) {
-        console.error(e);
-    }
-}
+		loading.value = false;
+	} catch (e) {
+		console.error(e);
+	}
+};
 
 startup();
-
 </script>
 
 <template>

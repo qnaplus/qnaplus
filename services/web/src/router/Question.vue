@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Node as ParserNode } from "domhandler";
+import type { Node as ParserNode } from "domhandler";
 import * as htmlparser2 from "htmlparser2";
 import Divider from "primevue/divider";
 import Message from "primevue/message";
@@ -7,39 +7,48 @@ import sanitize from "sanitize-html";
 import { ref } from "vue";
 import QuestionDetails from "../components/question/QuestionDetails.vue";
 import QuestionTags from "../components/shared/QuestionTags.vue";
-import { resolveQuestionComponent, resolveQuestionComponentProps } from "../composable/componentMap";
+import {
+	resolveQuestionComponent,
+	resolveQuestionComponentProps,
+} from "../composable/componentMap";
 import { getQuestion } from "../database";
 import Root from "./Root.vue";
 
 const props = defineProps<{
-  id: string;
+	id: string;
 }>();
 
 const archived = ref<boolean | null | undefined>(undefined);
 const question = await getQuestion(props.id);
 
 const getStatus = async () => {
-  if (question !== undefined) {
-    try {
-      const fetchedQuestion = await fetch(question.url);
-      archived.value = fetchedQuestion.status === 404;
-    } catch (error) {
-      archived.value = null
-    }
-  }
-}
+	if (question !== undefined) {
+		try {
+			const fetchedQuestion = await fetch(question.url);
+			archived.value = fetchedQuestion.status === 404;
+		} catch (error) {
+			archived.value = null;
+		}
+	}
+};
 
 getStatus();
 
 const sanitizeOptions: sanitize.IOptions = {
-  allowedTags: sanitize.defaults.allowedTags.concat("img")
-}
+	allowedTags: sanitize.defaults.allowedTags.concat("img"),
+};
 
-const sanitizedQuestionHTML = sanitize(question?.questionRaw ?? "", sanitizeOptions);
+const sanitizedQuestionHTML = sanitize(
+	question?.questionRaw ?? "",
+	sanitizeOptions,
+);
 const questionDom = htmlparser2.parseDocument(sanitizedQuestionHTML);
 const questionChildren = questionDom.children as ParserNode[];
 
-const sanitizedAnswerHTML = sanitize(question?.answerRaw ?? "", sanitizeOptions);
+const sanitizedAnswerHTML = sanitize(
+	question?.answerRaw ?? "",
+	sanitizeOptions,
+);
 const answerDom = htmlparser2.parseDocument(sanitizedAnswerHTML);
 const answerChildren = answerDom.children as ParserNode[];
 </script>

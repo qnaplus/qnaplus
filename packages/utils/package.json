@@ -1,19 +1,19 @@
 {
-    "name": "@qnaplus/utils",
-    "version": "1.0.0",
-    "description": "",
-    "main": "dist/index.js",
-    "author": "battlesqui_d",
-    "license": "ISC",
-    "scripts": {
-        "build": "tsc",
-        "check-types": "tsc --noEmit"
-    },
-    "devDependencies": {
-        "@qnaplus/typescript-config": "*"
-    },
-    "volta": {
-        "node": "22.13.1",
-        "yarn": "1.22.22"
-    }
+	"name": "@qnaplus/utils",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/index.js",
+	"author": "battlesqui_d",
+	"license": "ISC",
+	"scripts": {
+		"build": "tsc",
+		"check-types": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@qnaplus/typescript-config": "*"
+	},
+	"volta": {
+		"node": "22.13.1",
+		"yarn": "1.22.22"
+	}
 }

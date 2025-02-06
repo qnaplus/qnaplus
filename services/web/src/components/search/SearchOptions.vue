@@ -1,51 +1,62 @@
 <script setup lang="ts">
 import Accordion from "primevue/accordion";
-import AccordionPanel from "primevue/accordionpanel";
-import AccordionHeader from "primevue/accordionheader";
 import AccordionContent from "primevue/accordioncontent";
-import Badge from 'primevue/badge';
-import Button from 'primevue/button';
+import AccordionHeader from "primevue/accordionheader";
+import AccordionPanel from "primevue/accordionpanel";
+import AutoComplete from "primevue/autocomplete";
+import Badge from "primevue/badge";
+import Button from "primevue/button";
 import DatePicker from "primevue/datepicker";
-import AutoComplete from 'primevue/autocomplete';
-import Dropdown from 'primevue/dropdown';
+import Divider from "primevue/divider";
+import Dropdown from "primevue/dropdown";
 import IconField from "primevue/iconfield";
 import InputGroup from "primevue/inputgroup";
-import InputGroupAddon from 'primevue/inputgroupaddon';
-import InputIcon from "primevue/inputicon"
-import InputSwitch from 'primevue/inputswitch';
+import InputGroupAddon from "primevue/inputgroupaddon";
+import InputIcon from "primevue/inputicon";
+import InputSwitch from "primevue/inputswitch";
 import InputText from "primevue/inputtext";
-import MultiSelect from 'primevue/multiselect';
-import SelectButton from 'primevue/selectbutton';
-import { VueDraggable } from "vue-draggable-plus";
-import Tabs from "primevue/tabs";
-import TabList from "primevue/tablist";
+import MultiSelect from "primevue/multiselect";
+import SelectButton from "primevue/selectbutton";
 import Tab from "primevue/tab";
-import TabPanels from "primevue/tabpanels";
+import TabList from "primevue/tablist";
 import TabPanel from "primevue/tabpanel";
-import Divider from 'primevue/divider';
+import TabPanels from "primevue/tabpanels";
+import Tabs from "primevue/tabs";
 import { computed } from "vue";
-import { SearchFilterOptions, questionStateOptions } from "../../composable/useSearchFilter";
-import { SearchSortOptions, SortOptions, sortOptionsList, sortOrderList } from "../../composable/useSort";
-import { Option } from "../../composable";
+import { VueDraggable } from "vue-draggable-plus";
+import type { Option } from "../../composable";
+import {
+	type SearchFilterOptions,
+	questionStateOptions,
+} from "../../composable/useSearchFilter";
+import {
+	type SearchSortOptions,
+	type SortOptions,
+	sortOptionsList,
+	sortOrderList,
+} from "../../composable/useSort";
 
 const props = defineProps<{
-    filterOptions: SearchFilterOptions;
-    sortOptions: SearchSortOptions;
+	filterOptions: SearchFilterOptions;
+	sortOptions: SearchSortOptions;
 }>();
 
 const remainingAdvancedOptions = computed(() => {
-    return sortOptionsList.filter(sortOption => !props.sortOptions.advanced.find(selectedSortOption => sortOption.value === selectedSortOption.value))
+	return sortOptionsList.filter(
+		(sortOption) =>
+			!props.sortOptions.advanced.find(
+				(selectedSortOption) => sortOption.value === selectedSortOption.value,
+			),
+	);
 });
 
-
 const updateSelectedAdvancedOption = (value: Option<SortOptions>) => {
-    props.sortOptions.advanced.push({ ...value, asc: sortOrderList[0] });
-}
+	props.sortOptions.advanced.push({ ...value, asc: sortOrderList[0] });
+};
 
 const removeSelectedAdvancedOption = (index: number) => {
-    props.sortOptions.advanced.splice(index, 1);
-}
-
+	props.sortOptions.advanced.splice(index, 1);
+};
 </script>
 
 <template>
