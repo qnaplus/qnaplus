@@ -1,7 +1,7 @@
 import { ChangeEvent, ChangeQuestion, ChangeTypeMap } from "@qnaplus/store";
 import { chunk } from "@qnaplus/utils";
 import { ColorResolvable, EmbedBuilder, bold, codeBlock, hyperlink } from "discord.js";
-import { config } from "qnaplus";
+import { config } from "@qnaplus/dotenv";
 
 const ProgramColorMap: Record<string, ColorResolvable> = {
     V5RC: "#f54242",

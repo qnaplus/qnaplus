@@ -1,5 +1,5 @@
 import { Logger } from "pino";
-import { getAllQuestions, QnaplusBuckets, upload, UploadMetadata } from "qnaplus";
+import { getAllQuestions, QnaplusBuckets, upload, UploadMetadata } from "@qnaplus/store";
 
 export const doStorageUpdate = async (_logger?: Logger) => {
     const logger = _logger?.child({ label: "doStorageUpdate" });

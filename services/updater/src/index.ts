@@ -1,7 +1,7 @@
 import { getLoggerInstance } from "@qnaplus/logger";
 import Cron from "croner";
 import { Logger } from "pino";
-import { config } from "qnaplus";
+import { config } from "@qnaplus/dotenv";
 import { doDatabaseUpdate } from "./updaters/database_update";
 import { doRenotifyUpdate, onRenotifyQueueFlushAck } from "./updaters/renotify_update";
 import { doStorageUpdate } from "./updaters/storage_update";

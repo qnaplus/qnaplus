@@ -2,7 +2,7 @@ import { FetchClient, FetchClientResponse, ITERATIVE_BATCH_COUNT, Question, Seas
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import { chunk, unique } from "@qnaplus/utils";
 import { Logger } from "pino";
-import { doDatabaseAnswerQueueUpdate, doFailureQuestionUpdate, findNewAnsweredQuestions, getFailures, getMetadata, getQuestion, saveMetadata, updateFailures } from "qnaplus";
+import { doDatabaseAnswerQueueUpdate, doFailureQuestionUpdate, findNewAnsweredQuestions, getFailures, getMetadata, getQuestion, saveMetadata, updateFailures } from "@qnaplus/store";
 
 type FailureUpdateResult = {
     oldest: Question | undefined;

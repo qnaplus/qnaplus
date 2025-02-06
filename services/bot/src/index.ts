@@ -1,10 +1,10 @@
+import { config } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
-import {config} from "qnaplus";
 import { LogLevel, SapphireClient, container } from "@sapphire/framework";
 import { ActivityType, GatewayIntentBits, Partials } from "discord.js";
 import { startBroadcaster } from "./broadcaster";
-import { PinoLoggerAdapter } from "./utils/logger_adapter";
 import { doQueueCheck } from "./queue_check";
+import { PinoLoggerAdapter } from "./utils/logger_adapter";
 
 const pinoLogger = getLoggerInstance("qnabot");
 

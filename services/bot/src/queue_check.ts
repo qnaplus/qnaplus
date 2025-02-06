@@ -1,4 +1,4 @@
-import { ChangeQuestion, clearAnswerQueue, getAnswerQueue } from "qnaplus";
+import { ChangeQuestion, clearAnswerQueue, getAnswerQueue } from "@qnaplus/store";
 import { handleOnChange } from "./broadcaster";
 import { PinoLoggerAdapter } from "./utils/logger_adapter";
 

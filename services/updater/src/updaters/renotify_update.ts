@@ -1,5 +1,5 @@
 import { Logger } from "pino";
-import { QnaplusChannels, QnaplusEvents, clearRenotifyQueue, getRenotifyQueue, supabase } from "qnaplus";
+import { QnaplusChannels, QnaplusEvents, clearRenotifyQueue, getRenotifyQueue, supabase } from "@qnaplus/store";
 
 export const onRenotifyQueueFlushAck = (_logger: Logger) => {
     const logger = _logger.child({ label: "renotifyQueueAck" });

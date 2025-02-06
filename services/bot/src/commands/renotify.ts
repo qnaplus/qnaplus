@@ -5,11 +5,12 @@ import { PaginatedFieldMessageEmbed } from "@sapphire/discord.js-utilities";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import Cron from "croner";
 import { EmbedBuilder, hyperlink, inlineCode } from "discord.js";
-import { clearRenotifyQueue, config, getAnsweredQuestionsNewerThanDate, getQuestion, getRenotifyQueue, insertRenotifyQueue } from "qnaplus";
+import { clearRenotifyQueue, getAnsweredQuestionsNewerThanDate, getQuestion, getRenotifyQueue, insertRenotifyQueue } from "@qnaplus/store";
 import { buildQuestionUrl } from "../formatting";
 import { renotify } from "../interactions";
 import { PinoLoggerAdapter } from "../utils/logger_adapter";
 import { LoggerSubcommand } from "../utils/logger_subcommand";
+import { config } from "@qnaplus/dotenv";
 
 
 @ApplyOptions<Subcommand.Options>({
