@@ -11,11 +11,12 @@
   "license": "ISC",
   "devDependencies": {
     "dotenv-vault": "^1.26.0",
+    "turbo": "^2.4.0",
     "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "tsc --build",
-    "clean:dist": "rm -rf ./packages/**/dist packages/**/tsconfig.tsbuildinfo",
+    "clean:dist": "rm -rf ./packages/**/dist packages/**/tsconfig.tsbuildinfo packages/**/.turbo .turbo",
     "clean:packages": "rm -rf packages/**/node_modules node_modules",
     "clean:all": "yarn clean:dist && yarn clean:packages",
     "bot:start": "yarn workspace @qnaplus/bot run start",
@@ -29,5 +30,6 @@
   "volta": {
     "node": "22.13.1",
     "yarn": "1.22.22"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }

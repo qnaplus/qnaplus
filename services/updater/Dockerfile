@@ -1,4 +1,4 @@
-FROM node:22.13.1-alpine3.20 as build
+FROM node:22.13.1-alpine3.20 AS build
 
 WORKDIR /app
 
@@ -15,13 +15,14 @@ RUN yarn install && yarn workspace @qnaplus/updater run build
 # =======================================================
 
 # TODO: try and find a slimmer image that still supports ts-curl-impersonate linked libraries
-FROM node:22.13.1 as production
+FROM node:22.13.1 AS production
 
 WORKDIR /app
 
 COPY --from=build /app/yarn.lock .
 COPY --from=build /app/package.json .
-COPY --from=build /app/dist dist
+COPY --from=build /app/services/updater/dist services/updater/dist
+COPY --from=build /app/packages/**/dist services/updater/dist
 COPY .env.vault .
 
 RUN yarn install --production
