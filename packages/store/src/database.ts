@@ -7,7 +7,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-let PG_CLIENT: postgres.Sql<{}> | null = null;
+let PG_CLIENT: postgres.Sql | null = null;
 
 export const getPgClient = () => {
 	if (PG_CLIENT === null) {

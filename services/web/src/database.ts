@@ -66,13 +66,7 @@ const updateAppData = async (db: QnaplusDatabase) => {
 };
 
 const updateDatabase = async (db: QnaplusDatabase) => {
-	const metadataCount = await db.metadata.count();
-	let metadata: QnaplusMetadata;
-	if (metadataCount === 0) {
-		metadata = await updateMetadata(db);
-	} else {
-		metadata = (await getMetadata())!;
-	}
+	const metadata = await getMetadata(db);
 	const UPDATE_INTERVAL_HOURS = Number.parseInt(
 		import.meta.env.VITE_UPDATE_INTERVAL_HOURS,
 	);
@@ -105,8 +99,12 @@ export const setupDatabase = async () => {
 	});
 };
 
-export const getMetadata = () => {
-	return database.metadata.get(DATA_PRIMARY_KEY);
+export const getMetadata = async (db: QnaplusDatabase) => {
+	const maybeMetadata = await database.metadata.get(DATA_PRIMARY_KEY);
+	if (maybeMetadata !== undefined) {
+		return maybeMetadata;
+	}
+	return updateMetadata(db);
 };
 
 export const getAppData = async () => {

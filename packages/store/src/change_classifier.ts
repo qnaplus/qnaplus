@@ -50,6 +50,7 @@ const CHANGE_MAP: ChangeMap<Question> = {
 		},
 		format(newItem, oldItem) {
 			// based on the above condition, we can safely use non-null assertion
+			// biome-ignore lint: style/noNonNullAssertion
 			const diff = diffSentences(oldItem.answer!, newItem.answer!);
 			return { ...newItem, changeType: "answer_edited", diff };
 		},

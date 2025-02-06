@@ -1,4 +1,4 @@
-import * as path from "path";
+import * as path from "node:path";
 import { config } from "dotenv";
 
 const ENV_VARIABLES = [
@@ -22,16 +22,16 @@ const loadEnv = () => {
 	const { error } = config({ path: path.resolve(__dirname, "../../../.env") });
 	if (error) {
 		console.error(error);
-		throw Error(`Environment variables could not be loaded, exiting`);
+		throw Error("Environment variables could not be loaded, exiting");
 	}
 	const loaded: Record<string, string> = {};
-	ENV_VARIABLES.forEach((v) => {
+	for (const v of ENV_VARIABLES) {
 		const value = process.env[v];
 		if (value === undefined) {
 			throw Error(`Environment variable '${v}' missing, exiting.`);
 		}
 		loaded[v] = value;
-	});
+	}
 	return loaded;
 };
 

@@ -1,4 +1,4 @@
-import os from "os";
+import os from "node:os";
 import { getenv } from "@qnaplus/dotenv";
 import { type LoggerOptions, pino } from "pino";
 

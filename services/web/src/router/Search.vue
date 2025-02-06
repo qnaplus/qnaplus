@@ -23,11 +23,11 @@ const dbQuestions = useObservable<Question[], Question[]>(
 		initialValue: [],
 	},
 );
-const appData = inject<Ref<QnaplusAppData | undefined>>("appdata")!;
+const appData = inject<Ref<QnaplusAppData | undefined>>("appdata");
 const { questions } = useSearch(query, dbQuestions);
 const { filteredQuestions, ...filterOptions } = useSearchFilter(questions, {
-	programs: appData.value?.programs ?? [],
-	seasons: appData.value?.seasons ?? [],
+	programs: appData?.value?.programs ?? [],
+	seasons: appData?.value?.seasons ?? [],
 });
 const { sortedQuestions, sortOptions } = useSort(filteredQuestions);
 </script>

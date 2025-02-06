@@ -18,6 +18,7 @@ export const doStorageUpdate = async (_logger?: Logger) => {
 	}
 	const json = JSON.stringify(questions);
 	// typed as any to address limitation in tus-js-client (https://github.com/tus/tus-js-client/issues/289)
+	// biome-ignore lint: suspicious/noExplicitAny
 	const buffer: any = Buffer.from(json, "utf-8");
 	const metadata: UploadMetadata = {
 		bucket: QnaplusBuckets.Data,

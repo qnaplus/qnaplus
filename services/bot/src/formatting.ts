@@ -76,10 +76,10 @@ export const buildQuestionEmbed = (question: ChangeQuestion) => {
 		.setFooter({ text: tags.length > 0 ? `🏷️ ${tags.join(", ")}` : "No tags" });
 	switch (question.changeType) {
 		case "answer_edited":
-			embedFormatter["answer_edited"](base, question);
+			embedFormatter.answer_edited(base, question);
 			break;
 		case "answered":
-			embedFormatter["answered"](base, question);
+			embedFormatter.answered(base, question);
 			break;
 		default:
 			((_: never) => {})(question);

@@ -38,13 +38,19 @@ export const populateWithMetadata = async (
 		currentSeason,
 	);
 	const oldestQuestion = getOldestQuestion(questions, currentSeason);
+	if (oldestQuestion === undefined) {
+		logger?.error(
+			"An unexpected error occurred: unable to find oldest question from current season, exiting.",
+		);
+		return;
+	}
 
 	// assert non-null since we know the scraper is starting from the beginning
 	// meaning we are practically guaranteed at least one "oldest question"
 	const oldestQuestionId =
 		oldestUnansweredQuestion !== undefined
 			? oldestUnansweredQuestion.id
-			: oldestQuestion!.id;
+			: oldestQuestion.id;
 
 	const { ok, error } = await trycatch(
 		db.transaction(async (tx) => {

@@ -291,7 +291,10 @@ export class Renotify extends LoggerSubcommand {
 
 	private getNextRuntimeString() {
 		const nextRuntime = Cron(getenv("DATABASE_UPDATE_INTERVAL")).msToNext();
-		const minutes = Math.round(nextRuntime! / 1000 / 60);
+		if (nextRuntime === null) {
+			return "";
+		}
+		const minutes = Math.round(nextRuntime / 1000 / 60);
 		return ` ${minutes} minutes until next run.`;
 	}
 }

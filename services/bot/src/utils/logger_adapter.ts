@@ -38,19 +38,23 @@ export class PinoLoggerAdapter implements ISapphireLogger {
 
 	write(level: LogLevel, ...values: readonly unknown[]): void {
 		switch (level) {
-			case LogLevel.Trace:
+			case LogLevel.Trace: {
 				this.logger.trace({ values });
 				break;
-			case LogLevel.Debug:
+			}
+			case LogLevel.Debug: {
 				this.logger.debug({ values });
 				break;
-			case LogLevel.Info:
+			}
+			case LogLevel.Info: {
 				this.logger.info({ values });
 				break;
-			case LogLevel.Warn:
+			}
+			case LogLevel.Warn: {
 				this.logger.warn({ values });
 				break;
-			case LogLevel.Error:
+			}
+			case LogLevel.Error: {
 				const [maybeError, ...otherValues] = values;
 				if (maybeError instanceof Error) {
 					this.logger.error({ error: maybeError, otherValues });
@@ -58,9 +62,11 @@ export class PinoLoggerAdapter implements ISapphireLogger {
 					this.logger.error({ values });
 				}
 				break;
-			case LogLevel.Fatal:
+			}
+			case LogLevel.Fatal: {
 				this.logger.fatal({ values });
 				break;
+			}
 			case LogLevel.None:
 				break;
 			default:

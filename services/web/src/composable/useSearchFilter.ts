@@ -59,28 +59,28 @@ const FILTER_MAP: FilterMap = {
 			: !q.answered;
 	},
 	askedBefore(q, f) {
-		if (q.askedTimestampMs === null) {
+		if (q.askedTimestampMs === null || f.askedBefore === null) {
 			return false;
 		}
-		return new Date(q.askedTimestampMs) < f.askedBefore!;
+		return new Date(q.askedTimestampMs) < f.askedBefore;
 	},
 	askedAfter(q, f) {
-		if (q.askedTimestampMs === null) {
+		if (q.askedTimestampMs === null || f.askedAfter === null) {
 			return false;
 		}
-		return new Date(q.askedTimestampMs) > f.askedAfter!;
+		return new Date(q.askedTimestampMs) > f.askedAfter;
 	},
 	answeredBefore(q, f) {
-		if (q.askedTimestampMs === null) {
+		if (q.askedTimestampMs === null || f.answeredBefore === null) {
 			return false;
 		}
-		return new Date(q.askedTimestampMs) < f.answeredBefore!;
+		return new Date(q.askedTimestampMs) < f.answeredBefore;
 	},
 	answeredAfter(q, f) {
-		if (q.askedTimestampMs === null) {
+		if (q.askedTimestampMs === null || f.answeredAfter === null) {
 			return false;
 		}
-		return new Date(q.askedTimestampMs) > f.answeredAfter!;
+		return new Date(q.askedTimestampMs) > f.answeredAfter;
 	},
 	tags(q, f) {
 		return f.tags.every((t) => q.tags.includes(t));
@@ -92,7 +92,8 @@ const isEmptyFilterValue = (
 ): boolean => {
 	if (typeof filterValue === "string") {
 		return filterValue.trim() === "";
-	} else if (Array.isArray(filterValue)) {
+	}
+	if (Array.isArray(filterValue)) {
 		return filterValue.length === 0;
 	}
 	return filterValue === null;
