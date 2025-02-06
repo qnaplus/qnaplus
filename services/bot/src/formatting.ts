@@ -1,7 +1,7 @@
 import { ChangeEvent, ChangeQuestion, ChangeTypeMap } from "@qnaplus/store";
 import { chunk } from "@qnaplus/utils";
 import { ColorResolvable, EmbedBuilder, bold, codeBlock, hyperlink } from "discord.js";
-import { config } from "@qnaplus/dotenv";
+import { getenv } from "@qnaplus/dotenv";
 
 const ProgramColorMap: Record<string, ColorResolvable> = {
     V5RC: "#f54242",
@@ -12,7 +12,7 @@ const ProgramColorMap: Record<string, ColorResolvable> = {
 }
 
 export const buildQuestionUrl = (id: string) => {
-    return `${config.getenv("QNA_WEBSITE")}/${id}`;
+    return `${getenv("QNA_WEBSITE")}/${id}`;
 }
 
 const baseEmbedDescription = ({ author, askedTimestamp, title, id }: ChangeQuestion) => {

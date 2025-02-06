@@ -1,4 +1,4 @@
-import { config } from "@qnaplus/dotenv"
+import { getenv } from "@qnaplus/dotenv"
 import { ChangeQuestion, onChange } from "@qnaplus/store"
 import { chunk, groupby } from "@qnaplus/utils"
 import { container } from "@sapphire/framework"
@@ -7,7 +7,7 @@ import { Logger } from "pino"
 import { buildQuestionEmbed } from "./formatting"
 import { PinoLoggerAdapter } from "./utils/logger_adapter"
 
-const channels = JSON.parse(config.getenv("BROADCASTER_CHANNELS"));
+const channels = JSON.parse(getenv("BROADCASTER_CHANNELS"));
 
 const MAX_EMBEDS_PER_MESSAGE = 10;
 

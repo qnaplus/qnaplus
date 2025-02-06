@@ -1,4 +1,4 @@
-import { config } from "@qnaplus/dotenv";
+import { getenv } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
 import { LogLevel, SapphireClient, container } from "@sapphire/framework";
 import { ActivityType, GatewayIntentBits, Partials } from "discord.js";
@@ -15,7 +15,7 @@ const client = new SapphireClient({
         GatewayIntentBits.MessageContent
     ],
     logger: {
-        level: config.getenv("NODE_ENV") === 'development' ? LogLevel.Debug : LogLevel.Info,
+        level: getenv("NODE_ENV") === 'development' ? LogLevel.Debug : LogLevel.Info,
         instance: new PinoLoggerAdapter(pinoLogger)
     },
     partials: [Partials.Message, Partials.Channel],
@@ -31,7 +31,7 @@ const client = new SapphireClient({
 });
 
 const start = async () => {
-    await client.login(config.getenv("DISCORD_TOKEN"));
+    await client.login(getenv("DISCORD_TOKEN"));
     await doQueueCheck(container.logger as PinoLoggerAdapter)
     startBroadcaster(pinoLogger);
 }

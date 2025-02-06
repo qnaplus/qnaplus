@@ -1,4 +1,4 @@
-import { config } from "@qnaplus/dotenv"
+import { getenv } from "@qnaplus/dotenv"
 import { pino, LoggerOptions } from "pino"
 import os from "os";
 
@@ -6,7 +6,7 @@ export const getLoggerInstance = (stream: string, options?: LoggerOptions) => {
     return pino({
         ...options,
         base: {
-            env: config.getenv("NODE_ENV"),
+            env: getenv("NODE_ENV"),
             pid: process.pid,
             hostname: os.hostname()
         },
@@ -16,11 +16,11 @@ export const getLoggerInstance = (stream: string, options?: LoggerOptions) => {
                 {
                     target: "pino-parseable",
                     options: {
-                        endpoint: config.getenv("PARSEABLE_ENDPOINT"),
+                        endpoint: getenv("PARSEABLE_ENDPOINT"),
                         stream,
                         auth: {
-                            username: config.getenv("PARSEABLE_USERNAME"),
-                            password: config.getenv("PARSEABLE_PASSWORD")
+                            username: getenv("PARSEABLE_USERNAME"),
+                            password: getenv("PARSEABLE_PASSWORD")
                         }
                     }
                 },

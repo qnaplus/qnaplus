@@ -1,4 +1,4 @@
-import { config } from '@qnaplus/dotenv';
+import { getenv } from '@qnaplus/dotenv';
 import 'dotenv/config';
 import { defineConfig } from 'drizzle-kit';
 export default defineConfig({
@@ -6,6 +6,6 @@ export default defineConfig({
     schema: './src/schema.ts',
     dialect: 'postgresql',
     dbCredentials: {
-        url: config.getenv("SUPABASE_CONNECTION_STRING"),
+        url: getenv("SUPABASE_CONNECTION_STRING"),
     },
 });

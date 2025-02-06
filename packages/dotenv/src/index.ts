@@ -1,4 +1,4 @@
-import { config as configenv } from "dotenv";
+import { config } from "dotenv";
 import * as path from "path";
 
 const ENV_VARIABLES = [
@@ -16,10 +16,10 @@ const ENV_VARIABLES = [
     "QNA_WEBSITE"
 ] as const;
 
-type ConfigVariable = typeof ENV_VARIABLES[number];
+type EnvVariable = typeof ENV_VARIABLES[number];
 
-const loadConfig = () => {
-    const { error } = configenv({ path: path.resolve(__dirname, "../../../.env") });
+const loadEnv = () => {
+    const { error } = config({ path: path.resolve(__dirname, "../../../.env") });
     if (error) {
         console.error(error);
         throw Error(`Environment variables could not be loaded, exiting`);
@@ -35,13 +35,11 @@ const loadConfig = () => {
     return loaded;
 }
 
-let CONFIG: Record<string, string> | null = null;
+let ENV: Record<string, string> | null = null;
 
-export const config = {
-    getenv(key: ConfigVariable) {
-        if (CONFIG === null) {
-            CONFIG = loadConfig();
-        }
-        return CONFIG[key];
+export const getenv = (key: EnvVariable) => {
+    if (ENV === null) {
+        ENV = loadEnv();
     }
+    return ENV[key];
 }

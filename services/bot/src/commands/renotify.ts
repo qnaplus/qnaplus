@@ -10,7 +10,7 @@ import { buildQuestionUrl } from "../formatting";
 import { renotify } from "../interactions";
 import { PinoLoggerAdapter } from "../utils/logger_adapter";
 import { LoggerSubcommand } from "../utils/logger_subcommand";
-import { config } from "@qnaplus/dotenv";
+import { getenv } from "@qnaplus/dotenv";
 
 
 @ApplyOptions<Subcommand.Options>({
@@ -249,7 +249,7 @@ export class Renotify extends LoggerSubcommand {
     }
 
     private getNextRuntimeString() {
-        const nextRuntime = Cron(config.getenv("DATABASE_UPDATE_INTERVAL")).msToNext();
+        const nextRuntime = Cron(getenv("DATABASE_UPDATE_INTERVAL")).msToNext();
         const minutes = Math.round(nextRuntime! / 1000 / 60);
         return ` ${minutes} minutes until next run.`;
     }

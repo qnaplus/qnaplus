@@ -1,4 +1,4 @@
-import { config } from "@qnaplus/dotenv";
+import { getenv } from "@qnaplus/dotenv";
 import { Question } from "@qnaplus/scraper";
 import { trycatch } from "@qnaplus/utils";
 import { createClient } from "@supabase/supabase-js";
@@ -11,7 +11,7 @@ let PG_CLIENT: postgres.Sql<{}> | null = null;
 
 export const getPgClient = () => {
     if (PG_CLIENT === null) {
-        PG_CLIENT = postgres(config.getenv("SUPABASE_CONNECTION_STRING"), { prepare: false });
+        PG_CLIENT = postgres(getenv("SUPABASE_CONNECTION_STRING"), { prepare: false });
     }
     return PG_CLIENT;
 }
@@ -23,7 +23,7 @@ export const disconnectPgClient = async () => {
 }
 
 export const db = drizzle({ schema, client: getPgClient() });
-export const supabase = createClient(config.getenv("SUPABASE_URL"), config.getenv("SUPABASE_KEY"));
+export const supabase = createClient(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY"));
 
 export const METADATA_ROW_ID = 0;
 
