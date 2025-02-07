@@ -30,7 +30,7 @@ RUN yarn install --production
 
 # =======================================================
 
-FROM node:22.13.1-alpine3.21 AS prod
+FROM node:22.13.1-bookworm-slim AS prod
 
 COPY --from=build /app /app
 
