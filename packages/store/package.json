@@ -27,7 +27,7 @@
 		"tus-js-client": "^4.1.0"
 	},
 	"devDependencies": {
-		"@qnaplus/scraper-strategies": "^2.0.0",
+		"@qnaplus/scraper-strategies": "^2.0.1",
 		"@qnaplus/typescript-config": "*",
 		"@types/diff": "^5.0.9",
 		"drizzle-kit": "^0.30.4",

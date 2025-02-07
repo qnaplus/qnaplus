@@ -1,4 +1,4 @@
-FROM node:22.13.1-alpine3.20 AS base
+FROM node:22.13.1-alpine3.21 AS base
 
 WORKDIR /app
 
@@ -10,14 +10,30 @@ RUN turbo prune @qnaplus/updater --docker
 
 # =======================================================
 
-FROM node:22.13.1-alpine3.20 AS build
+FROM node:22.13.1-alpine3.21 AS build
 
 WORKDIR /app
 
 COPY --from=base /app/out/json/ .
+COPY --from=base /app/.env.vault .
+
+
 RUN yarn install --frozen-lockfile
- 
+
 COPY --from=base /app/out/full/ .
 RUN yarn turbo run build
 
-CMD ["yarn", "updater:start"]
+RUN find . -name node_modules -exec rm -rf {} +;
+
+ENV NODE_ENV=production
+RUN yarn install --production
+
+# =======================================================
+
+FROM node:22.13.1-alpine3.21 AS prod
+
+COPY --from=build /app /app
+
+WORKDIR /app
+
+CMD ["node", "services/updater/dist/index.js"]

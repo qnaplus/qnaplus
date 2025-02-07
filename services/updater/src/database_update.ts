@@ -129,9 +129,9 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 	const start =
 		failureUpdateResult.oldest !== undefined
 			? Math.min(
-					Number.parseInt(failureUpdateResult.oldest.id),
-					Number.parseInt(oldestUnansweredQuestion),
-				)
+				Number.parseInt(failureUpdateResult.oldest.id),
+				Number.parseInt(oldestUnansweredQuestion),
+			)
 			: Number.parseInt(oldestUnansweredQuestion);
 
 	logger?.info(`Starting update from Q&A ${start}`);
@@ -149,21 +149,22 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 		return;
 	}
 	logger.info(`${newAnsweredQuestions.result.length} new answers detected.`);
-
-	const answerQueueUpdate = await doDatabaseAnswerQueueUpdate(
-		questions,
-		newAnsweredQuestions.result,
-	);
-	if (!answerQueueUpdate.ok) {
-		logger?.error(
-			{ error: answerQueueUpdate.error },
-			`Failed to upsert ${questions.length} questions and update answer queue, retrying on next run.`,
+	if (newAnsweredQuestions.result.length !== 0) {
+		const answerQueueUpdate = await doDatabaseAnswerQueueUpdate(
+			questions,
+			newAnsweredQuestions.result,
 		);
-		return;
+		if (!answerQueueUpdate.ok) {
+			logger?.error(
+				{ error: answerQueueUpdate.error },
+				`Failed to upsert ${questions.length} questions and update answer queue, retrying on next run.`,
+			);
+			return;
+		}
+		logger?.info(
+			`Upserted ${questions.length} questions and updated answer queue.`,
+		);
 	}
-	logger?.info(
-		`Upserted ${questions.length} questions and updated answer queue.`,
-	);
 
 	const allFailures = unique([...failureUpdateResult.failures, ...failures]);
 
@@ -188,8 +189,8 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 	}
 
 	/*
-        If the starting question fails, we should consider it as unanswered, giving it a chance to succeed on the next run.
-    */
+		If the starting question fails, we should consider it as unanswered, giving it a chance to succeed on the next run.
+	*/
 	let oldestUnansweredFromUpdate: Question | undefined;
 	if (validFailures.includes(`${start}`)) {
 		const { ok, error, result } = await getQuestion(`${start}`);
@@ -218,9 +219,9 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 	const oldest =
 		failureUpdateResult.oldest !== undefined
 			? getOldestUnansweredQuestion(
-					[failureUpdateResult.oldest, oldestUnansweredFromUpdate],
-					currentSeason as Season,
-				)
+				[failureUpdateResult.oldest, oldestUnansweredFromUpdate],
+				currentSeason as Season,
+			)
 			: oldestUnansweredFromUpdate;
 	if (oldest === undefined) {
 		logger?.info(

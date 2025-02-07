@@ -54,7 +54,9 @@ export const populateWithMetadata = async (
 
 	const { ok, error } = await trycatch(
 		db.transaction(async (tx) => {
-			await tx.insert(schema.questions).values(questions);
+			if (questions.length !== 0) {
+				await tx.insert(schema.questions).values(questions);
+			}
 			await tx
 				.insert(schema.metadata)
 				.values({

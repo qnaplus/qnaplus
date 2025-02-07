@@ -24,7 +24,7 @@ const startStorageJob = (logger: Logger) => {
 };
 
 (async () => {
-	const logger = getLoggerInstance("qnaupdater");
+	const logger = getLoggerInstance("qnaupdater", { level: "trace" });
 	logger.info("Starting updater service");
 	onRenotifyQueueFlushAck(logger);
 	startDatabaseJob(logger);
