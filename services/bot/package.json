@@ -11,7 +11,7 @@
 		"clean": "rimraf dist .turbo",
 		"clean:full": "yarn clean && rimraf node_modules",
 		"start": "node dist/index.js",
-		"dev": "node dist/index.js | pino-pretty"
+		"dev": "NODE_ENV=development node dist/index.js"
 	},
 	"dependencies": {
 		"@qnaplus/logger": "*",

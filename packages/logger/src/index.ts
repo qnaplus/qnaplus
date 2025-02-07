@@ -1,8 +1,33 @@
 import os from "node:os";
 import { getenv } from "@qnaplus/dotenv";
-import { type LoggerOptions, pino } from "pino";
+import { type LoggerOptions, type TransportTargetOptions, pino } from "pino";
+
+const targets: TransportTargetOptions[] = [
+	{
+		target: "pino/file",
+		options: { destination: 1 },
+	},
+];
 
 export const getLoggerInstance = (stream: string, options?: LoggerOptions) => {
+	if (getenv("NODE_ENV") === "development") {
+		targets.push({
+			target: "pino-pretty",
+		});
+	}
+	if (getenv("NODE_ENV") === "production") {
+		targets.push({
+			target: "pino-parseable",
+			options: {
+				endpoint: getenv("PARSEABLE_ENDPOINT"),
+				stream,
+				auth: {
+					username: getenv("PARSEABLE_USERNAME"),
+					password: getenv("PARSEABLE_PASSWORD"),
+				},
+			},
+		});
+	}
 	return pino({
 		...options,
 		base: {
@@ -12,23 +37,7 @@ export const getLoggerInstance = (stream: string, options?: LoggerOptions) => {
 		},
 		errorKey: "error",
 		transport: {
-			targets: [
-				{
-					target: "pino-parseable",
-					options: {
-						endpoint: getenv("PARSEABLE_ENDPOINT"),
-						stream,
-						auth: {
-							username: getenv("PARSEABLE_USERNAME"),
-							password: getenv("PARSEABLE_PASSWORD"),
-						},
-					},
-				},
-				{
-					target: "pino/file",
-					options: { destination: 1 },
-				},
-			],
+			targets,
 		},
 	});
 };

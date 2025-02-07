@@ -9,7 +9,7 @@
 	"scripts": {
 		"build": "tsc",
 		"start": "node dist/index.js",
-		"dev": "node dist/index.js",
+		"dev": "NODE_ENV=development node dist/index.js",
 		"clean": "rimraf dist .turbo",
 		"clean:full": "yarn clean && rimraf node_modules",
 		"update_storage": "tsx scripts/update_storage.ts | pino-pretty"
