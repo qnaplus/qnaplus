@@ -1,16 +1,15 @@
 {
 	"name": "@qnaplus/logger",
+	"private": true,
 	"version": "1.0.0",
 	"description": "",
 	"author": "battlesqui_d",
 	"license": "GPL-3.0",
 	"scripts": {
 		"build": "tsc",
+		"clean": "rimraf dist .turbo",
+		"clean:full": "yarn clean && rimraf node_modules",
 		"check-types": "tsc --noEmit"
-	},
-	"volta": {
-		"node": "22.13.1",
-		"yarn": "1.22.22"
 	},
 	"dependencies": {
 		"@qnaplus/dotenv": "*",
@@ -25,5 +24,8 @@
 			"default": "./dist/index.js",
 			"types": "./dist/index.d.ts"
 		}
+	},
+	"volta": {
+		"extends": "../../package.json"
 	}
 }

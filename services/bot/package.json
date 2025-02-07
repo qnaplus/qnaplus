@@ -1,23 +1,22 @@
 {
 	"name": "@qnaplus/bot",
+	"private": true,
 	"version": "1.0.0",
 	"description": "",
 	"main": "dist/index.js",
 	"author": "battlesqui_d",
 	"license": "GPL-3.0",
-	"volta": {
-		"node": "22.13.1",
-		"yarn": "1.22.22"
-	},
 	"scripts": {
 		"build": "tsc",
-		"clean": "rm -rf dist tsconfig.tsbuildinfo",
+		"clean": "rimraf dist .turbo",
+		"clean:full": "yarn clean && rimraf node_modules",
 		"start": "node dist/index.js",
 		"dev": "node dist/index.js | pino-pretty"
 	},
 	"dependencies": {
-		"@qnaplus/logger": "1.0.0",
-		"@qnaplus/utils": "1.0.0",
+		"@qnaplus/logger": "*",
+		"@qnaplus/utils": "*",
+		"@qnaplus/store": "*",
 		"@sapphire/decorators": "^6.1.0",
 		"@sapphire/discord.js-utilities": "^7.3.0",
 		"@sapphire/framework": "^5.2.1",
@@ -30,5 +29,8 @@
 	"devDependencies": {
 		"pino-pretty": "^10.3.1",
 		"@qnaplus/scraper": "^2.0.2"
+	},
+	"volta": {
+		"extends": "../../package.json"
 	}
 }

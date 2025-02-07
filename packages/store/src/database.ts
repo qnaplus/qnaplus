@@ -169,7 +169,10 @@ export const doDatabaseAnswerQueueUpdate = async (
 	return trycatch(
 		db.transaction(async (tx) => {
 			if (questions.length !== 0) {
-				await tx.insert(schema.questions).values(questions).onConflictDoNothing();
+				await tx
+					.insert(schema.questions)
+					.values(questions)
+					.onConflictDoNothing();
 			}
 			if (answeredIds.length !== 0) {
 				await tx

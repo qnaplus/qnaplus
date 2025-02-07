@@ -129,9 +129,9 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 	const start =
 		failureUpdateResult.oldest !== undefined
 			? Math.min(
-				Number.parseInt(failureUpdateResult.oldest.id),
-				Number.parseInt(oldestUnansweredQuestion),
-			)
+					Number.parseInt(failureUpdateResult.oldest.id),
+					Number.parseInt(oldestUnansweredQuestion),
+				)
 			: Number.parseInt(oldestUnansweredQuestion);
 
 	logger?.info(`Starting update from Q&A ${start}`);
@@ -219,9 +219,9 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 	const oldest =
 		failureUpdateResult.oldest !== undefined
 			? getOldestUnansweredQuestion(
-				[failureUpdateResult.oldest, oldestUnansweredFromUpdate],
-				currentSeason as Season,
-			)
+					[failureUpdateResult.oldest, oldestUnansweredFromUpdate],
+					currentSeason as Season,
+				)
 			: oldestUnansweredFromUpdate;
 	if (oldest === undefined) {
 		logger?.info(

@@ -9,6 +9,8 @@
 			"dependsOn": ["^build"],
 			"outputs": ["dist/**"]
 		},
+		"clean": {},
+		"clean:full": {},
 		"check-types": {
 			"dependsOn": ["^check-types"]
 		},

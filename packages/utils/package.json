@@ -1,5 +1,6 @@
 {
 	"name": "@qnaplus/utils",
+	"private": true,
 	"version": "1.0.0",
 	"description": "",
 	"main": "dist/index.js",
@@ -7,13 +8,14 @@
 	"license": "ISC",
 	"scripts": {
 		"build": "tsc",
+		"clean": "rimraf dist .turbo",
+		"clean:full": "yarn clean && rimraf node_modules",
 		"check-types": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@qnaplus/typescript-config": "*"
 	},
 	"volta": {
-		"node": "22.13.1",
-		"yarn": "1.22.22"
+		"extends": "../../package.json"
 	}
 }
