@@ -30,10 +30,10 @@ RUN yarn install --production
 
 # =======================================================
 
-FROM node:22.13.1-bookworm-slim AS prod
+FROM gcr.io/distroless/nodejs22-debian12 AS prod
 
 COPY --from=build /app /app
 
 WORKDIR /app
 
-CMD ["node", "services/bot/dist/index.js"]
+CMD ["services/bot/dist/index.js"]
