@@ -10,7 +10,7 @@ const targets: TransportTargetOptions[] = [
 ];
 
 export const getLoggerInstance = (stream: string, options?: LoggerOptions) => {
-	if (getenv("NODE_ENV") === "development") {
+	if (getenv("NODE_ENV") === "local") {
 		targets.push({
 			target: "pino-pretty",
 		});
