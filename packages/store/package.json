@@ -8,8 +8,10 @@
 	"license": "GPL-3.0",
 	"scripts": {
 		"build": "tsc",
+		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
 		"clean": "rimraf dist .turbo",
-		"clean:full": "yarn clean && rimraf node_modules",
+		"clean:modules": "rimraf node_modules",
+		"clean:full": "yarn clean && yarn clean:modules",
 		"populate": "tsx scripts/populate.ts | pino-pretty",
 		"populate_metadata": "tsx scripts/populate.ts --metadata | pino-pretty",
 		"check-types": "tsc --noEmit"

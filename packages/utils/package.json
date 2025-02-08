@@ -8,8 +8,10 @@
 	"license": "ISC",
 	"scripts": {
 		"build": "tsc",
+		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
 		"clean": "rimraf dist .turbo",
-		"clean:full": "yarn clean && rimraf node_modules",
+		"clean:modules": "rimraf node_modules",
+		"clean:full": "yarn clean && yarn clean:modules",
 		"check-types": "tsc --noEmit"
 	},
 	"devDependencies": {

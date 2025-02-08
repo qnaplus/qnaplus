@@ -17,11 +17,10 @@ WORKDIR /app
 COPY --from=base /app/out/json/ .
 COPY --from=base /app/.env.vault .
 
-
 RUN yarn install --frozen-lockfile
 
 COPY --from=base /app/out/full/ .
-RUN yarn turbo run build
+RUN yarn turbo run build:production
 
 RUN find . -name node_modules -exec rm -rf {} +;
 
@@ -32,8 +31,11 @@ RUN yarn install --production
 
 FROM node:22.13.1-bookworm-slim AS prod
 
-COPY --from=build /app /app
+RUN apt-get update
+RUN apt-get -y install libnss3-dev ca-certificates
+RUN update-ca-certificates
 
+COPY --from=build /app /app
 WORKDIR /app
 
 CMD ["node", "services/updater/dist/index.js"]

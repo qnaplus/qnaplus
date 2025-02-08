@@ -10,11 +10,6 @@ const targets: TransportTargetOptions[] = [
 ];
 
 export const getLoggerInstance = (stream: string, options?: LoggerOptions) => {
-	if (getenv("NODE_ENV") === "local") {
-		targets.push({
-			target: "pino-pretty",
-		});
-	}
 	if (getenv("NODE_ENV") === "production") {
 		targets.push({
 			target: "pino-parseable",
@@ -26,6 +21,10 @@ export const getLoggerInstance = (stream: string, options?: LoggerOptions) => {
 					password: getenv("PARSEABLE_PASSWORD"),
 				},
 			},
+		});
+	} else if (getenv("NODE_ENV") !== "development") {
+		targets.push({
+			target: "pino-pretty",
 		});
 	}
 	return pino({
