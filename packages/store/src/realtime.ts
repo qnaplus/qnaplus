@@ -9,6 +9,7 @@ import {
 } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents } from "./resources";
 import * as schema from "./schema";
+import { getTableName } from "drizzle-orm";
 
 export type ChangeCallback = (items: ChangeQuestion[]) => void | Promise<void>;
 
@@ -31,7 +32,7 @@ export const onChange = (callback: ChangeCallback, logger?: Logger) => {
 			{
 				event: "UPDATE",
 				schema: "public",
-				table: schema.questions._.name,
+				table: getTableName(schema.questions),
 			},
 			(payload) => queue.push({ old: payload.old, new: payload.new }),
 		)

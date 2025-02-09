@@ -157,7 +157,7 @@ export const getAnswerQueue = async () => {
 			.from(schema.answer_queue)
 			.innerJoin(
 				schema.questions,
-				eq(schema.renotify_queue.id, schema.questions.id),
+				eq(schema.answer_queue.id, schema.questions.id),
 			),
 	);
 };
