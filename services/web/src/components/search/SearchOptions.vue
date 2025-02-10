@@ -61,7 +61,7 @@ const removeSelectedAdvancedOption = (index: number) => {
 
 <template>
 
-    <Accordion :value="0">
+    <Accordion :value="undefined">
         <AccordionPanel :value="0">
             <AccordionHeader>Search Options</AccordionHeader>
             <AccordionContent>

@@ -3,7 +3,6 @@
 	"private": true,
 	"version": "1.0.0",
 	"description": "",
-	"main": "dist/index.js",
 	"author": "battlesqui_d",
 	"license": "GPL-3.0",
 	"scripts": {

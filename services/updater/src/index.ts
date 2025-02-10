@@ -5,7 +5,8 @@ import type { Logger } from "pino";
 import { doDatabaseUpdate } from "./database_update";
 import { doRenotifyUpdate, onRenotifyQueueFlushAck } from "./renotify_update";
 import { doStorageUpdate } from "./storage_update";
-import { handlePrecheckRequests } from "./precheck";
+import { handlePrecheckRequests } from "@qnaplus/store"
+import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 
 const startDatabaseJob = async (logger: Logger) => {
 	await doRenotifyUpdate(logger);
@@ -24,11 +25,13 @@ const startStorageJob = (logger: Logger) => {
 	});
 };
 
+
 (async () => {
 	const logger = getLoggerInstance("qnaupdater", { level: "trace" });
+	const client = new CurlImpersonateScrapingClient(logger);
 	logger.info("Starting updater service");
-	onRenotifyQueueFlushAck(logger);
-	startDatabaseJob(logger);
+	// onRenotifyQueueFlushAck(logger);
+	// startDatabaseJob(logger);
 	startStorageJob(logger);
-	handlePrecheckRequests(logger);
+	handlePrecheckRequests(client, logger);
 })();

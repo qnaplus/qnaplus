@@ -11,6 +11,7 @@
 	},
 	"dependencies": {
 		"@primevue/themes": "^4.0.0",
+		"@qnaplus/store": "*",
 		"@supabase/supabase-js": "^2.48.1",
 		"@vueuse/core": "^10.9.0",
 		"@vueuse/integrations": "^10.8.0",
@@ -25,6 +26,7 @@
 		"rxjs": "^7.8.1",
 		"sanitize-html": "^2.13.0",
 		"tailwindcss-primeui": "^0.3.4",
+		"uuid": "^11.0.5",
 		"virtua": "^0.28.0",
 		"vue": "^3.4.15",
 		"vue-draggable-plus": "^0.5.0",

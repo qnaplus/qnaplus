@@ -2,52 +2,50 @@
 import type { Node as ParserNode } from "domhandler";
 import * as htmlparser2 from "htmlparser2";
 import Divider from "primevue/divider";
+import ProgressSpinner from "primevue/progressspinner";
 import Message from "primevue/message";
 import sanitize from "sanitize-html";
 import { ref } from "vue";
 import QuestionDetails from "../components/question/QuestionDetails.vue";
 import QuestionTags from "../components/shared/QuestionTags.vue";
 import {
-	resolveQuestionComponent,
-	resolveQuestionComponentProps,
+  resolveQuestionComponent,
+  resolveQuestionComponentProps,
 } from "../composable/componentMap";
 import { getQuestion } from "../database";
 import Root from "./Root.vue";
+import { doPrecheck } from "../precheck";
 
 const props = defineProps<{
-	id: string;
+  id: string;
 }>();
 
 const archived = ref<boolean | null | undefined>(undefined);
 const question = await getQuestion(props.id);
 
 const getStatus = async () => {
-	if (question !== undefined) {
-		try {
-			const fetchedQuestion = await fetch(question.url);
-			archived.value = fetchedQuestion.status === 404;
-		} catch (error) {
-			archived.value = null;
-		}
-	}
+  if (question === undefined) {
+    return;
+  }
+  archived.value = await doPrecheck(question.id);
 };
 
 getStatus();
 
 const sanitizeOptions: sanitize.IOptions = {
-	allowedTags: sanitize.defaults.allowedTags.concat("img"),
+  allowedTags: sanitize.defaults.allowedTags.concat("img"),
 };
 
 const sanitizedQuestionHTML = sanitize(
-	question?.questionRaw ?? "",
-	sanitizeOptions,
+  question?.questionRaw ?? "",
+  sanitizeOptions,
 );
 const questionDom = htmlparser2.parseDocument(sanitizedQuestionHTML);
 const questionChildren = questionDom.children as ParserNode[];
 
 const sanitizedAnswerHTML = sanitize(
-	question?.answerRaw ?? "",
-	sanitizeOptions,
+  question?.answerRaw ?? "",
+  sanitizeOptions,
 );
 const answerDom = htmlparser2.parseDocument(sanitizedAnswerHTML);
 const answerChildren = answerDom.children as ParserNode[];
@@ -65,6 +63,11 @@ const answerChildren = answerDom.children as ParserNode[];
         </Message>
         <Message v-if="archived === null" severity="warn" :closable="false">Warning: Unable to check if Q&A exists.
         </Message>
+        <div v-if="archived === undefined" class="flex justify-end items-center gap-2 p-2">
+          <ProgressSpinner style="width: 20px; height: 20px; margin: 0;" strokeWidth="4" fill="transparent"
+            animationDuration="0.5s" />
+          <span class="text-muted-color">Checking Question Status...</span>
+        </div>
         <h2 class="mb-1">{{ question.title }}</h2>
         <question-details :question="question" />
         <Divider />
@@ -87,11 +90,19 @@ const answerChildren = answerDom.children as ParserNode[];
         <Divider />
         <div class="flex justify-between">
           <QuestionTags :tags="question.tags" :program="question.program" />
-          <a class="text-muted-color" :href="question.url" target="_blank">View on RobotEvents <i class=" ml-1 pi pi-external-link"></i></a>
+          <a class="text-muted-color" :href="question.url" target="_blank">View on RobotEvents <i
+              class=" ml-1 pi pi-external-link"></i></a>
         </div>
       </div>
     </div>
   </Root>
 </template>
 
-<style scoped></style>
+<style scoped>
+.answer {
+  background-color: color-mix(in srgb, #22c55e, #00000000 80%) !important;
+  border: 1px solid #34774d;
+  padding: 1px 20px;
+  border-radius: 8px;
+}
+</style>

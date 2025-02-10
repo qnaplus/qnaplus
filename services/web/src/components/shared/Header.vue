@@ -5,7 +5,6 @@ import { onMounted, ref } from "vue";
 const header = ref<HTMLDivElement | null>(null);
 const filler = ref<HTMLDivElement | null>(null);
 const update = () => {
-	console.log("called");
 	if (window.scrollY !== 0) {
 		header.value?.classList.add("header-sticky");
 		header.value?.classList.remove("border-transparent");
