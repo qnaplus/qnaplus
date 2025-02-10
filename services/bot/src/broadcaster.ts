@@ -1,5 +1,5 @@
 import { getenv } from "@qnaplus/dotenv";
-import { type ChangeQuestion, onChange } from "@qnaplus/store";
+import { type ChangeQuestion, onQuestionsChange } from "@qnaplus/store";
 import { chunk, groupby } from "@qnaplus/utils";
 import { container } from "@sapphire/framework";
 import { ChannelType, channelMention } from "discord.js";
@@ -62,5 +62,5 @@ export const handleOnChange = async (docs: ChangeQuestion[]) => {
 };
 
 export const startBroadcaster = async (logger?: Logger) => {
-	onChange(handleOnChange, logger);
+	onQuestionsChange(handleOnChange, logger);
 };

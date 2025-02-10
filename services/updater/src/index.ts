@@ -5,6 +5,7 @@ import type { Logger } from "pino";
 import { doDatabaseUpdate } from "./database_update";
 import { doRenotifyUpdate, onRenotifyQueueFlushAck } from "./renotify_update";
 import { doStorageUpdate } from "./storage_update";
+import { handlePrecheckRequests } from "./precheck";
 
 const startDatabaseJob = async (logger: Logger) => {
 	await doRenotifyUpdate(logger);
@@ -29,4 +30,5 @@ const startStorageJob = (logger: Logger) => {
 	onRenotifyQueueFlushAck(logger);
 	startDatabaseJob(logger);
 	startStorageJob(logger);
+	handlePrecheckRequests(logger);
 })();

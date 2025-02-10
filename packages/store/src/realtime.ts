@@ -13,7 +13,7 @@ import { getTableName } from "drizzle-orm";
 
 export type ChangeCallback = (items: ChangeQuestion[]) => void | Promise<void>;
 
-export const onChange = (callback: ChangeCallback, logger?: Logger) => {
+export const onQuestionsChange = (callback: ChangeCallback, logger?: Logger) => {
 	const queue = new PayloadQueue<UpdatePayload<Question>>({
 		onFlush(items) {
 			const changes = classifyChanges(items);
