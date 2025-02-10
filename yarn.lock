@@ -6436,7 +6436,7 @@ set-function-name@^2.0.2:
     functions-have-names "^1.2.3"
     has-property-descriptors "^1.0.2"
 
-sharp-ico@0.1.5, sharp-ico@^0.1.5:
+sharp-ico@^0.1.5:
   version "0.1.5"
   resolved "https://registry.npmjs.org/sharp-ico/-/sharp-ico-0.1.5.tgz#5d263558adfb00903313db9403e20dc66ffcfa5b"
   integrity sha512-a3jODQl82NPp1d5OYb0wY+oFaPk7AvyxipIowCHk7pBsZCWgbe0yAkU2OOXdoH0ENyANhyOQbs9xkAiRHcF02Q==
@@ -6445,7 +6445,7 @@ sharp-ico@0.1.5, sharp-ico@^0.1.5:
     ico-endec "*"
     sharp "*"
 
-sharp@*, sharp@0.32.6, sharp@^0.32.6:
+sharp@*, sharp@^0.32.6:
   version "0.32.6"
   resolved "https://registry.npmjs.org/sharp/-/sharp-0.32.6.tgz#6ad30c0b7cd910df65d5f355f774aa4fce45732a"
   integrity sha512-KyLTWwgcR9Oe4d9HwCwNM2l7+J0dUQwn/yf7S0EnTtb0eVS4RxO0eUSvxPtzT4F3SY+C4K6fqdv/DO27sJ/v/w==

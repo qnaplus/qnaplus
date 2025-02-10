@@ -1,4 +1,4 @@
-import { type SupabaseClient, createClient } from "@supabase/supabase-js";
+import { type RealtimeChannelSendResponse, type SupabaseClient, createClient } from "@supabase/supabase-js";
 import { v4 } from "uuid"
 
 let SUPABASE_CLIENT: SupabaseClient | null = null;
@@ -16,17 +16,31 @@ export const doPrecheck = async (id: string): Promise<boolean | null> => {
     const supabase = getClient();
     const room = v4();
 
-    const precheckStatus = await supabase
-        .channel("precheck", {
-            config: {
-                broadcast: { ack: true }
-            }
-        })
-        .send({
-            type: "broadcast",
-            event: "precheck-request",
-            payload: { room, id }
-        })
+    console.log("sending precheck request")
+    const precheckStatus = await new Promise<RealtimeChannelSendResponse>((resolve) => {
+        const timeout = setTimeout(() => {
+            resolve("timed out");
+        }, 1000 * 5);
+        supabase
+            .channel("precheck", {
+                config: {
+                    broadcast: { ack: true, }
+                }
+            })
+            .send({
+                type: "broadcast",
+                event: "precheck-request",
+                payload: { room, id },
+            })
+            .then(() => {
+                clearTimeout(timeout);
+                resolve("ok");
+            })
+            .catch(() => {
+                clearTimeout(timeout);
+                resolve("error");
+            })
+    })
 
     if (precheckStatus !== "ok") {
         console.warn(`Got ${precheckStatus} for precheck status`)
@@ -34,10 +48,10 @@ export const doPrecheck = async (id: string): Promise<boolean | null> => {
         return null;
     }
 
-    const exists = await new Promise<boolean | null>((resolve, reject) => {
+    const exists = await new Promise<boolean | null>((resolve) => {
         const timeout = setTimeout(() => {
-            reject(null);
-        }, 1000 * 10);
+            resolve(null);
+        }, 1000 * 5);
         supabase
             .channel(room)
             .on(

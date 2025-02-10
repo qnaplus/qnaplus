@@ -32,7 +32,7 @@ export const onQuestionsChange = (callback: ChangeCallback, logger?: Logger) => 
 			callback(changes);
 		},
 	});
-	return supabase
+	return supabase()
 		.channel(QnaplusChannels.DbChanges)
 		.on<Question>(
 			"postgres_changes",
@@ -53,7 +53,7 @@ export const onQuestionsChange = (callback: ChangeCallback, logger?: Logger) => 
 					new: p,
 				}));
 				queue.push(...items);
-				const result = await supabase
+				const result = await supabase()
 					.channel(QnaplusChannels.RenotifyQueue)
 					.send({
 						type: "broadcast",
@@ -85,7 +85,7 @@ const handlePayload = async (client: FetchClient<FetchClientResponse>, { id, roo
 	const response: PrecheckResponsePayload = { exists: status === 200 };
 	logger.info(`Precheck response for Q&A ${id}: ${response.exists}`)
 
-	const channel = supabase.channel(room, ACK_CONFIG);
+	const channel = supabase().channel(room, ACK_CONFIG);
 	const { error, ok } = await trycatch(
 		channel.send({
 			type: "broadcast",
@@ -98,11 +98,11 @@ const handlePayload = async (client: FetchClient<FetchClientResponse>, { id, roo
 	} else {
 		logger.error({ error }, "Failed to send precheck response.")
 	}
-	supabase.removeChannel(channel);
+	supabase().removeChannel(channel);
 }
 
 export const handlePrecheckRequests = (client: FetchClient<FetchClientResponse>, logger: Logger) => {
-	return supabase
+	return supabase()
 		.channel(QnaplusChannels.Precheck)
 		.on<PrecheckRequestPayload>(
 			"broadcast",

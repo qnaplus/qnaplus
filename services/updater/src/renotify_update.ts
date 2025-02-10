@@ -11,7 +11,7 @@ export const onRenotifyQueueFlushAck = (_logger: Logger) => {
 	const logger = _logger.child({ label: "renotifyQueueAck" });
 	logger.info("Registering listener for RenotifyQueueFlushAck");
 
-	supabase
+	supabase()
 		.channel(QnaplusChannels.RenotifyQueue)
 		.on(
 			"broadcast",
@@ -45,7 +45,7 @@ export const doRenotifyUpdate = async (_logger: Logger) => {
 		return;
 	}
 
-	const broadcastResponse = await supabase
+	const broadcastResponse = await supabase()
 		.channel(QnaplusChannels.DbChanges)
 		.send({
 			type: "broadcast",
