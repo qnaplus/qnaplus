@@ -5,6 +5,7 @@ import type {
 	ChangeTypeMap,
 } from "@qnaplus/store";
 import { chunk } from "@qnaplus/utils";
+import { capitalizeFirstLetter } from "@sapphire/utilities";
 import {
 	type ColorResolvable,
 	EmbedBuilder,
@@ -41,7 +42,7 @@ type ChangeFormatMap = {
 const embedFormatter: ChangeFormatMap = {
 	answered(embed, q) {
 		embed
-			.setTitle(`New ${q.program} Q&A response`)
+			.setTitle(`New ${capitalizeFirstLetter(q.program)} Q&A response`)
 			.setDescription(baseEmbedDescription(q));
 	},
 	answer_edited(embed, q) {
