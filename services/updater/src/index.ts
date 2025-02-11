@@ -27,7 +27,7 @@ const startStorageJob = (logger: Logger) => {
 
 
 (async () => {
-	const logger = getLoggerInstance("qnaupdater", { level: "trace" });
+	const logger = getLoggerInstance("qnaupdater");
 	const client = new CurlImpersonateScrapingClient(logger);
 	logger.info("Starting updater service");
 	onRenotifyQueueFlushAck(logger);
