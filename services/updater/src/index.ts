@@ -30,8 +30,8 @@ const startStorageJob = (logger: Logger) => {
 	const logger = getLoggerInstance("qnaupdater", { level: "trace" });
 	const client = new CurlImpersonateScrapingClient(logger);
 	logger.info("Starting updater service");
-	// onRenotifyQueueFlushAck(logger);
-	// startDatabaseJob(logger);
+	onRenotifyQueueFlushAck(logger);
+	startDatabaseJob(logger);
 	startStorageJob(logger);
 	handlePrecheckRequests(client, logger);
 })();
