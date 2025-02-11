@@ -1,4 +1,4 @@
-name: Updater Image (Production)
+name: Updater Image
 
 on:
   push:

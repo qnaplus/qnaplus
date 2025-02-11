@@ -1,4 +1,4 @@
-name: Bot Image (Production)
+name: Bot Image
 
 on:
   push:
