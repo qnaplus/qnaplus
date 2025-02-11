@@ -1,5 +1,5 @@
 import { getenv } from "@qnaplus/dotenv";
-import { type ChangeQuestion, onQuestionsChange } from "@qnaplus/store";
+import { type ChangeQuestion, clearAnswerQueue, onQuestionsChange } from "@qnaplus/store";
 import { chunk, groupby } from "@qnaplus/utils";
 import { container } from "@sapphire/framework";
 import { ChannelType, channelMention } from "discord.js";
@@ -54,10 +54,22 @@ export const handleOnChange = async (docs: ChangeQuestion[]) => {
 	const logger = (container.logger as PinoLoggerAdapter).child({
 		label: "handleOnChange",
 	});
-	logger.info(`${docs.length} changes detected`);
+	const answers = docs.filter(d => d.changeType === "answered");
+	const edits = docs.filter(d => d.changeType === "answer_edited");
+	logger.info(`${docs.length} changes detected (${answers.length} answers, ${edits.length} edits)`);
 	const grouped = groupby(docs, (q) => q.program);
 	for (const program in grouped) {
 		await handleProgramBroadcast(program, grouped[program]);
+	}
+	if (answers.length !== 0) {
+		const { ok: deleteOk, error: deleteError } = await clearAnswerQueue();
+		if (!deleteOk) {
+			logger.error(
+				{ error: deleteError },
+				"An error occurred while trying to clear answer queue.",
+			);
+			return;
+		}
 	}
 };
 
