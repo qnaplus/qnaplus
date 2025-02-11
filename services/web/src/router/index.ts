@@ -26,7 +26,7 @@ export default createRouter({
 		if (savedPosition) {
 			return new Promise((resolve) => {
 				setTimeout(() => {
-					resolve({ left: 0, top: savedPosition.top, behavior: "smooth" });
+					resolve({ left: 0, top: savedPosition.top, behavior: "instant" });
 				}, 200);
 			});
 		}
