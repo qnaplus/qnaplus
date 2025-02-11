@@ -10,7 +10,7 @@ import {
 	type UpdatePayload,
 } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents } from "./resources";
-import * as schema from "./schema";
+import { questions } from "./schema";
 
 export const ACK_CONFIG = {
 	config: {
@@ -39,7 +39,7 @@ export const onQuestionsChange = (callback: ChangeCallback, logger?: Logger) => 
 			{
 				event: "UPDATE",
 				schema: "public",
-				table: getTableName(schema.questions),
+				table: getTableName(questions),
 			},
 			(payload) => queue.push({ old: payload.old, new: payload.new }),
 		)
