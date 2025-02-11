@@ -37,4 +37,4 @@ jobs:
         with:
           push: true
           file: services/bot/Dockerfile
-          tags: battlesquid0101/qnaplus_updater_${{ (github.head_ref || github.ref_name) == 'master' && 'prod' || 'dev'}}:latest
+          tags: battlesquid0101/qnaplus_bot_${{ (github.head_ref || github.ref_name) == 'master' && 'prod' || 'dev'}}:latest
