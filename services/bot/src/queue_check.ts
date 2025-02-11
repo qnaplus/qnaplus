@@ -2,6 +2,7 @@ import {
 	type ChangeQuestion,
 	clearAnswerQueue,
 	getAnswerQueue,
+	testConnection,
 } from "@qnaplus/store";
 import { handleOnChange } from "./broadcaster";
 import type { PinoLoggerAdapter } from "./utils/logger_adapter";
@@ -10,6 +11,11 @@ import { trycatch } from "@qnaplus/utils";
 export const doQueueCheck = async (_logger: PinoLoggerAdapter) => {
 	const logger = _logger.child({ label: "doQueueCheck" });
 	logger.info("Running queue check.");
+	const { ok: connOk, error: connError } = await testConnection();
+	if (!connOk) {
+		logger.error({ error: connError }, "Unable to establish database connection, exiting.");
+		process.exit(1);
+	}
 	const { ok, error, result } = await getAnswerQueue();
 	if (!ok) {
 		logger.error(

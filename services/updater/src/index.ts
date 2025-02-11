@@ -5,8 +5,9 @@ import type { Logger } from "pino";
 import { doDatabaseUpdate } from "./database_update";
 import { doRenotifyUpdate, onRenotifyQueueFlushAck } from "./renotify_update";
 import { doStorageUpdate } from "./storage_update";
-import { handlePrecheckRequests } from "@qnaplus/store"
+import { handlePrecheckRequests, testConnection } from "@qnaplus/store"
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
+import { trycatch } from "@qnaplus/utils";
 
 const startDatabaseJob = async (logger: Logger) => {
 	await doRenotifyUpdate(logger);
@@ -28,10 +29,18 @@ const startStorageJob = (logger: Logger) => {
 
 (async () => {
 	const logger = getLoggerInstance("qnaupdater");
-	const client = new CurlImpersonateScrapingClient(logger);
 	logger.info("Starting updater service");
-	onRenotifyQueueFlushAck(logger);
+
+	const { ok, error } = await testConnection();
+	if (!ok) {
+		logger.error({ error }, "Unable to establish database connection, exiting.");
+		process.exit(1);
+	}
+
 	startDatabaseJob(logger);
+	onRenotifyQueueFlushAck(logger);
 	startStorageJob(logger);
+
+	const client = new CurlImpersonateScrapingClient(logger);
 	handlePrecheckRequests(client, logger);
 })();
