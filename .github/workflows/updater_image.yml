@@ -1,4 +1,4 @@
-name: Push updater image
+name: Updater Image (Production)
 
 on:
   push:
@@ -34,4 +34,4 @@ jobs:
         with:
           push: true
           file: services/updater/Dockerfile
-          tags: battlesquid0101/qnaplus_updater:latest
+          tags: battlesquid0101/qnaplus_updater_${{ (github.head_ref || github.ref_name) == 'master' && 'prod' || 'dev'}}:latest
