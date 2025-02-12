@@ -73,6 +73,6 @@ export const handleOnChange = async (docs: ChangeQuestion[]) => {
 	}
 };
 
-export const startBroadcaster = async (logger?: Logger) => {
+export const startBroadcaster = (logger?: Logger) => {
 	onQuestionsChange(handleOnChange, logger);
 };
