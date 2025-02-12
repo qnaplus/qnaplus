@@ -75,22 +75,22 @@ export const upsertQuestions = async (data: Question[]) => {
         db().insert(schema.questions).values(data).onConflictDoUpdate({
             target: schema.questions.id,
             set: {
-                id: sql`questions.id`,
-                url: sql`questions.url`,
-                author: sql`questions.author`,
-                program: sql`questions.program`,
-                title: sql`questions.title`,
-                question: sql`questions.question`,
-                questionRaw: sql`questions."questionRaw"`,
-                answer: sql`questions.answer`,
-                answerRaw: sql`questions."answerRaw"`,
-                season: sql`questions.season`,
-                askedTimestamp: sql`questions."askedTimestamp"`,
-                askedTimestampMs: sql`questions."askedTimestampMs"`,
-                answeredTimestamp: sql`questions."answeredTimestamp"`,
-                answeredTimestampMs: sql`questions."answeredTimestampMs"`,
-                answered: sql`questions.answered`,
-                tags: sql`questions.tags`
+                id: sql`excluded.id`,
+                url: sql`excluded.url`,
+                author: sql`excluded.author`,
+                program: sql`excluded.program`,
+                title: sql`excluded.title`,
+                question: sql`excluded.question`,
+                questionRaw: sql`excluded."questionRaw"`,
+                answer: sql`excluded.answer`,
+                answerRaw: sql`excluded."answerRaw"`,
+                season: sql`excluded.season`,
+                askedTimestamp: sql`excluded."askedTimestamp"`,
+                askedTimestampMs: sql`excluded."askedTimestampMs"`,
+                answeredTimestamp: sql`excluded."answeredTimestamp"`,
+                answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
+                answered: sql`excluded.answered`,
+                tags: sql`excluded.tags`
             }
         }),
     );
@@ -133,7 +133,7 @@ export const updateFailures = async (
         db().insert(schema.failures).values(data).onConflictDoUpdate({
             target: schema.failures.id,
             set: {
-                id: sql`failures.id`
+                id: sql`excluded.id`
             }
         }),
     );
@@ -146,22 +146,22 @@ export const doFailureQuestionUpdate = async (questions: Question[]) => {
             await tx.insert(schema.questions).values(questions).onConflictDoUpdate({
                 target: schema.questions.id,
                 set: {
-                    id: sql`questions.id`,
-                    url: sql`questions.url`,
-                    author: sql`questions.author`,
-                    program: sql`questions.program`,
-                    title: sql`questions.title`,
-                    question: sql`questions.question`,
-                    questionRaw: sql`questions."questionRaw"`,
-                    answer: sql`questions.answer`,
-                    answerRaw: sql`questions."answerRaw"`,
-                    season: sql`questions.season`,
-                    askedTimestamp: sql`questions."askedTimestamp"`,
-                    askedTimestampMs: sql`questions."askedTimestampMs"`,
-                    answeredTimestamp: sql`questions."answeredTimestamp"`,
-                    answeredTimestampMs: sql`questions."answeredTimestampMs"`,
-                    answered: sql`questions.answered`,
-                    tags: sql`questions.tags`
+                    id: sql`excluded.id`,
+                    url: sql`excluded.url`,
+                    author: sql`excluded.author`,
+                    program: sql`excluded.program`,
+                    title: sql`excluded.title`,
+                    question: sql`excluded.question`,
+                    questionRaw: sql`excluded."questionRaw"`,
+                    answer: sql`excluded.answer`,
+                    answerRaw: sql`excluded."answerRaw"`,
+                    season: sql`excluded.season`,
+                    askedTimestamp: sql`excluded."askedTimestamp"`,
+                    askedTimestampMs: sql`excluded."askedTimestampMs"`,
+                    answeredTimestamp: sql`excluded."answeredTimestamp"`,
+                    answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
+                    answered: sql`excluded.answered`,
+                    tags: sql`excluded.tags`
                 }
             });
             await tx
@@ -192,7 +192,7 @@ export const insertRenotifyQueue = async (ids: { id: string }[]) => {
         db().insert(schema.renotify_queue).values(ids).onConflictDoUpdate({
             target: schema.renotify_queue.id,
             set: {
-                id: sql`renotify_queue.id`
+                id: sql`excluded.id`
             }
         })
     );
@@ -223,22 +223,22 @@ export const doDatabaseAnswerQueueUpdate = async (
                     .onConflictDoUpdate({
                         target: schema.questions.id,
                         set: {
-                            id: sql`questions.id`,
-                            url: sql`questions.url`,
-                            author: sql`questions.author`,
-                            program: sql`questions.program`,
-                            title: sql`questions.title`,
-                            question: sql`questions.question`,
-                            questionRaw: sql`questions."questionRaw"`,
-                            answer: sql`questions.answer`,
-                            answerRaw: sql`questions."answerRaw"`,
-                            season: sql`questions.season`,
-                            askedTimestamp: sql`questions."askedTimestamp"`,
-                            askedTimestampMs: sql`questions."askedTimestampMs"`,
-                            answeredTimestamp: sql`questions."answeredTimestamp"`,
-                            answeredTimestampMs: sql`questions."answeredTimestampMs"`,
-                            answered: sql`questions.answered`,
-                            tags: sql`questions.tags`
+                            id: sql`excluded.id`,
+                            url: sql`excluded.url`,
+                            author: sql`excluded.author`,
+                            program: sql`excluded.program`,
+                            title: sql`excluded.title`,
+                            question: sql`excluded.question`,
+                            questionRaw: sql`excluded."questionRaw"`,
+                            answer: sql`excluded.answer`,
+                            answerRaw: sql`excluded."answerRaw"`,
+                            season: sql`excluded.season`,
+                            askedTimestamp: sql`excluded."askedTimestamp"`,
+                            askedTimestampMs: sql`excluded."askedTimestampMs"`,
+                            answeredTimestamp: sql`excluded."answeredTimestamp"`,
+                            answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
+                            answered: sql`excluded.answered`,
+                            tags: sql`excluded.tags`
                         }
                     });
             }
@@ -249,7 +249,7 @@ export const doDatabaseAnswerQueueUpdate = async (
                     .onConflictDoUpdate({
                         target: schema.answer_queue.id,
                         set: {
-                            id: sql`answer_queue.id`
+                            id: sql`excluded.id`
                         }
                     });
             }
