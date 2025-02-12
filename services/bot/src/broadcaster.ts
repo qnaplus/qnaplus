@@ -37,7 +37,10 @@ const handleProgramBroadcast = async (
 	for (let i = 0; i < embedSlices.length; i++) {
 		const embeds = embedSlices[i];
 		try {
-			await channel.send({ embeds });
+			const message = await channel.send({ embeds });
+			if (message.crosspostable) {
+				message.crosspost();
+			}
 			logger.info(
 				`Successfully sent chunk ${i + 1} of ${embedSlices.length} chunks (${embeds.length} items in chunk).`,
 			);
