@@ -14,7 +14,7 @@ const limitedAnswer = applyWordLimit(question.answer, WORD_LIMIT);
 </script>
 
 <template>
-    <Card class="prose dark:prose-invert prose-slate max-w-none !bg-surface-900 border-surface mb-3 !rounded-md">
+    <Card class="prose dark:prose-invert prose-slate max-w-none !bg-surface-900 border-1 border-surface-800 mb-3 !rounded-md">
         <template #title>
             <router-link class="prose-a" :to="`/${id}`">{{ title }}</router-link>
         </template>

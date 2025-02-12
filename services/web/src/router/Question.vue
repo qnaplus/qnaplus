@@ -21,7 +21,12 @@ const props = defineProps<{
 }>();
 
 const archived = ref<boolean | null | undefined>(undefined);
-const question = await getQuestion(props.id);
+
+const loading = ref(true);
+const question = await getQuestion(props.id)
+  .finally(() => {
+    setTimeout(() => loading.value = false, 1000);
+  });
 
 const getStatus = async () => {
   if (question === undefined) {
@@ -30,7 +35,9 @@ const getStatus = async () => {
   archived.value = await doPrecheck(question.id);
 };
 
-getStatus();
+if (question !== undefined) {
+  getStatus();
+}
 
 const sanitizeOptions: sanitize.IOptions = {
   allowedTags: sanitize.defaults.allowedTags.concat("img"),
@@ -53,48 +60,55 @@ const answerChildren = answerDom.children as ParserNode[];
 
 <template>
   <Root>
-    <div class="prose dark:prose-invert prose-slate max-w-none p-4">
-      <div class="flex flex-col items-center justify-center" v-if="question === undefined">
-        <h2>uhhhhhhhhhh...</h2>
-        <h4>Couldn't find a question here.</h4>
-      </div>
-      <div v-else>
-        <Message v-if="archived" severity="warn" :closable="false">Archived: Question is no longer available on the Q&A.
-        </Message>
-        <Message v-if="archived === null" severity="warn" :closable="false">Warning: Unable to check if Q&A exists.
-        </Message>
-        <div v-if="archived === undefined" class="flex justify-end items-center gap-2 p-2">
-          <ProgressSpinner style="width: 20px; height: 20px; margin: 0;" strokeWidth="4" fill="transparent"
-            animationDuration="0.5s" />
-          <span class="text-muted-color">Checking Question Status...</span>
+    <Suspense suspensible>
+      <div class="prose dark:prose-invert prose-slate max-w-none p-4">
+        <div class="flex flex-col items-center justify-center" v-if="!loading && question === undefined">
+          <h2>uhhhhhhhhhh...</h2>
+          <h4>Couldn't find a question here.</h4>
         </div>
-        <h2 class="mb-1">{{ question.title }}</h2>
-        <question-details :question="question" />
-        <Divider />
-        <div>
-          <h3>Question</h3>
-          <div class="text-surface-300">
-            <component :is="resolveQuestionComponent(child)" v-bind="resolveQuestionComponentProps(child)"
-              v-for="child in questionChildren" />
+        <div v-if="!loading && question !== undefined">
+          <Message v-if="archived" severity="warn" :closable="false">Archived: Question is no longer available on the
+            Q&A.
+          </Message>
+          <Message v-if="archived === null" severity="warn" :closable="false">Unable to check if Q&A exists.
+          </Message>
+          <div v-if="archived === undefined" class="flex justify-end items-center gap-2 p-2">
+            <ProgressSpinner style="width: 20px; height: 20px; margin: 0;" strokeWidth="4" fill="transparent"
+              animationDuration="0.5s" />
+            <span class="text-muted-color">Checking Question Status...</span>
           </div>
-        </div>
-        <div>
-          <div v-if="question.answered" class="text-surface-300">
-            <h3>Answer</h3>
-            <div>
+          <h2 class="mb-1">{{ question.title }}</h2>
+          <question-details :question="question" />
+          <Divider />
+          <div>
+            <h3>Question</h3>
+            <div class="text-surface-300">
               <component :is="resolveQuestionComponent(child)" v-bind="resolveQuestionComponentProps(child)"
-                v-for="child in answerChildren" />
+                v-for="child in questionChildren" />
             </div>
           </div>
+          <div>
+            <div v-if="question.answered" class="text-surface-300">
+              <h3>Answer</h3>
+              <div>
+                <component :is="resolveQuestionComponent(child)" v-bind="resolveQuestionComponentProps(child)"
+                  v-for="child in answerChildren" />
+              </div>
+            </div>
+          </div>
+          <Divider />
+          <div class="flex justify-between">
+            <QuestionTags :tags="question.tags" :program="question.program" />
+            <a class="text-muted-color" :href="question.url" target="_blank">View on RobotEvents <i
+                class=" ml-1 pi pi-external-link"></i></a>
+          </div>
         </div>
-        <Divider />
-        <div class="flex justify-between">
-          <QuestionTags :tags="question.tags" :program="question.program" />
-          <a class="text-muted-color" :href="question.url" target="_blank">View on RobotEvents <i
-              class=" ml-1 pi pi-external-link"></i></a>
+        <div v-else class="h-full flex flex-col items-center justify-center">
+          <ProgressSpinner style="width: 40px; height: 40px; margin: 0;" strokeWidth="6" fill="transparent"
+            animationDuration="0.5s" />
         </div>
       </div>
-    </div>
+    </Suspense>
   </Root>
 </template>
 

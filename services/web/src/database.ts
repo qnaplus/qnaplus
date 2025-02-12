@@ -1,6 +1,7 @@
 import type { Question } from "@qnaplus/scraper";
 import Dexie, { type EntityTable } from "dexie";
 import { elapsedHours } from "./util/date";
+import { supabase } from "./supabase";
 
 const DATA_PRIMARY_KEY = "0";
 
@@ -117,5 +118,20 @@ export const getAppData = async () => {
 };
 
 export const getQuestion = async (id: string) => {
-	return database.questions.get(id);
+	const localQuestion = await database.questions.get(id);
+	if (localQuestion === undefined) {
+		const remoteQuestion = await supabase()
+			.from("questions")
+			.select()
+			.eq("id", id)
+			.limit(1)
+			.single<Question>();
+		if (remoteQuestion.error) {
+			console.error(remoteQuestion.status, remoteQuestion.statusText);
+			return undefined;
+		}
+		await database.questions.put(remoteQuestion.data);
+		return remoteQuestion.data;
+	}
+	return localQuestion;
 };
