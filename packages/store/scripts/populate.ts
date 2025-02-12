@@ -53,7 +53,7 @@ export const populateWithMetadata = async (
 			: oldestQuestion.id;
 
 	const { ok, error } = await trycatch(
-		db.transaction(async (tx) => {
+		db().transaction(async (tx) => {
 			if (questions.length !== 0) {
 				await tx.insert(schema.questions).values(questions);
 			}

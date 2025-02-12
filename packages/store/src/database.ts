@@ -72,7 +72,26 @@ export const insertQuestions = async (data: Question[]) => {
 
 export const upsertQuestions = async (data: Question[]) => {
     return trycatch(
-        db().insert(schema.questions).values(data).onConflictDoNothing(),
+        db().insert(schema.questions).values(data).onConflictDoUpdate({
+            target: schema.questions.id,
+            set: {
+                id: sql`id`,
+                url: sql`url`,
+                author: sql`author`,
+                program: sql`program`,
+                title: sql`title`,
+                question: sql`question`,
+                questionRaw: sql`questionRaw`,
+                answer: sql`answer`,
+                answerRaw: sql`answerRaw`,
+                season: sql`season`,
+                askedTimestamp: sql`askedTimestamp`,
+                askedTimestampMs: sql`askedTimestampMs`,
+                answeredTimestamp: sql`answeredTimestamp`,
+                answeredTimestampMs: sql`answeredTimestampMs`,
+                answered: sql`answered`
+            }
+        }),
     );
 };
 
@@ -91,7 +110,14 @@ export const saveMetadata = async (
         db()
             .insert(schema.metadata)
             .values({ ...data, id: METADATA_ROW_ID })
-            .onConflictDoNothing(),
+            .onConflictDoUpdate({
+                target: schema.metadata.id,
+                set: {
+                    id: METADATA_ROW_ID,
+                    currentSeason: data.currentSeason,
+                    oldestUnansweredQuestion: data.oldestUnansweredQuestion
+                }
+            }),
     );
 };
 
@@ -103,7 +129,12 @@ export const updateFailures = async (
     data: (typeof schema.failures.$inferInsert)[],
 ) => {
     return trycatch(
-        db().insert(schema.failures).values(data).onConflictDoNothing(),
+        db().insert(schema.failures).values(data).onConflictDoUpdate({
+            target: schema.failures.id,
+            set: {
+                id: sql`id`
+            }
+        }),
     );
 };
 
@@ -111,7 +142,26 @@ export const doFailureQuestionUpdate = async (questions: Question[]) => {
     const oldFailures = questions.map((q) => q.id);
     return trycatch(
         db().transaction(async (tx) => {
-            await tx.insert(schema.questions).values(questions).onConflictDoNothing();
+            await tx.insert(schema.questions).values(questions).onConflictDoUpdate({
+                target: schema.questions.id,
+                set: {
+                    id: sql`id`,
+                    url: sql`url`,
+                    author: sql`author`,
+                    program: sql`program`,
+                    title: sql`title`,
+                    question: sql`question`,
+                    questionRaw: sql`questionRaw`,
+                    answer: sql`answer`,
+                    answerRaw: sql`answerRaw`,
+                    season: sql`season`,
+                    askedTimestamp: sql`askedTimestamp`,
+                    askedTimestampMs: sql`askedTimestampMs`,
+                    answeredTimestamp: sql`answeredTimestamp`,
+                    answeredTimestampMs: sql`answeredTimestampMs`,
+                    answered: sql`answered`
+                }
+            });
             await tx
                 .delete(schema.failures)
                 .where(inArray(schema.failures.id, oldFailures));
@@ -137,7 +187,12 @@ export const clearRenotifyQueue = async () => {
 
 export const insertRenotifyQueue = async (ids: { id: string }[]) => {
     return trycatch(
-        db().insert(schema.renotify_queue).values(ids).onConflictDoNothing(),
+        db().insert(schema.renotify_queue).values(ids).onConflictDoUpdate({
+            target: schema.renotify_queue.id,
+            set: {
+                id: sql`id`
+            }
+        })
     );
 };
 
@@ -163,13 +218,37 @@ export const doDatabaseAnswerQueueUpdate = async (
                 await tx
                     .insert(schema.questions)
                     .values(questions)
-                    .onConflictDoNothing();
+                    .onConflictDoUpdate({
+                        target: schema.questions.id,
+                        set: {
+                            id: sql`id`,
+                            url: sql`url`,
+                            author: sql`author`,
+                            program: sql`program`,
+                            title: sql`title`,
+                            question: sql`question`,
+                            questionRaw: sql`questionRaw`,
+                            answer: sql`answer`,
+                            answerRaw: sql`answerRaw`,
+                            season: sql`season`,
+                            askedTimestamp: sql`askedTimestamp`,
+                            askedTimestampMs: sql`askedTimestampMs`,
+                            answeredTimestamp: sql`answeredTimestamp`,
+                            answeredTimestampMs: sql`answeredTimestampMs`,
+                            answered: sql`answered`
+                        }
+                    });
             }
             if (answeredIds.length !== 0) {
                 await tx
                     .insert(schema.answer_queue)
                     .values(answeredIds)
-                    .onConflictDoNothing();
+                    .onConflictDoUpdate({
+                        target: schema.answer_queue.id,
+                        set: {
+                            id: sql`id`
+                        }
+                    });
             }
         }),
     );
