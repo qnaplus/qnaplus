@@ -75,21 +75,22 @@ export const upsertQuestions = async (data: Question[]) => {
         db().insert(schema.questions).values(data).onConflictDoUpdate({
             target: schema.questions.id,
             set: {
-                id: sql`id`,
-                url: sql`url`,
-                author: sql`author`,
-                program: sql`program`,
-                title: sql`title`,
-                question: sql`question`,
-                questionRaw: sql`questionRaw`,
-                answer: sql`answer`,
-                answerRaw: sql`answerRaw`,
-                season: sql`season`,
-                askedTimestamp: sql`askedTimestamp`,
-                askedTimestampMs: sql`askedTimestampMs`,
-                answeredTimestamp: sql`answeredTimestamp`,
-                answeredTimestampMs: sql`answeredTimestampMs`,
-                answered: sql`answered`
+                id: sql`questions.id`,
+                url: sql`questions.url`,
+                author: sql`questions.author`,
+                program: sql`questions.program`,
+                title: sql`questions.title`,
+                question: sql`questions.question`,
+                questionRaw: sql`questions.questionRaw`,
+                answer: sql`questions.answer`,
+                answerRaw: sql`questions.answerRaw`,
+                season: sql`questions.season`,
+                askedTimestamp: sql`questions.askedTimestamp`,
+                askedTimestampMs: sql`questions.askedTimestampMs`,
+                answeredTimestamp: sql`questions.answeredTimestamp`,
+                answeredTimestampMs: sql`questions.answeredTimestampMs`,
+                answered: sql`questions.answered`,
+                tags: sql`questions.tags`
             }
         }),
     );
@@ -132,7 +133,7 @@ export const updateFailures = async (
         db().insert(schema.failures).values(data).onConflictDoUpdate({
             target: schema.failures.id,
             set: {
-                id: sql`id`
+                id: sql`failures.id`
             }
         }),
     );
@@ -145,21 +146,22 @@ export const doFailureQuestionUpdate = async (questions: Question[]) => {
             await tx.insert(schema.questions).values(questions).onConflictDoUpdate({
                 target: schema.questions.id,
                 set: {
-                    id: sql`id`,
-                    url: sql`url`,
-                    author: sql`author`,
-                    program: sql`program`,
-                    title: sql`title`,
-                    question: sql`question`,
-                    questionRaw: sql`questionRaw`,
-                    answer: sql`answer`,
-                    answerRaw: sql`answerRaw`,
-                    season: sql`season`,
-                    askedTimestamp: sql`askedTimestamp`,
-                    askedTimestampMs: sql`askedTimestampMs`,
-                    answeredTimestamp: sql`answeredTimestamp`,
-                    answeredTimestampMs: sql`answeredTimestampMs`,
-                    answered: sql`answered`
+                    id: sql`questions.id`,
+                    url: sql`questions.url`,
+                    author: sql`questions.author`,
+                    program: sql`questions.program`,
+                    title: sql`questions.title`,
+                    question: sql`questions.question`,
+                    questionRaw: sql`questions.questionRaw`,
+                    answer: sql`questions.answer`,
+                    answerRaw: sql`questions.answerRaw`,
+                    season: sql`questions.season`,
+                    askedTimestamp: sql`questions.askedTimestamp`,
+                    askedTimestampMs: sql`questions.askedTimestampMs`,
+                    answeredTimestamp: sql`questions.answeredTimestamp`,
+                    answeredTimestampMs: sql`questions.answeredTimestampMs`,
+                    answered: sql`questions.answered`,
+                    tags: sql`questions.tags`
                 }
             });
             await tx
@@ -190,7 +192,7 @@ export const insertRenotifyQueue = async (ids: { id: string }[]) => {
         db().insert(schema.renotify_queue).values(ids).onConflictDoUpdate({
             target: schema.renotify_queue.id,
             set: {
-                id: sql`id`
+                id: sql`renotify_queue.id`
             }
         })
     );
@@ -221,21 +223,22 @@ export const doDatabaseAnswerQueueUpdate = async (
                     .onConflictDoUpdate({
                         target: schema.questions.id,
                         set: {
-                            id: sql`id`,
-                            url: sql`url`,
-                            author: sql`author`,
-                            program: sql`program`,
-                            title: sql`title`,
-                            question: sql`question`,
-                            questionRaw: sql`questionRaw`,
-                            answer: sql`answer`,
-                            answerRaw: sql`answerRaw`,
-                            season: sql`season`,
-                            askedTimestamp: sql`askedTimestamp`,
-                            askedTimestampMs: sql`askedTimestampMs`,
-                            answeredTimestamp: sql`answeredTimestamp`,
-                            answeredTimestampMs: sql`answeredTimestampMs`,
-                            answered: sql`answered`
+                            id: sql`questions.id`,
+                            url: sql`questions.url`,
+                            author: sql`questions.author`,
+                            program: sql`questions.program`,
+                            title: sql`questions.title`,
+                            question: sql`questions.question`,
+                            questionRaw: sql`questions.questionRaw`,
+                            answer: sql`questions.answer`,
+                            answerRaw: sql`questions.answerRaw`,
+                            season: sql`questions.season`,
+                            askedTimestamp: sql`questions.askedTimestamp`,
+                            askedTimestampMs: sql`questions.askedTimestampMs`,
+                            answeredTimestamp: sql`questions.answeredTimestamp`,
+                            answeredTimestampMs: sql`questions.answeredTimestampMs`,
+                            answered: sql`questions.answered`,
+                            tags: sql`questions.tags`
                         }
                     });
             }
@@ -246,7 +249,7 @@ export const doDatabaseAnswerQueueUpdate = async (
                     .onConflictDoUpdate({
                         target: schema.answer_queue.id,
                         set: {
-                            id: sql`id`
+                            id: sql`answer_queue.id`
                         }
                     });
             }
