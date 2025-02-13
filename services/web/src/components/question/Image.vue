@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import Image from 'primevue/image';
+import Image from "primevue/image";
 
 defineProps<{
-    src: string;
-    height: number;
-    preview: boolean;
+	src: string;
+	height: number;
+	preview: boolean;
 }>();
 </script>
 
 <template>
     <div>
-        <Image image-class="fit-image" :src="src" :height="height" :preview="preview" />
+        <Image :src="src" :width="height" :preview="preview" />
     </div>
 </template>
 

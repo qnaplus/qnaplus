@@ -1,0 +1,38 @@
+@import "primeicons/primeicons.css";
+/* @import "primevue/resources/themes/aura-dark-blue/theme.css"; */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+@layer base {
+	a:hover {
+		@apply text-muted-color-emphasis;
+	}
+}
+
+/* for SearchFilters.vue */
+.select-button-flex > button {
+	flex-grow: 1 !important;
+}
+
+.h-screen-mobile {
+	height: 100vh;
+	height: 100svh;
+}
+
+.autocomplete-group ul {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.border-1 {
+	border-width: 1px;
+}

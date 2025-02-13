@@ -1,22 +1,39 @@
-FROM node:20.11.0-alpine3.19 as base
+FROM node:22.13.1-alpine3.21 AS base
 
 WORKDIR /app
 
-# We only copy the dependencies we need
-COPY packages packages
+RUN yarn global add turbo@2.4.0
 
-COPY services/bot services/bot
+COPY . .
 
-# The global package.json only contains build dependencies
-COPY package.json .
-COPY yarn.lock .
-COPY tsconfig.json .
-COPY tsconfig.base.json .
-COPY .env.vault .
+RUN turbo prune @qnaplus/bot --docker
 
-RUN yarn install \
-&& yarn workspace @qnaplus/bot run build \
-&& rm -rf node_modules \
-&& yarn install --production
+# =======================================================
 
-CMD yarn bot:start
+FROM node:22.13.1-alpine3.21 AS build
+
+WORKDIR /app
+
+COPY --from=base /app/out/json/ .
+COPY --from=base /app/.env.vault .
+
+
+RUN yarn install --frozen-lockfile
+
+COPY --from=base /app/out/full/ .
+RUN yarn turbo run build
+
+RUN find . -name node_modules -exec rm -rf {} +;
+
+ENV NODE_ENV=production
+RUN yarn install --production
+
+# =======================================================
+
+FROM gcr.io/distroless/nodejs22-debian12 AS prod
+
+COPY --from=build /app /app
+
+WORKDIR /app
+
+CMD ["services/bot/dist/index.js"]

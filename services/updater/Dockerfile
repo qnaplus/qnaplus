@@ -1,22 +1,41 @@
-FROM node:20.11.0-alpine3.19 as base
+FROM node:22.13.1-alpine3.21 AS base
 
 WORKDIR /app
 
-# We only copy the dependencies we need
-COPY packages packages
+RUN yarn global add turbo@2.4.0
 
-COPY services/updater services/updater
+COPY . .
 
-# The global package.json only contains build dependencies
-COPY package.json .
-COPY yarn.lock .
-COPY tsconfig.json .
-COPY tsconfig.base.json .
-COPY .env.vault .
+RUN turbo prune @qnaplus/updater --docker
 
-RUN yarn install \
-&& yarn workspace @qnaplus/updater run build \
-&& rm -rf node_modules \
-&& yarn install --production
+# =======================================================
 
-CMD yarn updater:start
+FROM node:22.13.1-alpine3.21 AS build
+
+WORKDIR /app
+
+COPY --from=base /app/out/json/ .
+COPY --from=base /app/.env.vault .
+
+RUN yarn install --frozen-lockfile
+
+COPY --from=base /app/out/full/ .
+RUN yarn turbo run build:production
+
+RUN find . -name node_modules -exec rm -rf {} +;
+
+ENV NODE_ENV=production
+RUN yarn install --production
+
+# =======================================================
+
+FROM node:22.13.1-bookworm-slim AS prod
+
+RUN apt-get update
+RUN apt-get -y install libnss3-dev ca-certificates
+RUN update-ca-certificates
+
+COPY --from=build /app /app
+WORKDIR /app
+
+CMD ["node", "services/updater/dist/index.js"]

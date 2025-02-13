@@ -1,0 +1,31 @@
+{
+	"name": "@qnaplus/dotenv",
+	"private": true,
+	"version": "1.0.0",
+	"description": "",
+	"author": "battlesqui_d",
+	"license": "GPL-3.0",
+	"scripts": {
+		"build": "tsc",
+		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
+		"clean": "rimraf dist .turbo",
+		"clean:modules": "rimraf node_modules",
+		"clean:full": "yarn clean && yarn clean:modules",
+		"check-types": "tsc --noEmit"
+	},
+	"dependencies": {
+		"dotenv": "^16.3.1"
+	},
+	"devDependencies": {
+		"@qnaplus/typescript-config": "*"
+	},
+	"exports": {
+		".": {
+			"default": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"volta": {
+		"extends": "../../package.json"
+	}
+}

@@ -1,170 +1,273 @@
-import { config } from "@qnaplus/config";
+import { getenv } from "@qnaplus/dotenv";
+import type { Question } from "@qnaplus/scraper";
+import { lazy, trycatch } from "@qnaplus/utils";
 import { createClient } from "@supabase/supabase-js";
-import { Logger } from "pino";
-import { Question, getAllQuestions as archiverGetAllQuestions, fetchCurrentSeason, getOldestQuestion, getOldestUnansweredQuestion } from "vex-qna-archiver";
-import { ChangeQuestion, classifyChanges } from "./change_classifier";
-import { PayloadQueue, RenotifyPayload, UpdatePayload } from "./payload_queue";
-import { QnaplusChannels, QnaplusEvents, QnaplusTables, asEnvironmentResource } from "./resources";
-import { Database } from "./supabase";
+import { and, eq, gte, inArray, sql } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "./schema";
 
-const supabase = createClient<Database>(config.getenv("SUPABASE_URL"), config.getenv("SUPABASE_KEY"))
-const METADATA_ROW_ID = 0;
+const pg = lazy(() => postgres(getenv("SUPABASE_CONNECTION_STRING")));
+export const db = lazy(() => drizzle({ schema, client: pg() }));
+export const supabase = lazy(() =>
+	createClient(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY")),
+);
 
-export type StoreOptions = {
-    logger?: Logger;
-}
+export const disconnectPgClient = async () => {
+	const client = pg();
+	if (client !== null) {
+		await client.end();
+	}
+};
 
-export const getSupabaseInstance = () => {
-    return supabase;
-}
+export const METADATA_ROW_ID = 0;
 
-export const populate = async (logger?: Logger) => {
-    const { questions } = await archiverGetAllQuestions({ logger, trySessionRefresh: true });
-    return insertQuestions(questions, { logger });
-}
+export const testConnection = async () => {
+	return trycatch(db().execute(sql`select 1`));
+};
 
-export const populateWithMetadata = async (logger?: Logger) => {
-    const { questions } = await archiverGetAllQuestions({ logger, trySessionRefresh: true });
-    const currentSeason = await fetchCurrentSeason({ logger, trySessionRefresh: true });
+export const getQuestion = async (id: Question["id"]) => {
+	return trycatch(
+		db().query.questions.findFirst({ where: eq(schema.questions.id, id) }),
+	);
+};
 
-    const oldestUnansweredQuestion = getOldestUnansweredQuestion(questions, currentSeason);
-    const oldestQuestion = getOldestQuestion(questions, currentSeason);
+export const getAllQuestions = async () => {
+	return trycatch(db().select().from(schema.questions));
+};
 
-    // assert non-null since we know the scraper is starting from the beginning
-    // meaning we are practically guaranteed at least one "oldest question" 
-    const oldestQuestionId = oldestUnansweredQuestion !== undefined
-        ? oldestUnansweredQuestion.id
-        : oldestQuestion!.id;
+export const getAnsweredQuestionsNewerThanDate = async (ms: number) => {
+	return trycatch(
+		db()
+			.select()
+			.from(schema.questions)
+			.where(
+				and(
+					gte(schema.questions.answeredTimestampMs, ms),
+					eq(schema.questions.answered, true),
+				),
+			),
+	);
+};
 
-    await insertQuestions(questions, { logger });
-    logger?.info("Successfully populated database");
+export const findNewAnsweredQuestions = async (questions: Question[]) => {
+	const ids = questions.filter((q) => q.answered).map((q) => q.id);
+	return trycatch(
+		db()
+			.select()
+			.from(schema.questions)
+			.where(
+				and(
+					eq(schema.questions.answered, false),
+					inArray(schema.questions.id, ids),
+				),
+			),
+	);
+};
 
-    const { error } = await supabase
-        .from(asEnvironmentResource(QnaplusTables.Metadata))
-        .upsert({ id: METADATA_ROW_ID, current_season: currentSeason, oldest_unanswered_question: oldestQuestionId });
+export const insertQuestions = async (data: Question[]) => {
+	return trycatch(db().insert(schema.questions).values(data));
+};
 
-    if (error) {
-        logger?.error({ error }, "Unable to populate question metadata");
-    } else {
-        logger?.info({ oldest_question_id: oldestQuestionId, current_season: currentSeason }, "Successfully populated metadata")
-    }
-}
-
-export const getQuestion = async (id: Question["id"], opts?: StoreOptions): Promise<Question | null> => {
-    const logger = opts?.logger?.child({ label: "getDocument" });
-    const row = await supabase.from(asEnvironmentResource(QnaplusTables.Questions)).select().eq("id", id).single();
-    if (row.error !== null) {
-        logger?.trace(`No question with id '${id}' found.`);
-    }
-    return row.data;
-}
-
-export const getAllQuestions = async (opts?: StoreOptions): Promise<Question[]> => {
-    const logger = opts?.logger?.child({ label: "getAllQuestions" });
-    let hasRows = true;
-    let page = 0;
-    const LIMIT = 1000;
-    const data: Question[] = [];
-    while (hasRows) {
-        const from = page * LIMIT;
-        const to = from + LIMIT;
-        const rows = await supabase
-            .from(asEnvironmentResource(QnaplusTables.Questions))
-            .select("*", { count: "exact" })
-            .range(from, to);
-        if (rows.error !== null) {
-            logger?.error(rows.error);
-            continue;
-        }
-        data.push(...rows.data);
-        page++;
-        hasRows = rows.data.length === LIMIT;
-    }
-    logger?.info(`Retreived all questions (${data.length}) from database.`);
-    return data;
-}
-
-export const insertQuestion = async (data: Question, opts?: StoreOptions) => {
-    const logger = opts?.logger?.child({ label: "insertQuestion" });
-    const { error, status } = await supabase.from(asEnvironmentResource(QnaplusTables.Questions)).insert(data);
-    logger?.trace({ error, status });
-}
-
-export const insertQuestions = async (data: Question[], opts?: StoreOptions) => {
-    const logger = opts?.logger?.child({ label: "insertQuestions" });
-    const { error, status } = await supabase.from(asEnvironmentResource(QnaplusTables.Questions)).insert(data);
-    logger?.trace({ error, status });
-}
-
-export const upsertQuestions = async (data: Question[], opts?: StoreOptions) => {
-    const logger = opts?.logger?.child({ label: "upsertQuestions" });
-    logger?.info(`Upserting ${data.length} questions`)
-    const { error, status } = await supabase.from(asEnvironmentResource(QnaplusTables.Questions)).upsert(data, { ignoreDuplicates: false });
-    if (error !== null) {
-        logger?.warn({ error, status })
-    }
-    return error === null;
-}
+export const upsertQuestions = async (data: Question[]) => {
+	return trycatch(
+		db()
+			.insert(schema.questions)
+			.values(data)
+			.onConflictDoUpdate({
+				target: schema.questions.id,
+				set: {
+					id: sql`excluded.id`,
+					url: sql`excluded.url`,
+					author: sql`excluded.author`,
+					program: sql`excluded.program`,
+					title: sql`excluded.title`,
+					question: sql`excluded.question`,
+					questionRaw: sql`excluded."questionRaw"`,
+					answer: sql`excluded.answer`,
+					answerRaw: sql`excluded."answerRaw"`,
+					season: sql`excluded.season`,
+					askedTimestamp: sql`excluded."askedTimestamp"`,
+					askedTimestampMs: sql`excluded."askedTimestampMs"`,
+					answeredTimestamp: sql`excluded."answeredTimestamp"`,
+					answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
+					answered: sql`excluded.answered`,
+					tags: sql`excluded.tags`,
+				},
+			}),
+	);
+};
 
 export const getMetadata = async () => {
-    return await supabase.from(asEnvironmentResource(QnaplusTables.Metadata))
-        .select("*")
-        .eq("id", METADATA_ROW_ID)
-        .single();
-}
+	return trycatch(
+		db().query.metadata.findFirst({
+			where: eq(schema.metadata.id, METADATA_ROW_ID),
+		}),
+	);
+};
 
-// TODO add better typing
-export const saveMetadata = async (metadata: object) => {
-    return await supabase.from(asEnvironmentResource(QnaplusTables.Metadata))
-        .upsert({ id: METADATA_ROW_ID, ...metadata });
-}
+export const saveMetadata = async (
+	data: typeof schema.metadata.$inferInsert,
+) => {
+	return trycatch(
+		db()
+			.insert(schema.metadata)
+			.values({ ...data, id: METADATA_ROW_ID })
+			.onConflictDoUpdate({
+				target: schema.metadata.id,
+				set: {
+					id: METADATA_ROW_ID,
+					currentSeason: data.currentSeason,
+					oldestUnansweredQuestion: data.oldestUnansweredQuestion,
+				},
+			}),
+	);
+};
+
+export const getFailures = async () => {
+	return trycatch(db().select().from(schema.failures));
+};
+
+export const updateFailures = async (
+	data: (typeof schema.failures.$inferInsert)[],
+) => {
+	return trycatch(
+		db()
+			.insert(schema.failures)
+			.values(data)
+			.onConflictDoUpdate({
+				target: schema.failures.id,
+				set: {
+					id: sql`excluded.id`,
+				},
+			}),
+	);
+};
+
+export const doFailureQuestionUpdate = async (questions: Question[]) => {
+	const oldFailures = questions.map((q) => q.id);
+	return trycatch(
+		db().transaction(async (tx) => {
+			await tx
+				.insert(schema.questions)
+				.values(questions)
+				.onConflictDoUpdate({
+					target: schema.questions.id,
+					set: {
+						id: sql`excluded.id`,
+						url: sql`excluded.url`,
+						author: sql`excluded.author`,
+						program: sql`excluded.program`,
+						title: sql`excluded.title`,
+						question: sql`excluded.question`,
+						questionRaw: sql`excluded."questionRaw"`,
+						answer: sql`excluded.answer`,
+						answerRaw: sql`excluded."answerRaw"`,
+						season: sql`excluded.season`,
+						askedTimestamp: sql`excluded."askedTimestamp"`,
+						askedTimestampMs: sql`excluded."askedTimestampMs"`,
+						answeredTimestamp: sql`excluded."answeredTimestamp"`,
+						answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
+						answered: sql`excluded.answered`,
+						tags: sql`excluded.tags`,
+					},
+				});
+			await tx
+				.delete(schema.failures)
+				.where(inArray(schema.failures.id, oldFailures));
+		}),
+	);
+};
+
 export const getRenotifyQueue = async () => {
-    return await supabase.from(asEnvironmentResource(QnaplusTables.RenotifyQueue))
-        .select(`*, ..."${asEnvironmentResource(QnaplusTables.Questions)}" (*)`)
-        .returns<Question[]>(); // TODO remove once spread is fixed (https://github.com/supabase/postgrest-js/pull/531)
-}
+	return trycatch(
+		db()
+			.select({ question: schema.questions })
+			.from(schema.renotify_queue)
+			.innerJoin(
+				schema.questions,
+				eq(schema.renotify_queue.id, schema.questions.id),
+			),
+	);
+};
 
-export type ChangeCallback = (items: ChangeQuestion[]) => void | Promise<void>;
+export const clearRenotifyQueue = async () => {
+	return trycatch(db().delete(schema.renotify_queue));
+};
 
-export const onChange = (callback: ChangeCallback, logger?: Logger) => {
-    const queue = new PayloadQueue<UpdatePayload<Question>>({
-        onFlush(items) {
-            const changes = classifyChanges(items);
-            if (changes.length < 1) {
-                logger?.info("No changes detected.");
-                return;
-            }
-            logger?.info(`${changes.length} changes detected.`);
-            callback(changes);
-        }
-    });
-    return supabase
-        .channel(asEnvironmentResource(QnaplusChannels.DbChanges))
-        .on<Question>(
-            "postgres_changes",
-            {
-                event: "UPDATE",
-                schema: "public",
-                table: asEnvironmentResource(QnaplusTables.Questions),
-            },
-            payload => queue.push({ old: payload.old, new: payload.new })
-        )
-        .on<RenotifyPayload>(
-            "broadcast",
-            { event: QnaplusEvents.RenotifyQueueFlush },
-            async ({ payload }) => {
-                const { questions } = payload;
-                const items = questions.map<UpdatePayload<Question>>(p => ({ old: { ...p, answered: false }, new: p }));
-                queue.push(...items);
-                const result = await supabase
-                    .channel(asEnvironmentResource(QnaplusChannels.RenotifyQueue))
-                    .send({
-                        type: "broadcast",
-                        event: QnaplusEvents.RenotifyQueueFlushAck,
-                        payload: {}
-                    });
-                logger?.info(`Sent renotify queue acknowledgement with result '${result}'`);
-            }
-        )
-        .subscribe();
-}
+export const insertRenotifyQueue = async (ids: { id: string }[]) => {
+	return trycatch(
+		db()
+			.insert(schema.renotify_queue)
+			.values(ids)
+			.onConflictDoUpdate({
+				target: schema.renotify_queue.id,
+				set: {
+					id: sql`excluded.id`,
+				},
+			}),
+	);
+};
+
+export const getAnswerQueue = async () => {
+	return trycatch(
+		db()
+			.select({ question: schema.questions })
+			.from(schema.answer_queue)
+			.innerJoin(
+				schema.questions,
+				eq(schema.answer_queue.id, schema.questions.id),
+			),
+	);
+};
+
+export const doDatabaseAnswerQueueUpdate = async (
+	questions: Question[],
+	answeredIds: (typeof schema.answer_queue.$inferInsert)[],
+) => {
+	return trycatch(
+		db().transaction(async (tx) => {
+			if (questions.length !== 0) {
+				await tx
+					.insert(schema.questions)
+					.values(questions)
+					.onConflictDoUpdate({
+						target: schema.questions.id,
+						set: {
+							id: sql`excluded.id`,
+							url: sql`excluded.url`,
+							author: sql`excluded.author`,
+							program: sql`excluded.program`,
+							title: sql`excluded.title`,
+							question: sql`excluded.question`,
+							questionRaw: sql`excluded."questionRaw"`,
+							answer: sql`excluded.answer`,
+							answerRaw: sql`excluded."answerRaw"`,
+							season: sql`excluded.season`,
+							askedTimestamp: sql`excluded."askedTimestamp"`,
+							askedTimestampMs: sql`excluded."askedTimestampMs"`,
+							answeredTimestamp: sql`excluded."answeredTimestamp"`,
+							answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
+							answered: sql`excluded.answered`,
+							tags: sql`excluded.tags`,
+						},
+					});
+			}
+			if (answeredIds.length !== 0) {
+				await tx
+					.insert(schema.answer_queue)
+					.values(answeredIds)
+					.onConflictDoUpdate({
+						target: schema.answer_queue.id,
+						set: {
+							id: sql`excluded.id`,
+						},
+					});
+			}
+		}),
+	);
+};
+
+export const clearAnswerQueue = async () => {
+	return trycatch(db().delete(schema.answer_queue));
+};

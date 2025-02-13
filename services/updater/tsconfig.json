@@ -1,12 +1,8 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
-  },
-  "references": [
-    {
-      "path": "../../packages/qnaplus"
-    }
-  ]
+	"extends": "@qnaplus/typescript-config/base.json",
+	"compilerOptions": {
+		"outDir": "dist"
+	},
+	"include": ["src"],
+	"exclude": ["node_modules"]
 }

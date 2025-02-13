@@ -1,13 +1,11 @@
 <script setup lang="ts">
-
 defineProps<{
-    results: number;
+	results: number;
 }>();
-
 </script>
 
 <template>
-    <div class="flex justify-content-between p-3">
+    <div class="flex justify-between py-3">
         <div></div>
         <div class="text-sm">{{ results }} results</div>
     </div>

@@ -42,3 +42,8 @@ dist
 !.env.project
 !.env.vault
 !.env.template
+
+.turbo
+
+out/
+.env*

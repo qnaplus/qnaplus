@@ -1,0 +1,11 @@
+services:
+  updater:
+    build:
+      dockerfile: ./services/updater/Dockerfile
+    environment:
+      - DOTENV_KEY=${DOTENV_KEY}
+  bot:
+    build:
+      dockerfile: ./services/bot/Dockerfile
+    environment:
+      - DOTENV_KEY=${DOTENV_KEY}

@@ -1,2 +1,0 @@
-# @qnaplus/env
-

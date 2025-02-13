@@ -1,20 +1,33 @@
 {
-    "name": "@qnaplus/logger",
-    "version": "1.0.0",
-    "description": "",
-    "main": "dist/index.js",
-    "author": "battlesqui_d",
-    "license": "ISC",
-    "scripts": {
-        "build": "tsc --build"
-    },
-    "volta": {
-        "node": "20.11.0",
-        "yarn": "1.22.19"
-    },
-    "dependencies": {
-        "@qnaplus/config": "1.0.0",
-        "pino": "^9.0.0",
-        "pino-parseable": "^1.0.3"
-    }
+	"name": "@qnaplus/logger",
+	"private": true,
+	"version": "1.0.0",
+	"description": "",
+	"author": "battlesqui_d",
+	"license": "GPL-3.0",
+	"scripts": {
+		"build": "tsc",
+		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
+		"clean": "rimraf dist .turbo",
+		"clean:modules": "rimraf node_modules",
+		"clean:full": "yarn clean && yarn clean:modules",
+		"check-types": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@qnaplus/dotenv": "*",
+		"pino": "^9.0.0",
+		"pino-parseable": "^1.0.3"
+	},
+	"devDependencies": {
+		"@qnaplus/typescript-config": "*"
+	},
+	"exports": {
+		".": {
+			"default": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"volta": {
+		"extends": "../../package.json"
+	}
 }

@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { Node as ParserNode } from 'domhandler';
-import { resolveQuestionComponent, resolveQuestionComponentProps } from '../../composable/componentMap';
+import type { Node as ParserNode } from "domhandler";
+import {
+	resolveQuestionComponent,
+	resolveQuestionComponentProps,
+} from "../../composable/componentMap";
 
 defineProps<{
-    children: ParserNode[];
+	children: ParserNode[];
 }>();
 </script>
 

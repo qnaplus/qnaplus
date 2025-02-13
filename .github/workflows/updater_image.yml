@@ -1,19 +1,42 @@
-name: Push updater image
+name: Updater Image
+
+permissions:
+  actions: write
+  contents: read
 
 on:
   push:
     branches:
       - master
+      - dev
     paths:
       - .github/workflows/updater_image.yml
-      - services/updater/**
-      - .env.vault
+      - '!services/web/**'
+      - '!services/bot/**'
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+    branches:
+      - master
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-
 jobs:
+  should_skip:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          do_not_skip: '["pull_request"]'
+          cancel_others: true
+          concurrent_skipping: always 
+
   docker:
+    needs: should_skip
+    if: needs.should_skip.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
       -
@@ -34,4 +57,4 @@ jobs:
         with:
           push: true
           file: services/updater/Dockerfile
-          tags: battlesquid0101/qnaplus_updater:latest
+          tags: battlesquid0101/qnaplus_updater_${{ (github.head_ref || github.ref_name) == 'master' && 'prod' || 'dev'}}:latest

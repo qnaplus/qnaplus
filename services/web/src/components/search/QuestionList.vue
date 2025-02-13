@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { Question } from "vex-qna-archiver";
+import type { Question } from "@qnaplus/scraper";
 import { WindowVirtualizer } from "virtua/vue";
 import QuestionCard from "./QuestionCard.vue";
 
 defineProps<{
-    questions: Question[]
+	questions: Question[];
 }>();
-
 </script>
 
 <template>
