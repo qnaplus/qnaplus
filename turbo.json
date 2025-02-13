@@ -9,13 +9,13 @@
 			"dependsOn": ["^build"],
 			"outputs": ["dist/**"]
 		},
-    "build:production": {
-      "dependsOn": ["^build:production"],
+		"build:production": {
+			"dependsOn": ["^build:production"],
 			"outputs": ["dist/**"]
-    },
+		},
 		"clean": { "cache": false },
-		"clean:modules": {"cache": false},
-		"clean:full": {"cache": false },
+		"clean:modules": { "cache": false },
+		"clean:full": { "cache": false },
 		"check-types": {
 			"dependsOn": ["^check-types"]
 		},

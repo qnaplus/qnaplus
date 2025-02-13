@@ -4,16 +4,19 @@ import {
 	getAnswerQueue,
 	testConnection,
 } from "@qnaplus/store";
+import { trycatch } from "@qnaplus/utils";
 import { handleOnChange } from "./broadcaster";
 import type { PinoLoggerAdapter } from "./utils/logger_adapter";
-import { trycatch } from "@qnaplus/utils";
 
 export const doQueueCheck = async (_logger: PinoLoggerAdapter) => {
 	const logger = _logger.child({ label: "doQueueCheck" });
 	logger.info("Running queue check.");
 	const { ok: connOk, error: connError } = await testConnection();
 	if (!connOk) {
-		logger.error({ error: connError }, "Unable to establish database connection, exiting.");
+		logger.error(
+			{ error: connError },
+			"Unable to establish database connection, exiting.",
+		);
 		process.exit(1);
 	}
 	const { ok, error, result } = await getAnswerQueue();
@@ -29,12 +32,16 @@ export const doQueueCheck = async (_logger: PinoLoggerAdapter) => {
 		logger.info("No questions found in answer queue, exiting.");
 		return;
 	}
-	logger.info(`Found ${questions.length} questions in answer queue, broadcasting.`);
+	logger.info(
+		`Found ${questions.length} questions in answer queue, broadcasting.`,
+	);
 	const changeQuestions: ChangeQuestion[] = questions.map((q) => ({
 		...q,
 		changeType: "answered",
 	}));
-	const { ok: handleOk, error: handleError } = await trycatch(handleOnChange(changeQuestions));
+	const { ok: handleOk, error: handleError } = await trycatch(
+		handleOnChange(changeQuestions),
+	);
 	if (!handleOk) {
 		logger.error(
 			{ error: handleError },

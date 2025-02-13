@@ -1,7 +1,7 @@
 import type { Question } from "@qnaplus/scraper";
 import Dexie, { type EntityTable } from "dexie";
-import { elapsedHours } from "./util/date";
 import { supabase } from "./supabase";
+import { elapsedHours } from "./util/date";
 
 const DATA_PRIMARY_KEY = "0";
 

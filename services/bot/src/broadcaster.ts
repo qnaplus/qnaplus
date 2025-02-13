@@ -1,8 +1,17 @@
 import { getenv } from "@qnaplus/dotenv";
-import { type ChangeQuestion, clearAnswerQueue, onQuestionsChange } from "@qnaplus/store";
+import {
+	type ChangeQuestion,
+	clearAnswerQueue,
+	onQuestionsChange,
+} from "@qnaplus/store";
 import { chunk, groupby, trycatch } from "@qnaplus/utils";
 import { container } from "@sapphire/framework";
-import { ChannelType, EmbedBuilder, NewsChannel, channelMention } from "discord.js";
+import {
+	ChannelType,
+	type EmbedBuilder,
+	type NewsChannel,
+	channelMention,
+} from "discord.js";
 import type { Logger } from "pino";
 import { buildQuestionEmbed } from "./formatting";
 import type { PinoLoggerAdapter } from "./utils/logger_adapter";
@@ -16,7 +25,7 @@ const broadcast = async (channel: NewsChannel, embeds: EmbedBuilder[]) => {
 	if (message.crosspostable) {
 		await message.crosspost();
 	}
-}
+};
 
 const handleProgramBroadcast = async (
 	program: string,
@@ -31,9 +40,16 @@ const handleProgramBroadcast = async (
 		logger.warn(`No channel defined for ${program}, skipping broadcast.`);
 		return;
 	}
-	const { ok, error, result: channel } = await trycatch(container.client.channels.fetch(channelId));
+	const {
+		ok,
+		error,
+		result: channel,
+	} = await trycatch(container.client.channels.fetch(channelId));
 	if (!ok) {
-		logger.error({ error }, `An error occurred while fetching the channel with id ${channelId}, skipping broadcast for ${program}.`);
+		logger.error(
+			{ error },
+			`An error occurred while fetching the channel with id ${channelId}, skipping broadcast for ${program}.`,
+		);
 		return;
 	}
 	if (channel === null || channel.type !== ChannelType.GuildAnnouncement) {
@@ -59,16 +75,18 @@ const handleProgramBroadcast = async (
 			);
 		}
 	}
-	logger.info(`Successfully completed broadcast for ${program}`)
+	logger.info(`Successfully completed broadcast for ${program}`);
 };
 
 export const handleOnChange = async (docs: ChangeQuestion[]) => {
 	const logger = (container.logger as PinoLoggerAdapter).child({
 		label: "handleOnChange",
 	});
-	const answers = docs.filter(d => d.changeType === "answered");
-	const edits = docs.filter(d => d.changeType === "answer_edited");
-	logger.info(`${docs.length} changes detected (${answers.length} answers, ${edits.length} edits)`);
+	const answers = docs.filter((d) => d.changeType === "answered");
+	const edits = docs.filter((d) => d.changeType === "answer_edited");
+	logger.info(
+		`${docs.length} changes detected (${answers.length} answers, ${edits.length} edits)`,
+	);
 	const grouped = groupby(docs, (q) => q.program);
 	for (const program in grouped) {
 		await handleProgramBroadcast(program, grouped[program]);

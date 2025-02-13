@@ -2,57 +2,58 @@
 import type { Node as ParserNode } from "domhandler";
 import * as htmlparser2 from "htmlparser2";
 import Divider from "primevue/divider";
-import ProgressSpinner from "primevue/progressspinner";
 import Message from "primevue/message";
+import ProgressSpinner from "primevue/progressspinner";
 import sanitize from "sanitize-html";
 import { ref } from "vue";
 import QuestionDetails from "../components/question/QuestionDetails.vue";
 import QuestionTags from "../components/shared/QuestionTags.vue";
 import {
-  resolveQuestionComponent,
-  resolveQuestionComponentProps,
+	resolveQuestionComponent,
+	resolveQuestionComponentProps,
 } from "../composable/componentMap";
 import { getQuestion } from "../database";
-import Root from "./Root.vue";
 import { doPrecheck } from "../precheck";
+import Root from "./Root.vue";
 
 const props = defineProps<{
-  id: string;
+	id: string;
 }>();
 
 const archived = ref<boolean | null | undefined>(undefined);
 
 const loading = ref(true);
-const question = await getQuestion(props.id)
-  .finally(() => {
-    setTimeout(() => loading.value = false, 1000);
-  });
+const question = await getQuestion(props.id).finally(() => {
+	setTimeout(() => {
+		loading.value = false;
+	}, 1000);
+});
 
 const getStatus = async () => {
-  if (question === undefined) {
-    return;
-  }
-  archived.value = await doPrecheck(question.id);
+	if (question === undefined) {
+		return;
+	}
+	archived.value = await doPrecheck(question.id);
 };
 
 if (question !== undefined) {
-  getStatus();
+	getStatus();
 }
 
 const sanitizeOptions: sanitize.IOptions = {
-  allowedTags: sanitize.defaults.allowedTags.concat("img"),
+	allowedTags: sanitize.defaults.allowedTags.concat("img"),
 };
 
 const sanitizedQuestionHTML = sanitize(
-  question?.questionRaw ?? "",
-  sanitizeOptions,
+	question?.questionRaw ?? "",
+	sanitizeOptions,
 );
 const questionDom = htmlparser2.parseDocument(sanitizedQuestionHTML);
 const questionChildren = questionDom.children as ParserNode[];
 
 const sanitizedAnswerHTML = sanitize(
-  question?.answerRaw ?? "",
-  sanitizeOptions,
+	question?.answerRaw ?? "",
+	sanitizeOptions,
 );
 const answerDom = htmlparser2.parseDocument(sanitizedAnswerHTML);
 const answerChildren = answerDom.children as ParserNode[];

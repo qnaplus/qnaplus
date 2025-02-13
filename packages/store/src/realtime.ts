@@ -1,4 +1,9 @@
-import { type FetchClient, type FetchClientResponse, type Question, buildQnaUrlWithId } from "@qnaplus/scraper";
+import {
+	type FetchClient,
+	type FetchClientResponse,
+	type Question,
+	buildQnaUrlWithId,
+} from "@qnaplus/scraper";
 import { trycatch } from "@qnaplus/utils";
 import { getTableName } from "drizzle-orm";
 import type { Logger } from "pino";
@@ -14,13 +19,16 @@ import { questions } from "./schema";
 
 export const ACK_CONFIG = {
 	config: {
-		broadcast: { ack: true }
-	}
-}
+		broadcast: { ack: true },
+	},
+};
 
 export type ChangeCallback = (items: ChangeQuestion[]) => void | Promise<void>;
 
-export const onQuestionsChange = (callback: ChangeCallback, logger?: Logger) => {
+export const onQuestionsChange = (
+	callback: ChangeCallback,
+	logger?: Logger,
+) => {
 	const queue = new PayloadQueue<UpdatePayload<Question>>({
 		onFlush(items) {
 			const changes = classifyChanges(items);
@@ -71,19 +79,25 @@ export const onQuestionsChange = (callback: ChangeCallback, logger?: Logger) => 
 export type PrecheckRequestPayload = {
 	room: string;
 	id: string;
-}
+};
 
 export type PrecheckResponsePayload = {
 	exists: boolean;
-}
+};
 
-const handlePayload = async (client: FetchClient<FetchClientResponse>, { id, room }: PrecheckRequestPayload, logger: Logger) => {
+const handlePayload = async (
+	client: FetchClient<FetchClientResponse>,
+	{ id, room }: PrecheckRequestPayload,
+	logger: Logger,
+) => {
 	logger.info(`Received precheck request from ${room} for Q&A ${id}`);
 
-	const { status } = await client.fetch(buildQnaUrlWithId({ id, program: "V5RC", season: "2020-2021" }));
+	const { status } = await client.fetch(
+		buildQnaUrlWithId({ id, program: "V5RC", season: "2020-2021" }),
+	);
 
 	const response: PrecheckResponsePayload = { exists: status === 200 };
-	logger.info(`Precheck response for Q&A ${id}: ${response.exists}`)
+	logger.info(`Precheck response for Q&A ${id}: ${response.exists}`);
 
 	const channel = supabase().channel(room, ACK_CONFIG);
 	const { error, ok } = await trycatch(
@@ -91,23 +105,26 @@ const handlePayload = async (client: FetchClient<FetchClientResponse>, { id, roo
 			type: "broadcast",
 			event: QnaplusEvents.PrecheckResponse,
 			payload: response,
-		})
+		}),
 	);
 	if (ok) {
 		logger.info("Precheck response sent.");
 	} else {
-		logger.error({ error }, "Failed to send precheck response.")
+		logger.error({ error }, "Failed to send precheck response.");
 	}
 	supabase().removeChannel(channel);
-}
+};
 
-export const handlePrecheckRequests = (client: FetchClient<FetchClientResponse>, logger: Logger) => {
+export const handlePrecheckRequests = (
+	client: FetchClient<FetchClientResponse>,
+	logger: Logger,
+) => {
 	return supabase()
 		.channel(QnaplusChannels.Precheck)
 		.on<PrecheckRequestPayload>(
 			"broadcast",
 			{ event: QnaplusEvents.PrecheckRequest },
-			({ payload }) => handlePayload(client, payload, logger)
+			({ payload }) => handlePayload(client, payload, logger),
 		)
 		.subscribe();
-}
+};
