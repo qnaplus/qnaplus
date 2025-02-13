@@ -1,4 +1,4 @@
-name: Check Types
+name: Check Build
 
 on:
   pull_request:
@@ -15,4 +15,4 @@ jobs:
         with:
             node-version: 22.13.1
       - run: yarn install
-      - run: yarn check-types
+      - run: yarn build
