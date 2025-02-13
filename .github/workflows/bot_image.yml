@@ -1,5 +1,9 @@
 name: Bot Image
 
+permissions:
+  actions: write
+  contents: read
+
 on:
   push:
     branches:
@@ -9,14 +13,33 @@ on:
       - .github/workflows/bot_image.yml
       - '!services/web/**'
       - '!services/updater/**'
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+    branches:
+      - master
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
+  should_skip:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          do_not_skip: '["pull_request"]'
+          cancel_others: true
+
   docker:
+    needs: should_skip
+    if: needs.should_skip.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Skip Duplicate Actions
+        uses: fkirc/skip-duplicate-actions@v5.3.1
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
