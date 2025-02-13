@@ -25,11 +25,11 @@ const limitedAnswer = applyWordLimit(question.answer, WORD_LIMIT);
             <div class="flex flex-col gap-2">
                 <div class="flex flex-col gap-1">
                     <span class="font-bold">Question</span>
-                    <span>{{ limitedQuestion.content }}</span>
+                    <span class="break-words">{{ limitedQuestion.content }}</span>
                 </div>
                 <div v-if="answered" class="flex flex-col gap-1">
                     <span class="font-bold">Answer</span>
-                    <span>{{ limitedAnswer.content }}</span>
+                    <span class="break-words">{{ limitedAnswer.content }}</span>
                 </div>
                 <a v-if="limitedAnswer.applied || limitedQuestion.applied" :href="url">Read More</a>
             </div>
