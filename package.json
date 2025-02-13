@@ -15,6 +15,7 @@
 	},
 	"scripts": {
 		"build": "turbo run build",
+		"check-types": "turbo run check-types",
 		"clean": "turbo run clean",
 		"clean:full": "turbo run clean:full",
 		"format-and-lint": "biome check .",

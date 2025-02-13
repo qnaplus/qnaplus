@@ -11,6 +11,7 @@
 		"dev": "node dist/index.js",
 		"build": "tsc",
 		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
+		"check-types": "tsc --noEmit",
 		"clean": "rimraf dist .turbo",
 		"clean:modules": "rimraf node_modules",
 		"clean:full": "yarn clean && yarn clean:modules"
