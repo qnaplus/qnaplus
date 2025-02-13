@@ -2,10 +2,10 @@ import { type ILogger as ISapphireLogger, LogLevel } from "@sapphire/framework";
 import type { Logger, LoggerExtras } from "pino";
 
 export class PinoLoggerAdapter implements ISapphireLogger {
-	private logger: Logger;
+	readonly pino: Logger;
 
 	constructor(logger: Logger) {
-		this.logger = logger;
+		this.pino = logger;
 	}
 
 	has(level: LogLevel): boolean {
@@ -39,32 +39,32 @@ export class PinoLoggerAdapter implements ISapphireLogger {
 	write(level: LogLevel, ...values: readonly unknown[]): void {
 		switch (level) {
 			case LogLevel.Trace: {
-				this.logger.trace({ values });
+				this.pino.trace({ values });
 				break;
 			}
 			case LogLevel.Debug: {
-				this.logger.debug({ values });
+				this.pino.debug({ values });
 				break;
 			}
 			case LogLevel.Info: {
-				this.logger.info({ values });
+				this.pino.info({ values });
 				break;
 			}
 			case LogLevel.Warn: {
-				this.logger.warn({ values });
+				this.pino.warn({ values });
 				break;
 			}
 			case LogLevel.Error: {
 				const [maybeError, ...otherValues] = values;
 				if (maybeError instanceof Error) {
-					this.logger.error({ error: maybeError, otherValues });
+					this.pino.error({ error: maybeError, otherValues });
 				} else {
-					this.logger.error({ values });
+					this.pino.error({ values });
 				}
 				break;
 			}
 			case LogLevel.Fatal: {
-				this.logger.fatal({ values });
+				this.pino.fatal({ values });
 				break;
 			}
 			case LogLevel.None:
@@ -76,6 +76,6 @@ export class PinoLoggerAdapter implements ISapphireLogger {
 	}
 
 	child(...args: Parameters<LoggerExtras["child"]>) {
-		return this.logger.child(...args);
+		return this.pino.child(...args);
 	}
 }

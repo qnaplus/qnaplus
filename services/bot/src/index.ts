@@ -1,9 +1,7 @@
 import { getenv } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
-import { LogLevel, SapphireClient, container } from "@sapphire/framework";
+import { LogLevel, SapphireClient } from "@sapphire/framework";
 import { ActivityType, GatewayIntentBits, Partials } from "discord.js";
-import { startBroadcaster } from "./broadcaster";
-import { doQueueCheck } from "./queue_check";
 import { PinoLoggerAdapter } from "./utils/logger_adapter";
 
 const pinoLogger = getLoggerInstance("qnabot");
@@ -31,10 +29,4 @@ const client = new SapphireClient({
 	},
 });
 
-const start = async () => {
-	await client.login(getenv("DISCORD_TOKEN"));
-	await doQueueCheck(container.logger as PinoLoggerAdapter);
-	startBroadcaster(pinoLogger);
-};
-
-start().catch((e) => container.logger.error(e));
+client.login(getenv("DISCORD_TOKEN"));
