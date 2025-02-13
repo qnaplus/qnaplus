@@ -6,3 +6,5 @@ tsconfig.tsbuildinfo
 .flaskenv*
 !.env.project
 !.env.vault
+.turbo
+.idea
