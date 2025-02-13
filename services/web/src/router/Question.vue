@@ -26,7 +26,7 @@ const loading = ref(true);
 const question = await getQuestion(props.id).finally(() => {
 	setTimeout(() => {
 		loading.value = false;
-	}, 1000);
+	}, 500);
 });
 
 const getStatus = async () => {
