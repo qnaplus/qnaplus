@@ -32,7 +32,7 @@ jobs:
         with:
           do_not_skip: '["pull_request"]'
           cancel_others: true
-          concurrent_skipping: same_content_newer
+          concurrent_skipping: always
 
   docker:
     needs: should_skip
