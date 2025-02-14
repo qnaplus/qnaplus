@@ -9,20 +9,24 @@ const targets: TransportTargetOptions[] = [
 	},
 ];
 
-export const getLoggerInstance = (stream: string, options?: LoggerOptions) => {
-	if (getenv("NODE_ENV") === "production") {
+export const getLoggerInstance = (service: string, options?: LoggerOptions) => {
+	if (getenv("NODE_ENV") === "production" || getenv("NODE_ENV") === "development") {
 		targets.push({
-			target: "pino-parseable",
+			target: "pino-loki",
 			options: {
-				endpoint: getenv("PARSEABLE_ENDPOINT"),
-				stream,
-				auth: {
-					username: getenv("PARSEABLE_USERNAME"),
-					password: getenv("PARSEABLE_PASSWORD"),
+				batching: true,
+				interval: 5,
+				labels: {
+					service
+				},
+				host: getenv("LOKI_HOST"),
+				basicAuth: {
+					username: getenv("LOKI_USERNAME"),
+					password: getenv("LOKI_PASSWORD"),
 				},
 			},
 		});
-	} else if (getenv("NODE_ENV") !== "development") {
+	} else {
 		targets.push({
 			target: "pino-pretty",
 		});

@@ -16,7 +16,7 @@
 	"dependencies": {
 		"@qnaplus/dotenv": "*",
 		"pino": "^9.0.0",
-		"pino-parseable": "^1.0.3"
+		"pino-loki": "^2.5.0"
 	},
 	"devDependencies": {
 		"@qnaplus/typescript-config": "*"

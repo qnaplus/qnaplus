@@ -3271,6 +3271,11 @@ commander@^11.1.0:
   resolved "https://registry.npmjs.org/commander/-/commander-11.1.0.tgz#62fdce76006a68e5c1ab3314dc92e800eb83d906"
   integrity sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==
 
+commander@^12.1.0:
+  version "12.1.0"
+  resolved "https://registry.npmjs.org/commander/-/commander-12.1.0.tgz#01423b36f501259fdaac4d0e4d60c96c991585d3"
+  integrity sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA==
+
 commander@^2.20.0:
   version "2.20.3"
   resolved "https://registry.npmjs.org/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
@@ -5742,7 +5747,7 @@ pify@^2.3.0:
   resolved "https://registry.npmjs.org/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
   integrity sha512-udgsAY+fTnvv7kI7aaxbqwWNb0AHiB0qBO89PZKPkoTmGOgdbrHDKD+0B2X4uTfJ/FT1R09r9gTsjUjNJotuog==
 
-pino-abstract-transport@^1.0.0, pino-abstract-transport@^1.1.0, pino-abstract-transport@^1.2.0:
+pino-abstract-transport@^1.0.0, pino-abstract-transport@^1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/pino-abstract-transport/-/pino-abstract-transport-1.2.0.tgz#97f9f2631931e242da531b5c66d3079c12c9d1b5"
   integrity sha512-Guhh8EZfPCfH+PMXAb6rKOjGQEoy0xlAIn+irODG5kgfYV+BQ0rGYYWTIel3P5mmyXqkYkPmdIkywsn6QKUR1Q==
@@ -5757,12 +5762,14 @@ pino-abstract-transport@^2.0.0:
   dependencies:
     split2 "^4.0.0"
 
-pino-parseable@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.npmjs.org/pino-parseable/-/pino-parseable-1.0.3.tgz#d9a8be404b953c32c90588081c771dea1958811c"
-  integrity sha512-fcWUY5xYylOlDk1bUwM2zIc8Qz9TSD1DRdHeX1rW7hU7WJsaU20E4nOZA/Xa65UeFGBjrqbm/dI4XcOCBXlj5g==
+pino-loki@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.npmjs.org/pino-loki/-/pino-loki-2.5.0.tgz#73b7e925d4f0f680d0e997cbf2ea24ecb8317f23"
+  integrity sha512-/QCSukecqbjXWcVB58st0bKJFQiXg4ZEGXslnnMCMbcrDr5LT36XvkS0dy0eBvZvI8bWoh3efjLYLmN+94iLSQ==
   dependencies:
-    pino-abstract-transport "^1.1.0"
+    commander "^12.1.0"
+    pino-abstract-transport "^2.0.0"
+    pump "^3.0.2"
 
 pino-pretty@^10.3.1:
   version "10.3.1"
@@ -6031,7 +6038,7 @@ proxy-from-env@^1.1.0:
   resolved "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-1.1.0.tgz#e102f16ca355424865755d2c9e8ea4f24d58c3e2"
   integrity sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==
 
-pump@^3.0.0:
+pump@^3.0.0, pump@^3.0.2:
   version "3.0.2"
   resolved "https://registry.npmjs.org/pump/-/pump-3.0.2.tgz#836f3edd6bc2ee599256c924ffe0d88573ddcbf8"
   integrity sha512-tUPXtzlGM8FE3P0ZL6DVs/3P58k9nk8/jZeQCurTJylQA8qFYzHFfhBJkuqyE0FifOsQ0uKWekiZ5g8wtr28cw==
