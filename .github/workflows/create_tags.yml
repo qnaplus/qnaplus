@@ -1,0 +1,15 @@
+name: Create Tags
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  tags:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: butlerlogic/action-autotag@stable
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
