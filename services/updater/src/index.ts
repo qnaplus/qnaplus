@@ -2,7 +2,6 @@ import { getenv } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import { handlePrecheckRequests, testConnection } from "@qnaplus/store";
-import { trycatch } from "@qnaplus/utils";
 import Cron from "croner";
 import type { Logger } from "pino";
 import { doDatabaseUpdate } from "./database_update";
@@ -27,7 +26,7 @@ const startStorageJob = (logger: Logger) => {
 };
 
 (async () => {
-	const logger = getLoggerInstance("qnaupdater");
+	const logger = getLoggerInstance("qnaplus-updater");
 	logger.info("Starting updater service");
 
 	const { ok, error } = await testConnection();
