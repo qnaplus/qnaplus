@@ -10,14 +10,17 @@ const targets: TransportTargetOptions[] = [
 ];
 
 export const getLoggerInstance = (service: string, options?: LoggerOptions) => {
-	if (getenv("NODE_ENV") === "production" || getenv("NODE_ENV") === "development") {
+	if (
+		getenv("NODE_ENV") === "production" ||
+		getenv("NODE_ENV") === "development"
+	) {
 		targets.push({
 			target: "pino-loki",
 			options: {
 				batching: true,
 				interval: 5,
 				labels: {
-					service
+					service,
 				},
 				host: getenv("LOKI_HOST"),
 				basicAuth: {
