@@ -14,7 +14,6 @@ on:
       - 'v*'
     paths:
       - .github/workflows/updater_image.yml
-      - '!services/web/**'
       - '!services/bot/**'
   pull_request:
     types: [opened, reopened, edited, synchronize]

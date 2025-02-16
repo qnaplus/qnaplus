@@ -21,7 +21,7 @@ COPY --from=base /app/.env.vault .
 RUN yarn install --frozen-lockfile
 
 COPY --from=base /app/out/full/ .
-RUN yarn turbo run build
+RUN yarn turbo run build:production
 
 RUN find . -name node_modules -exec rm -rf {} +;
 
@@ -34,6 +34,6 @@ FROM gcr.io/distroless/nodejs22-debian12 AS prod
 
 COPY --from=build /app /app
 
-WORKDIR /app
+WORKDIR /app/services/bot
 
-CMD ["services/bot/dist/index.js"]
+CMD ["dist/index.js"]
