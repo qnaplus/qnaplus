@@ -39,7 +39,6 @@ This project uses [Yarn Workspaces](https://yarnpkg.com/features/workspaces) and
 - `services`: Applications that tie together the functionality in `packages`
   - `updater`: Service for continuously watching for updates on the Q&A.
   - `bot`: Discord Bot for announcing new answers.
-  - `web`: Alternative Q&A web/mobile client
 
 ## Features and Bugs
 
