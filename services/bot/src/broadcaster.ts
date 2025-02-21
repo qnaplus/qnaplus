@@ -2,7 +2,8 @@ import { getenv } from "@qnaplus/dotenv";
 import {
 	type ChangeQuestion,
 	clearAnswerQueue,
-	onQuestionsChange,
+	onDatabaseUpdate,
+	onRenotify,
 } from "@qnaplus/store";
 import { chunk, groupby, trycatch } from "@qnaplus/utils";
 import { container } from "@sapphire/framework";
@@ -107,5 +108,6 @@ export const handleOnChange = async (docs: ChangeQuestion[]) => {
 };
 
 export const startBroadcaster = (logger?: Logger) => {
-	onQuestionsChange(handleOnChange, logger);
+	onDatabaseUpdate(handleOnChange, logger);
+	onRenotify(handleOnChange, logger);
 };

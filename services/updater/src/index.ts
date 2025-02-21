@@ -1,7 +1,7 @@
 import { getenv } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
-import { handlePrecheckRequests, testConnection } from "@qnaplus/store";
+import { handlePrecheckRequests, onDatabaseUpdate, testConnection } from "@qnaplus/store";
 import Cron from "croner";
 import type { Logger } from "pino";
 import { doDatabaseUpdate } from "./database_update";
@@ -15,13 +15,6 @@ const startDatabaseJob = async (logger: Logger) => {
 	Cron(getenv("DATABASE_UPDATE_INTERVAL"), async () => {
 		await doRenotifyUpdate(logger);
 		doDatabaseUpdate(logger);
-	});
-};
-
-const startStorageJob = (logger: Logger) => {
-	logger.info("Starting webapp update job");
-	Cron(getenv("WEBAPP_UPDATE_INTERVAL"), () => {
-		doStorageUpdate(logger);
 	});
 };
 
@@ -40,7 +33,8 @@ const startStorageJob = (logger: Logger) => {
 
 	startDatabaseJob(logger);
 	onRenotifyQueueFlushAck(logger);
-	startStorageJob(logger);
+
+	onDatabaseUpdate(() => doStorageUpdate(logger));
 
 	const client = new CurlImpersonateScrapingClient(logger);
 	handlePrecheckRequests(client, logger);

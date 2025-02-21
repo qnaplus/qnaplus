@@ -16,15 +16,15 @@
 		"check-types": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.750.0",
 		"@qnaplus/dotenv": "*",
 		"@qnaplus/scraper": "^2.0.2",
 		"@qnaplus/utils": "*",
 		"@supabase/supabase-js": "^2.45.4",
 		"diff": "^5.1.0",
 		"drizzle-orm": "^0.39.1",
-		"pino": "^8.17.2",
-		"postgres": "^3.4.5",
-		"tus-js-client": "^4.1.0"
+		"pino": "^9.0.0",
+		"postgres": "^3.4.5"
 	},
 	"devDependencies": {
 		"@qnaplus/scraper-strategies": "^2.0.1",

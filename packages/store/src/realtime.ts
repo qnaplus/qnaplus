@@ -7,12 +7,12 @@ import {
 import { trycatch } from "@qnaplus/utils";
 import { getTableName } from "drizzle-orm";
 import type { Logger } from "pino";
-import { type ChangeQuestion, classifyChanges } from "./change_classifier";
+import { ChangeCallback, createChangeQueue } from "./change_classifier";
 import { supabase } from "./database";
 import {
 	PayloadQueue,
 	type RenotifyPayload,
-	type UpdatePayload,
+	type UpdatePayload
 } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents } from "./resources";
 import { questions } from "./schema";
@@ -23,23 +23,12 @@ export const ACK_CONFIG = {
 	},
 };
 
-export type ChangeCallback = (items: ChangeQuestion[]) => void | Promise<void>;
-
-export const onQuestionsChange = (
+export const onDatabaseUpdate = (
 	callback: ChangeCallback,
 	logger?: Logger,
 ) => {
-	const queue = new PayloadQueue<UpdatePayload<Question>>({
-		onFlush(items) {
-			const changes = classifyChanges(items);
-			if (changes.length < 1) {
-				logger?.info("No changes detected.");
-				return;
-			}
-			logger?.info(`${changes.length} changes detected.`);
-			callback(changes);
-		},
-	});
+	const queue = createChangeQueue(callback, logger);
+
 	return supabase()
 		.channel(QnaplusChannels.DbChanges)
 		.on<Question>(
@@ -51,6 +40,32 @@ export const onQuestionsChange = (
 			},
 			(payload) => queue.push({ old: payload.old, new: payload.new }),
 		)
+		.subscribe();
+};
+
+export const onDatabaseInsert = (callback: ChangeCallback, logger?: Logger) => {
+	const queue = new PayloadQueue<Question>({
+		onFlush(items) {
+
+		}
+	})
+
+	return onDatabaseUpdate(callback, logger)
+	.on<Question>(
+		"postgres_changes",
+		{
+			event: "INSERT",
+			schema: "public",
+			table: getTableName(questions)
+		},
+		(payload) => {}
+	)
+}
+
+export const onRenotify = (callback: ChangeCallback, logger?: Logger) => {
+	const queue = createChangeQueue(callback, logger);
+	return supabase()
+		.channel(QnaplusChannels.DbChanges)
 		.on<RenotifyPayload>(
 			"broadcast",
 			{ event: QnaplusEvents.RenotifyQueueFlush },
@@ -74,7 +89,7 @@ export const onQuestionsChange = (
 			},
 		)
 		.subscribe();
-};
+}
 
 export type PrecheckRequestPayload = {
 	room: string;

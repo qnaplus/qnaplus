@@ -1,12 +1,11 @@
+import { getenv } from "@qnaplus/dotenv";
 import {
-	QnaplusBuckets,
-	type UploadMetadata,
 	getAllQuestions,
 	upload,
 } from "@qnaplus/store";
 import type { Logger } from "pino";
 
-export const doStorageUpdate = async (_logger?: Logger) => {
+export const doStorageUpdate = async (_logger: Logger) => {
 	const logger = _logger?.child({ label: "doStorageUpdate" });
 	const { ok, error, result: questions } = await getAllQuestions();
 	if (!ok) {
@@ -17,16 +16,9 @@ export const doStorageUpdate = async (_logger?: Logger) => {
 		return;
 	}
 	const json = JSON.stringify(questions);
-	// typed as any to address limitation in tus-js-client (https://github.com/tus/tus-js-client/issues/289)
-	// biome-ignore lint: suspicious/noExplicitAny
-	const buffer: any = Buffer.from(json, "utf-8");
-	const metadata: UploadMetadata = {
-		bucket: QnaplusBuckets.Data,
-		filename: "questions.json",
-		type: "application/json",
-	};
+	const buffer = Buffer.from(json, "utf-8");
 	try {
-		await upload(buffer, metadata, logger);
+		await upload(getenv("CF_QUESTIONS_KEY"), buffer, logger);
 	} catch (e) {
 		logger?.error({ error: e }, "Error while updating storage json");
 	}

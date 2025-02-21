@@ -1,6 +1,7 @@
 import type { Question } from "@qnaplus/scraper";
 import { type Change, diffSentences } from "diff";
-import type { UpdatePayload } from "./payload_queue";
+import type { Logger } from "pino";
+import { PayloadQueue, type UpdatePayload } from "./payload_queue";
 
 const CHANGE_EVENTS = ["answered", "answer_edited"] as const;
 
@@ -68,3 +69,19 @@ export const classifyChanges = (items: UpdatePayload<Question>[]) => {
 	}
 	return changes;
 };
+
+export type ChangeCallback = (items: ChangeQuestion[]) => void | Promise<void>;
+
+export const createChangeQueue = (callback: ChangeCallback, logger?: Logger) => {
+	return new PayloadQueue<UpdatePayload<Question>>({
+		onFlush(items) {
+			const changes = classifyChanges(items);
+			if (changes.length < 1) {
+				logger?.info("No changes detected.");
+				return;
+			}
+			logger?.info(`${changes.length} changes detected.`);
+			callback(changes);
+		},
+	});
+}
