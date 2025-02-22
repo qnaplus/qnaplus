@@ -70,9 +70,9 @@ export const classifyChanges = (items: UpdatePayload<Question>[]) => {
 	return changes;
 };
 
-export type ChangeCallback = (items: ChangeQuestion[]) => void | Promise<void>;
+export type UpdateCallback = (items: ChangeQuestion[]) => void | Promise<void>;
 
-export const createChangeQueue = (callback: ChangeCallback, logger?: Logger) => {
+export const createUpdateQueue = (callback: UpdateCallback, logger?: Logger) => {
 	return new PayloadQueue<UpdatePayload<Question>>({
 		onFlush(items) {
 			const changes = classifyChanges(items);

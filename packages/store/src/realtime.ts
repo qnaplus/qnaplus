@@ -7,7 +7,7 @@ import {
 import { trycatch } from "@qnaplus/utils";
 import { getTableName } from "drizzle-orm";
 import type { Logger } from "pino";
-import { ChangeCallback, createChangeQueue } from "./change_classifier";
+import { UpdateCallback, createUpdateQueue } from "./change_classifier";
 import { supabase } from "./database";
 import {
 	PayloadQueue,
@@ -24,10 +24,10 @@ export const ACK_CONFIG = {
 };
 
 export const onDatabaseUpdate = (
-	callback: ChangeCallback,
+	callback: UpdateCallback,
 	logger?: Logger,
 ) => {
-	const queue = createChangeQueue(callback, logger);
+	const queue = createUpdateQueue(callback, logger);
 
 	return supabase()
 		.channel(QnaplusChannels.DbChanges)
@@ -43,27 +43,41 @@ export const onDatabaseUpdate = (
 		.subscribe();
 };
 
-export const onDatabaseInsert = (callback: ChangeCallback, logger?: Logger) => {
+export type ChangeCallback = () => void;
+
+export const onDatabaseChanges = (callback: ChangeCallback, logger?: Logger) => {
 	const queue = new PayloadQueue<Question>({
 		onFlush(items) {
-
-		}
-	})
-
-	return onDatabaseUpdate(callback, logger)
-	.on<Question>(
-		"postgres_changes",
-		{
-			event: "INSERT",
-			schema: "public",
-			table: getTableName(questions)
+			logger?.info(`Detected ${items.length} changes to database.`);
+			callback();
 		},
-		(payload) => {}
-	)
+	});
+
+	return supabase()
+		.channel(QnaplusChannels.DbChanges)
+		.on<Question>(
+			"postgres_changes",
+			{
+				event: "INSERT",
+				schema: "public",
+				table: getTableName(questions)
+			},
+			(payload) => queue.push(payload.new)
+		)
+		.on<Question>(
+			"postgres_changes",
+			{
+				event: "UPDATE",
+				schema: "public",
+				table: getTableName(questions)
+			},
+			(payload) => queue.push(payload.new)
+		)
+		.subscribe();
 }
 
-export const onRenotify = (callback: ChangeCallback, logger?: Logger) => {
-	const queue = createChangeQueue(callback, logger);
+export const onRenotify = (callback: UpdateCallback, logger?: Logger) => {
+	const queue = createUpdateQueue(callback, logger);
 	return supabase()
 		.channel(QnaplusChannels.DbChanges)
 		.on<RenotifyPayload>(
