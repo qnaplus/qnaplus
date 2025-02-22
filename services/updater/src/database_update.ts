@@ -171,6 +171,9 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 			logger.error({ error }, "An error occurred while upserting questions, exiting.");
 			return;
 		}
+		logger?.info(
+			`Upserted ${questions.length} questions.`,
+		);
 	}
 
 	const allFailures = unique([...failureUpdateResult.failures, ...failures]);
