@@ -1,9 +1,11 @@
 import { getenv } from "@qnaplus/dotenv";
 import { getAllQuestions, upload } from "@qnaplus/store";
+import { trycatch } from "@qnaplus/utils";
 import type { Logger } from "pino";
 
 export const doStorageUpdate = async (_logger: Logger) => {
 	const logger = _logger?.child({ label: "doStorageUpdate" });
+	logger.info("Starting storage update.");
 	const { ok, error, result: questions } = await getAllQuestions();
 	if (!ok) {
 		logger?.error(
@@ -14,9 +16,10 @@ export const doStorageUpdate = async (_logger: Logger) => {
 	}
 	const json = JSON.stringify(questions);
 	const buffer = Buffer.from(json, "utf-8");
-	try {
-		await upload(getenv("CF_QUESTIONS_KEY"), buffer, logger);
-	} catch (e) {
-		logger?.error({ error: e }, "Error while updating storage json");
+	const uploadResult = await trycatch(upload(getenv("CF_QUESTIONS_KEY"), buffer, logger));
+	if (!uploadResult.ok) {
+		logger?.error({ error: uploadResult.error }, "Error while updating storage json");
+		return;
 	}
+	logger.info("Successfully completed storage update.");
 };
