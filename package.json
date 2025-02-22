@@ -3,13 +3,17 @@
 	"version": "1.0.0",
 	"description": "",
 	"private": true,
-	"workspaces": ["packages/*", "services/*"],
+	"workspaces": [
+		"packages/*",
+		"services/*"
+	],
 	"author": "battlesqui_d",
 	"license": "GPL-3.0",
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"dotenv-vault": "^1.26.0",
 		"rimraf": "^6.0.1",
+		"syncpack": "^13.0.2",
 		"turbo": "^2.4.0",
 		"typescript": "^5.2.2"
 	},
