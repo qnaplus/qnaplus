@@ -19,6 +19,7 @@ import {
 	getQuestion,
 	saveMetadata,
 	updateFailures,
+	upsertQuestions,
 } from "@qnaplus/store";
 import { chunk, unique } from "@qnaplus/utils";
 import type { Logger } from "pino";
@@ -129,9 +130,9 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 	const start =
 		failureUpdateResult.oldest !== undefined
 			? Math.min(
-					Number.parseInt(failureUpdateResult.oldest.id),
-					Number.parseInt(oldestUnansweredQuestion),
-				)
+				Number.parseInt(failureUpdateResult.oldest.id),
+				Number.parseInt(oldestUnansweredQuestion),
+			)
 			: Number.parseInt(oldestUnansweredQuestion);
 
 	logger?.info(`Starting update from Q&A ${start}`);
@@ -144,7 +145,7 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 	if (!newAnsweredQuestions.ok) {
 		logger.error(
 			{ error: newAnsweredQuestions.error },
-			"Unable to find newly answered questions from update, retrying on next run.",
+			"An error occurred while trying to find newly answered questions from update, retrying on next run.",
 		);
 		return;
 	}
@@ -164,6 +165,12 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 		logger?.info(
 			`Upserted ${questions.length} questions and updated answer queue.`,
 		);
+	} else {
+		const { ok, error } = await upsertQuestions(questions);
+		if (!ok) {
+			logger.error({ error }, "An error occurred while upserting questions, exiting.");
+			return;
+		}
 	}
 
 	const allFailures = unique([...failureUpdateResult.failures, ...failures]);
@@ -219,9 +226,9 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 	const oldest =
 		failureUpdateResult.oldest !== undefined
 			? getOldestUnansweredQuestion(
-					[failureUpdateResult.oldest, oldestUnansweredFromUpdate],
-					currentSeason as Season,
-				)
+				[failureUpdateResult.oldest, oldestUnansweredFromUpdate],
+				currentSeason as Season,
+			)
 			: oldestUnansweredFromUpdate;
 	if (oldest === undefined) {
 		logger?.info(

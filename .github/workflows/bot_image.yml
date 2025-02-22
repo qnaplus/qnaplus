@@ -15,6 +15,7 @@ on:
     paths:
       - .github/workflows/bot_image.yml
       - '!services/updater/**'
+      - services/bot/**
   pull_request:
     types: [opened, reopened, edited, synchronize]
     branches:
