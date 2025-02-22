@@ -80,6 +80,10 @@ export const onDatabaseChanges = (callback: ChangeCallback, logger?: Logger) => 
 			},
 			(payload) => {
 				if (!deepEqual(payload.new, payload.old)) {
+					// raw content gets finnicky and triggers false alarms, so ignore them
+					if (payload.new.answerRaw !== payload.old.answerRaw || payload.new.questionRaw !== payload.old.questionRaw) {
+						return;
+					}
 					console.log(payload.new)
 					console.log(payload.old)
 					queue.push({ type: "UPDATE", question: payload.new.id })
