@@ -16,6 +16,7 @@ import {
 } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents } from "./resources";
 import { questions } from "./schema";
+import deepEqual from "deep-equal";
 
 export const ACK_CONFIG = {
 	config: {
@@ -71,7 +72,11 @@ export const onDatabaseChanges = (callback: ChangeCallback, logger?: Logger) => 
 				schema: "public",
 				table: getTableName(questions)
 			},
-			(payload) => queue.push(payload.new)
+			(payload) => {
+				if (!deepEqual(payload.new, payload.old)) {
+					queue.push(payload.new)
+				}
+			}
 		)
 		.subscribe();
 }

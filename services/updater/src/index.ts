@@ -1,7 +1,7 @@
 import { getenv } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
-import { handlePrecheckRequests, onDatabaseChanges, onDatabaseUpdate, testConnection } from "@qnaplus/store";
+import { handlePrecheckRequests, onDatabaseChanges, testConnection } from "@qnaplus/store";
 import Cron from "croner";
 import type { Logger } from "pino";
 import { doDatabaseUpdate } from "./database_update";
