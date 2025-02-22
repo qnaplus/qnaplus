@@ -1,8 +1,5 @@
 import { getenv } from "@qnaplus/dotenv";
-import {
-	getAllQuestions,
-	upload,
-} from "@qnaplus/store";
+import { getAllQuestions, upload } from "@qnaplus/store";
 import type { Logger } from "pino";
 
 export const doStorageUpdate = async (_logger: Logger) => {

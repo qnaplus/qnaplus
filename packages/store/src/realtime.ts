@@ -5,18 +5,18 @@ import {
 	buildQnaUrlWithId,
 } from "@qnaplus/scraper";
 import { groupby, trycatch } from "@qnaplus/utils";
+import deepEqual from "deep-equal";
 import { getTableName } from "drizzle-orm";
 import type { Logger } from "pino";
-import { UpdateCallback, createUpdateQueue } from "./change_classifier";
+import { type UpdateCallback, createUpdateQueue } from "./change_classifier";
 import { supabase } from "./database";
 import {
 	PayloadQueue,
 	type RenotifyPayload,
-	type UpdatePayload
+	type UpdatePayload,
 } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents } from "./resources";
 import { questions } from "./schema";
-import deepEqual from "deep-equal";
 
 export const ACK_CONFIG = {
 	config: {
@@ -24,10 +24,7 @@ export const ACK_CONFIG = {
 	},
 };
 
-export const onDatabaseUpdate = (
-	callback: UpdateCallback,
-	logger?: Logger,
-) => {
+export const onDatabaseUpdate = (callback: UpdateCallback, logger?: Logger) => {
 	const queue = createUpdateQueue(callback, logger);
 
 	return supabase()
@@ -49,15 +46,21 @@ export type ChangeCallback = () => void;
 export type DatabaseChange = {
 	type: "INSERT" | "UPDATE";
 	question: string;
-}
+};
 
-export const onDatabaseChanges = (callback: ChangeCallback, logger?: Logger) => {
+export const onDatabaseChanges = (
+	callback: ChangeCallback,
+	logger?: Logger,
+) => {
 	const queue = new PayloadQueue<DatabaseChange>({
 		onFlush(items) {
-			const groups = groupby(items, i => i.type);
-			const inserts = (groups["INSERT"] ?? []).map(i => i.question);
-			const updates = (groups["UPDATE"] ?? []).map(u => u.question);
-			logger?.info({ inserts, updates }, `Detected ${inserts.length} insert and ${updates.length} update changes to database.`);
+			const groups = groupby(items, (i) => i.type);
+			const inserts = (groups.INSERT ?? []).map((i) => i.question);
+			const updates = (groups.UPDATE ?? []).map((u) => u.question);
+			logger?.info(
+				{ inserts, updates },
+				`Detected ${inserts.length} insert and ${updates.length} update changes to database.`,
+			);
 			callback();
 		},
 	});
@@ -69,30 +72,33 @@ export const onDatabaseChanges = (callback: ChangeCallback, logger?: Logger) => 
 			{
 				event: "INSERT",
 				schema: "public",
-				table: getTableName(questions)
+				table: getTableName(questions),
 			},
-			(payload) => queue.push({ type: "INSERT", question: payload.new.id })
+			(payload) => queue.push({ type: "INSERT", question: payload.new.id }),
 		)
 		.on<Question>(
 			"postgres_changes",
 			{
 				event: "UPDATE",
 				schema: "public",
-				table: getTableName(questions)
+				table: getTableName(questions),
 			},
 			(payload) => {
 				if (deepEqual(payload.new, payload.old)) {
 					return;
 				}
 				// raw content gets finnicky and triggers false alarms, so ignore them
-				if (payload.new.answerRaw !== payload.old.answerRaw || payload.new.questionRaw !== payload.old.questionRaw) {
+				if (
+					payload.new.answerRaw !== payload.old.answerRaw ||
+					payload.new.questionRaw !== payload.old.questionRaw
+				) {
 					return;
 				}
-				queue.push({ type: "UPDATE", question: payload.new.id })
-			}
+				queue.push({ type: "UPDATE", question: payload.new.id });
+			},
 		)
 		.subscribe();
-}
+};
 
 export const onRenotify = (callback: UpdateCallback, logger?: Logger) => {
 	const queue = createUpdateQueue(callback, logger);
@@ -121,7 +127,7 @@ export const onRenotify = (callback: UpdateCallback, logger?: Logger) => {
 			},
 		)
 		.subscribe();
-}
+};
 
 export type PrecheckRequestPayload = {
 	room: string;

@@ -72,7 +72,10 @@ export const classifyChanges = (items: UpdatePayload<Question>[]) => {
 
 export type UpdateCallback = (items: ChangeQuestion[]) => void | Promise<void>;
 
-export const createUpdateQueue = (callback: UpdateCallback, logger?: Logger) => {
+export const createUpdateQueue = (
+	callback: UpdateCallback,
+	logger?: Logger,
+) => {
 	return new PayloadQueue<UpdatePayload<Question>>({
 		onFlush(items) {
 			const changes = classifyChanges(items);
@@ -84,4 +87,4 @@ export const createUpdateQueue = (callback: UpdateCallback, logger?: Logger) => 
 			callback(changes);
 		},
 	});
-}
+};
