@@ -55,7 +55,9 @@ export const onDatabaseChanges = (callback: ChangeCallback, logger?: Logger) => 
 	const queue = new PayloadQueue<DatabaseChange>({
 		onFlush(items) {
 			const groups = groupby(items, i => i.type);
-			logger?.info({ inserts: groups["INSERT"], updates: groups["UPDATE"] }, `Detected ${groups["INSERT"]?.length ?? 0} insert and ${groups["UPDATE"]?.length ?? 0} update changes to database.`);
+			const inserts = (groups["INSERT"] ?? []).map(i => i.question);
+			const updates = (groups["UPDATE"] ?? []).map(u => u.question);
+			logger?.info({ inserts, updates }, `Detected ${inserts.length} insert and ${updates.length} update changes to database.`);
 			callback();
 		},
 	});
@@ -79,15 +81,14 @@ export const onDatabaseChanges = (callback: ChangeCallback, logger?: Logger) => 
 				table: getTableName(questions)
 			},
 			(payload) => {
-				if (!deepEqual(payload.new, payload.old)) {
-					// raw content gets finnicky and triggers false alarms, so ignore them
-					if (payload.new.answerRaw !== payload.old.answerRaw || payload.new.questionRaw !== payload.old.questionRaw) {
-						return;
-					}
-					console.log(payload.new)
-					console.log(payload.old)
-					queue.push({ type: "UPDATE", question: payload.new.id })
+				if (deepEqual(payload.new, payload.old)) {
+					return;
 				}
+				// raw content gets finnicky and triggers false alarms, so ignore them
+				if (payload.new.answerRaw !== payload.old.answerRaw || payload.new.questionRaw !== payload.old.questionRaw) {
+					return;
+				}
+				queue.push({ type: "UPDATE", question: payload.new.id })
 			}
 		)
 		.subscribe();
