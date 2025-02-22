@@ -4,7 +4,7 @@ import {
 	type Question,
 	buildQnaUrlWithId,
 } from "@qnaplus/scraper";
-import { trycatch } from "@qnaplus/utils";
+import { groupby, trycatch } from "@qnaplus/utils";
 import { getTableName } from "drizzle-orm";
 import type { Logger } from "pino";
 import { UpdateCallback, createUpdateQueue } from "./change_classifier";
@@ -46,10 +46,16 @@ export const onDatabaseUpdate = (
 
 export type ChangeCallback = () => void;
 
+export type DatabaseChange = {
+	type: "INSERT" | "UPDATE";
+	question: string;
+}
+
 export const onDatabaseChanges = (callback: ChangeCallback, logger?: Logger) => {
-	const queue = new PayloadQueue<Question>({
+	const queue = new PayloadQueue<DatabaseChange>({
 		onFlush(items) {
-			logger?.info(`Detected ${items.length} changes to database.`);
+			const groups = groupby(items, i => i.type);
+			logger?.info(`Detected ${groups["INSERT"].length} insert and ${groups["UPDATE"].length} update changes to database.`);
 			callback();
 		},
 	});
@@ -63,7 +69,7 @@ export const onDatabaseChanges = (callback: ChangeCallback, logger?: Logger) => 
 				schema: "public",
 				table: getTableName(questions)
 			},
-			(payload) => queue.push(payload.new)
+			(payload) => queue.push({ type: "INSERT", question: payload.new.id })
 		)
 		.on<Question>(
 			"postgres_changes",
@@ -74,7 +80,7 @@ export const onDatabaseChanges = (callback: ChangeCallback, logger?: Logger) => 
 			},
 			(payload) => {
 				if (!deepEqual(payload.new, payload.old)) {
-					queue.push(payload.new)
+					queue.push({ type: "UPDATE", question: payload.new.id })
 				}
 			}
 		)
