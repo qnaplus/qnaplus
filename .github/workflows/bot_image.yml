@@ -16,6 +16,13 @@ on:
       - .github/workflows/bot_image.yml
       - '!services/updater/**'
       - services/bot/**
+      - packages/**
+      - .env.vault
+      - package.json
+      - turbo.json
+      - yarn.lock
+      - .gitignore
+      - docker-compose.yml
   pull_request:
     types: [opened, reopened, edited, synchronize]
     branches:
