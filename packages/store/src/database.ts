@@ -10,11 +10,7 @@ import * as schema from "./schema";
 const pg = lazy(() => postgres(getenv("SUPABASE_CONNECTION_STRING")));
 export const db = lazy(() => drizzle({ schema, client: pg() }));
 export const supabase = lazy(() =>
-	createClient(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY"), {
-		realtime: {
-			worker: true
-		}
-	}),
+	createClient(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY")),
 );
 
 export const disconnectPgClient = async () => {

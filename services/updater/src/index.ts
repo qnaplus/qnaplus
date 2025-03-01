@@ -39,11 +39,11 @@ const startDatabaseJob = async (logger: Logger) => {
 
 	startDatabaseJob(logger);
 
+	const client = new CurlImpersonateScrapingClient(logger);
 	const realtime = new RealtimeHandler(supabase(), logger);
 	realtime.add(supabase => onRenotifyQueueFlushAck(supabase, logger));
 	realtime.add(supabase => onDatabaseChanges(supabase, () => doStorageUpdate(logger), logger));
+	realtime.add(supabase => handlePrecheckRequests(supabase, client, logger));
 	realtime.start();
 	
-	const client = new CurlImpersonateScrapingClient(logger);
-	handlePrecheckRequests(client, logger);
 })();

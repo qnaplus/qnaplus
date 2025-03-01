@@ -195,15 +195,15 @@ const handlePayload = async (
 };
 
 export const handlePrecheckRequests = (
+	supabase: SupabaseClient,
 	client: FetchClient<FetchClientResponse>,
 	logger: Logger,
 ) => {
-	return supabase()
+	return supabase
 		.channel(QnaplusChannels.Precheck)
 		.on<PrecheckRequestPayload>(
 			"broadcast",
 			{ event: QnaplusEvents.PrecheckRequest },
 			({ payload }) => handlePayload(client, payload, logger),
 		)
-		.subscribe();
 };
