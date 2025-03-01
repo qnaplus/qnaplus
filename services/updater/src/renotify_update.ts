@@ -5,13 +5,14 @@ import {
 	getRenotifyQueue,
 	supabase,
 } from "@qnaplus/store";
+import { SupabaseClient } from "@supabase/supabase-js";
 import type { Logger } from "pino";
 
-export const onRenotifyQueueFlushAck = (_logger: Logger) => {
+export const onRenotifyQueueFlushAck = (client: SupabaseClient, _logger: Logger) => {
 	const logger = _logger.child({ label: "renotifyQueueAck" });
 	logger.info("Registering listener for RenotifyQueueFlushAck");
 
-	supabase()
+	return client
 		.channel(QnaplusChannels.RenotifyQueue)
 		.on(
 			"broadcast",
@@ -30,7 +31,6 @@ export const onRenotifyQueueFlushAck = (_logger: Logger) => {
 				);
 			},
 		)
-		.subscribe();
 };
 
 export const doRenotifyUpdate = async (_logger: Logger) => {

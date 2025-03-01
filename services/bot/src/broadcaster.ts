@@ -4,6 +4,8 @@ import {
 	clearAnswerQueue,
 	onDatabaseUpdate,
 	onRenotify,
+	RealtimeHandler,
+	supabase,
 } from "@qnaplus/store";
 import { chunk, groupby, trycatch } from "@qnaplus/utils";
 import { container } from "@sapphire/framework";
@@ -107,7 +109,9 @@ export const handleOnChange = async (docs: ChangeQuestion[]) => {
 	logger.info("No answers for this update, skipping answer queue clear.");
 };
 
-export const startBroadcaster = (logger?: Logger) => {
-	onDatabaseUpdate(handleOnChange, logger);
-	onRenotify(handleOnChange, logger);
+export const startBroadcaster = (logger: Logger) => {
+	const realtime = new RealtimeHandler(supabase(), logger);
+	realtime.add(supabase => onDatabaseUpdate(supabase, handleOnChange, logger));
+	realtime.add(supabase => onRenotify(supabase, handleOnChange, logger));
+	return realtime.start();
 };

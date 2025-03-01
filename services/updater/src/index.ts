@@ -4,6 +4,8 @@ import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import {
 	handlePrecheckRequests,
 	onDatabaseChanges,
+	RealtimeHandler,
+	supabase,
 	testConnection,
 } from "@qnaplus/store";
 import Cron from "croner";
@@ -37,10 +39,11 @@ const startDatabaseJob = async (logger: Logger) => {
 
 	startDatabaseJob(logger);
 
-	onRenotifyQueueFlushAck(logger);
-
-	onDatabaseChanges(() => doStorageUpdate(logger), logger);
-
+	const realtime = new RealtimeHandler(supabase(), logger);
+	realtime.add(supabase => onRenotifyQueueFlushAck(supabase, logger));
+	realtime.add(supabase => onDatabaseChanges(supabase, () => doStorageUpdate(logger), logger));
+	realtime.start();
+	
 	const client = new CurlImpersonateScrapingClient(logger);
 	handlePrecheckRequests(client, logger);
 })();

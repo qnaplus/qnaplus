@@ -9,7 +9,7 @@ import deepEqual from "deep-equal";
 import { getTableName } from "drizzle-orm";
 import type { Logger } from "pino";
 import { type UpdateCallback, createUpdateQueue } from "./change_classifier";
-import { supabase } from "./database";
+import { clearRenotifyQueue, supabase } from "./database";
 import {
 	PayloadQueue,
 	type RenotifyPayload,
@@ -17,6 +17,7 @@ import {
 } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents } from "./resources";
 import { questions } from "./schema";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export const ACK_CONFIG = {
 	config: {
@@ -24,10 +25,10 @@ export const ACK_CONFIG = {
 	},
 };
 
-export const onDatabaseUpdate = (callback: UpdateCallback, logger?: Logger) => {
+export const onDatabaseUpdate = (client: SupabaseClient, callback: UpdateCallback, logger?: Logger) => {
 	const queue = createUpdateQueue(callback, logger);
 
-	return supabase()
+	return client
 		.channel(QnaplusChannels.DbChanges)
 		.on<Question>(
 			"postgres_changes",
@@ -38,7 +39,6 @@ export const onDatabaseUpdate = (callback: UpdateCallback, logger?: Logger) => {
 			},
 			(payload) => queue.push({ old: payload.old, new: payload.new }),
 		)
-		.subscribe();
 };
 
 export type ChangeCallback = () => void;
@@ -49,6 +49,7 @@ export type DatabaseChange = {
 };
 
 export const onDatabaseChanges = (
+	client: SupabaseClient,
 	callback: ChangeCallback,
 	logger?: Logger,
 ) => {
@@ -65,7 +66,7 @@ export const onDatabaseChanges = (
 		},
 	});
 
-	return supabase()
+	return client
 		.channel(QnaplusChannels.DbChanges)
 		.on<Question>(
 			"postgres_changes",
@@ -97,12 +98,11 @@ export const onDatabaseChanges = (
 				queue.push({ type: "UPDATE", question: payload.new.id });
 			},
 		)
-		.subscribe();
 };
 
-export const onRenotify = (callback: UpdateCallback, logger?: Logger) => {
+export const onRenotify = (client: SupabaseClient, callback: UpdateCallback, logger?: Logger) => {
 	const queue = createUpdateQueue(callback, logger);
-	return supabase()
+	return client
 		.channel(QnaplusChannels.DbChanges)
 		.on<RenotifyPayload>(
 			"broadcast",
@@ -127,6 +127,32 @@ export const onRenotify = (callback: UpdateCallback, logger?: Logger) => {
 			},
 		)
 		.subscribe();
+};
+
+
+export const onRenotifyQueueFlushAck = (client: SupabaseClient, _logger: Logger) => {
+	const logger = _logger.child({ label: "renotifyQueueAck" });
+	logger.info("Registering listener for RenotifyQueueFlushAck");
+
+	return client
+		.channel(QnaplusChannels.RenotifyQueue)
+		.on(
+			"broadcast",
+			{ event: QnaplusEvents.RenotifyQueueFlushAck },
+			async () => {
+				const { ok, error, result } = await clearRenotifyQueue();
+				if (!ok) {
+					logger.error(
+						{ error },
+						"An error occurred while clearing renotify queue.",
+					);
+					return;
+				}
+				logger.info(
+					`Successfully cleared ${result.length} questions from the renotify queue.`,
+				);
+			},
+		)
 };
 
 export type PrecheckRequestPayload = {

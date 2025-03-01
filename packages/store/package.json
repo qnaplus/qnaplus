@@ -20,11 +20,11 @@
 		"@qnaplus/dotenv": "1.0.0",
 		"@qnaplus/scraper": "^2.0.2",
 		"@qnaplus/utils": "1.0.0",
-		"@supabase/supabase-js": "^2.45.4",
+		"@supabase/supabase-js": "^2.49.1",
 		"deep-equal": "^2.2.3",
 		"diff": "^5.1.0",
 		"drizzle-orm": "^0.39.1",
-		"pino": "^9.0.0",
+		"pino": "^9.6.0",
 		"postgres": "^3.4.5"
 	},
 	"devDependencies": {
