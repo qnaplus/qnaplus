@@ -29,7 +29,7 @@ export const onDatabaseUpdate = (client: SupabaseClient, callback: UpdateCallbac
 	const queue = createUpdateQueue(callback, logger);
 
 	return client
-		.channel(QnaplusChannels.DbChanges)
+		.channel(QnaplusChannels.DbUpdates)
 		.on<Question>(
 			"postgres_changes",
 			{

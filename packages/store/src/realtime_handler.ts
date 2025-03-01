@@ -144,7 +144,7 @@ export class RealtimeHandler<T extends SupabaseClient> {
             return;
         }
 
-        await this.refreshSessionIfNeeded();
+        // await this.refreshSessionIfNeeded();
 
         channel.subscribe(async (status, err) => {
             await this.handleSubscriptionStateEvent(channel, status, err);
@@ -248,18 +248,18 @@ export class RealtimeHandler<T extends SupabaseClient> {
     /**
      * Refreshes the session token if needed and sets the token for Supabase Realtime.
      */
-    private async refreshSessionIfNeeded() {
-        const { data, error } = await this.supabaseClient.auth.getSession();
-        if (error) {
-            throw error;
-        }
-        if (!data.session) {
-            throw new Error('Session not found');
-        }
-        if (this.supabaseClient.realtime.accessTokenValue !== data.session.access_token) {
-            await this.supabaseClient.realtime.setAuth(data.session.access_token);
-        }
-    }
+    // private async refreshSessionIfNeeded() {
+    //     const { data, error } = await this.supabaseClient.auth.getSession();
+    //     if (error) {
+    //         throw error;
+    //     }
+    //     if (!data.session) {
+    //         throw new Error('Session not found');
+    //     }
+    //     if (this.supabaseClient.realtime.accessTokenValue !== data.session.access_token) {
+    //         await this.supabaseClient.realtime.setAuth(data.session.access_token);
+    //     }
+    // }
 }
 
 /**

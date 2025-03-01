@@ -8,6 +8,7 @@ export const QnaplusEvents = {
 };
 
 export const QnaplusChannels = {
+	DbUpdates: "db-updates",
 	DbChanges: "db-changes",
 	RenotifyQueue: "renotify-queue",
 	Precheck: "precheck",
