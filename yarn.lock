@@ -4441,7 +4441,7 @@ pino-std-serializers@^7.0.0:
   resolved "https://registry.npmjs.org/pino-std-serializers/-/pino-std-serializers-7.0.0.tgz#7c625038b13718dbbd84ab446bd673dc52259e3b"
   integrity sha512-e906FRY0+tV27iq4juKzSYPbUj2do2X2JX4EzSca1631EB2QJQUqGbDuERal7LCtOpxl6x3+nvo9NPZcmjkiFA==
 
-pino@^9.0.0, pino@^9.4.0, pino@^9.6.0:
+pino@^9.4.0, pino@^9.6.0:
   version "9.6.0"
   resolved "https://registry.npmjs.org/pino/-/pino-9.6.0.tgz#6bc628159ba0cc81806d286718903b7fc6b13169"
   integrity sha512-i85pKRCt4qMjZ1+L7sy2Ag4t1atFcdbEt76+7iRJn1g2BvsnRMGu9p8pivl9fs63M2kF/A0OacFZhTub+m/qMg==

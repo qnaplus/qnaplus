@@ -2,7 +2,7 @@ import { getenv } from "@qnaplus/dotenv";
 import type { Question } from "@qnaplus/scraper";
 import { lazy, trycatch } from "@qnaplus/utils";
 import { createClient } from "@supabase/supabase-js";
-import { and, eq, gte, inArray, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
@@ -94,6 +94,11 @@ export const upsertQuestions = async (data: Question[]) => {
 					answered: sql`excluded.answered`,
 					tags: sql`excluded.tags`,
 				},
+				setWhere: or(
+					sql`${schema.questions.question} != excluded.question`,
+					sql`${schema.questions.answer} != excluded.answer`,
+					sql`${schema.questions.answered} != excluded.answered`,
+				)
 			}),
 	);
 };
@@ -171,6 +176,11 @@ export const doFailureQuestionUpdate = async (questions: Question[]) => {
 						answered: sql`excluded.answered`,
 						tags: sql`excluded.tags`,
 					},
+					setWhere: or(
+						sql`${schema.questions.question} != excluded.question`,
+						sql`${schema.questions.answer} != excluded.answer`,
+						sql`${schema.questions.answered} != excluded.answered`,
+					)
 				});
 			await tx
 				.delete(schema.failures)
@@ -251,6 +261,11 @@ export const doDatabaseAnswerQueueUpdate = async (
 							answered: sql`excluded.answered`,
 							tags: sql`excluded.tags`,
 						},
+						setWhere: or(
+							sql`${schema.questions.question} != excluded.question`,
+							sql`${schema.questions.answer} != excluded.answer`,
+							sql`${schema.questions.answered} != excluded.answered`,
+						)
 					});
 			}
 			if (answeredIds.length !== 0) {
