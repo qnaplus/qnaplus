@@ -1392,6 +1392,16 @@
     got-scraping "^4.0.6"
     pino "^9.4.0"
 
+"@qnaplus/scraper@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/@qnaplus/scraper/-/scraper-2.0.3.tgz#042d5192dd3b7240974a679fbbcce9c5adb08e89"
+  integrity sha512-67UL98BtRjcFqHfQjb0q6fc07bEW1erhrOIMUcJRoSdqGZEdWqs44inK1jDt7Nl5+1tGxfmM4dUVNE7/qU4MLA==
+  dependencies:
+    "@crawlee/core" "^3.11.5"
+    cheerio "^1.0.0"
+    got-scraping "^4.0.6"
+    pino "^9.4.0"
+
 "@sapphire/async-queue@^1.5.0", "@sapphire/async-queue@^1.5.1", "@sapphire/async-queue@^1.5.2", "@sapphire/async-queue@^1.5.3":
   version "1.5.5"
   resolved "https://registry.npmjs.org/@sapphire/async-queue/-/async-queue-1.5.5.tgz#2b18d402bb920b65b13ad4ed8dfb6c386300dd84"

@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"@qnaplus/logger": "1.0.0",
-		"@qnaplus/scraper": "^2.0.2",
+		"@qnaplus/scraper": "^2.0.3",
 		"@qnaplus/scraper-strategies": "^2.0.1",
 		"@qnaplus/store": "1.0.0",
 		"@qnaplus/utils": "1.0.0",
