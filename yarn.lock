@@ -1370,27 +1370,17 @@
   resolved "https://registry.npmjs.org/@qnaplus/node-curl-impersonate/-/node-curl-impersonate-1.0.1.tgz#c8d8859a631d40fc4984ff329796bd9d6ac99aa0"
   integrity sha512-nAX3/EpTAYpx4IyNJ+GAYhSENd6n/JRQBOG2LuTK3uz/0bYZjRC/J7vQMPpXQ00VumkjCUriMFpNbJw+f47pFQ==
 
-"@qnaplus/scraper-strategies@^2.0.1":
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/@qnaplus/scraper-strategies/-/scraper-strategies-2.0.2.tgz#62113869b5a1362f90ff95ac30be4b249d957983"
-  integrity sha512-3lXLktztppXXagpwyz/5y0+CASds6EvPP2GbleGMk/118+bVNRHLb1mw+8rRuMKDjoYk4SwTLEadviDJlP7dLA==
+"@qnaplus/scraper-strategies@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/@qnaplus/scraper-strategies/-/scraper-strategies-2.0.3.tgz#d690276f60c1d83a91db77c02716a4ad79289eb5"
+  integrity sha512-Nj1AQw5nd4ayo7cMPspJjlzT2a7stebEmHpkHwGPEhEv3f+Uw5EYHhU/JyrIFJMLR/h/LD0GYo6oUMo87mhUqQ==
   dependencies:
     "@qnaplus/node-curl-impersonate" "^1.0.0"
-    "@qnaplus/scraper" "^2.0.2"
+    "@qnaplus/scraper" "^2.0.3"
     cycletls "^1.0.27"
     form-data "^4.0.1"
     header-generator "^2.1.62"
     pino "^9.6.0"
-
-"@qnaplus/scraper@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/@qnaplus/scraper/-/scraper-2.0.2.tgz#b44a97aa999fcd870672124052dcfefd5a4de4f6"
-  integrity sha512-sLvzCIJ6XM5R/Ns6BbPR+YE+9mHfESbrjpkLRXYOg/osrfPOJBRXvVSy2vT2ZxmPwRql0T3zMHLx5t5YtGnvoA==
-  dependencies:
-    "@crawlee/core" "^3.11.5"
-    cheerio "^1.0.0"
-    got-scraping "^4.0.6"
-    pino "^9.4.0"
 
 "@qnaplus/scraper@^2.0.3":
   version "2.0.3"

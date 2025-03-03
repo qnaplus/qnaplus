@@ -17,7 +17,7 @@ import {
 } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents } from "./resources";
 import { questions } from "./schema";
-import { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const ACK_CONFIG = {
 	config: {

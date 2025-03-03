@@ -4,6 +4,7 @@ import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import {
 	handlePrecheckRequests,
 	onDatabaseChanges,
+	onRenotifyQueueFlushAck,
 	RealtimeHandler,
 	supabase,
 	testConnection,
@@ -11,7 +12,7 @@ import {
 import Cron from "croner";
 import type { Logger } from "pino";
 import { doDatabaseUpdate } from "./database_update";
-import { doRenotifyUpdate, onRenotifyQueueFlushAck } from "./renotify_update";
+import { doRenotifyUpdate } from "./renotify_update";
 import { doStorageUpdate } from "./storage_update";
 
 const startDatabaseJob = async (logger: Logger) => {
