@@ -205,7 +205,7 @@ export class RealtimeHandler<T extends SupabaseClient> {
 	private async handleSubscriptionStateEvent(
 		channel: RealtimeChannel,
 		status: REALTIME_SUBSCRIBE_STATES,
-		err: Error | undefined,
+		error: Error | undefined,
 	) {
 		const { topic } = channel;
 
@@ -239,18 +239,18 @@ export class RealtimeHandler<T extends SupabaseClient> {
 			}
 			case REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR: {
 				// We'll just reconnect when the tab becomes visible again. // if the tab is hidden, we don't really care about reconnection
-				if (err && isTokenExpiredError(err)) {
+				if (error && isTokenExpiredError(error)) {
 					this.logger.error(
 						`Token expired causing channel error in '${topic}'. Refreshing session.`,
 					);
 					this.resubscribeToChannel(topic);
 				} else {
-					this.logger.warn(`Channel error in '${topic}': `, err?.message);
+					this.logger.error({ error }, `Channel error in '${topic}': `);
 				}
 				const subscriptionEventCallbacks =
 					this.subscriptionEventCallbacks.get(topic);
 				if (subscriptionEventCallbacks?.onError) {
-					subscriptionEventCallbacks.onError(channel, err);
+					subscriptionEventCallbacks.onError(channel, error);
 				}
 				break;
 			}
