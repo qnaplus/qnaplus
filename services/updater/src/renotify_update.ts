@@ -2,7 +2,7 @@ import {
 	QnaplusChannels,
 	QnaplusEvents,
 	getRenotifyQueue,
-	supabase
+	supabase,
 } from "@qnaplus/store";
 import type { Logger } from "pino";
 

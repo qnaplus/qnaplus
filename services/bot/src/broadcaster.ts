@@ -1,10 +1,10 @@
 import { getenv } from "@qnaplus/dotenv";
 import {
 	type ChangeQuestion,
+	RealtimeHandler,
 	clearAnswerQueue,
 	onDatabaseUpdate,
 	onRenotify,
-	RealtimeHandler,
 	supabase,
 } from "@qnaplus/store";
 import { chunk, groupby, trycatch } from "@qnaplus/utils";
@@ -111,7 +111,9 @@ export const handleOnChange = async (docs: ChangeQuestion[]) => {
 
 export const startBroadcaster = (logger: Logger) => {
 	const realtime = new RealtimeHandler(supabase(), logger);
-	realtime.add(supabase => onDatabaseUpdate(supabase, handleOnChange, logger));
-	realtime.add(supabase => onRenotify(supabase, handleOnChange, logger));
+	realtime.add((supabase) =>
+		onDatabaseUpdate(supabase, handleOnChange, logger),
+	);
+	realtime.add((supabase) => onRenotify(supabase, handleOnChange, logger));
 	return realtime.start();
 };

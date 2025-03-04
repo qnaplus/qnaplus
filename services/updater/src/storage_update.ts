@@ -16,9 +16,14 @@ export const doStorageUpdate = async (_logger: Logger) => {
 	}
 	const json = JSON.stringify(questions);
 	const buffer = Buffer.from(json, "utf-8");
-	const uploadResult = await trycatch(upload(getenv("CF_QUESTIONS_KEY"), buffer, logger));
+	const uploadResult = await trycatch(
+		upload(getenv("CF_QUESTIONS_KEY"), buffer, logger),
+	);
 	if (!uploadResult.ok) {
-		logger?.error({ error: uploadResult.error }, "Error while updating storage json");
+		logger?.error(
+			{ error: uploadResult.error },
+			"Error while updating storage json",
+		);
 		return;
 	}
 	logger.info("Successfully completed storage update.");

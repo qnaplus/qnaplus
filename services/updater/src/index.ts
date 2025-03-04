@@ -2,10 +2,10 @@ import { getenv } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import {
+	RealtimeHandler,
 	handlePrecheckRequests,
 	onDatabaseChanges,
 	onRenotifyQueueFlushAck,
-	RealtimeHandler,
 	supabase,
 	testConnection,
 } from "@qnaplus/store";
@@ -42,9 +42,10 @@ const startDatabaseJob = async (logger: Logger) => {
 
 	const client = new CurlImpersonateScrapingClient(logger);
 	const realtime = new RealtimeHandler(supabase(), logger);
-	realtime.add(supabase => onRenotifyQueueFlushAck(supabase, logger));
-	realtime.add(supabase => onDatabaseChanges(supabase, () => doStorageUpdate(logger), logger));
-	realtime.add(supabase => handlePrecheckRequests(supabase, client, logger));
+	realtime.add((supabase) => onRenotifyQueueFlushAck(supabase, logger));
+	realtime.add((supabase) =>
+		onDatabaseChanges(supabase, () => doStorageUpdate(logger), logger),
+	);
+	realtime.add((supabase) => handlePrecheckRequests(supabase, client, logger));
 	realtime.start();
-	
 })();

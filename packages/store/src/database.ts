@@ -98,7 +98,7 @@ export const upsertQuestions = async (data: Question[]) => {
 					sql`${schema.questions.question} != excluded.question`,
 					sql`${schema.questions.answer} != excluded.answer`,
 					sql`${schema.questions.answered} != excluded.answered`,
-				)
+				),
 			}),
 	);
 };
@@ -180,7 +180,7 @@ export const doFailureQuestionUpdate = async (questions: Question[]) => {
 						sql`${schema.questions.question} != excluded.question`,
 						sql`${schema.questions.answer} != excluded.answer`,
 						sql`${schema.questions.answered} != excluded.answered`,
-					)
+					),
 				});
 			await tx
 				.delete(schema.failures)
@@ -265,7 +265,7 @@ export const doDatabaseAnswerQueueUpdate = async (
 							sql`${schema.questions.question} != excluded.question`,
 							sql`${schema.questions.answer} != excluded.answer`,
 							sql`${schema.questions.answered} != excluded.answered`,
-						)
+						),
 					});
 			}
 			if (answeredIds.length !== 0) {
