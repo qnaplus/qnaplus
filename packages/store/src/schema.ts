@@ -23,6 +23,7 @@ export const questions = pgTable("questions", {
 export const metadata = pgTable("metadata", {
 	id: integer().primaryKey(),
 	currentSeason: text().notNull(),
+	currentSeasonOpen: boolean().notNull(),
 	oldestUnansweredQuestion: text().notNull(),
 });
 
@@ -40,6 +41,11 @@ export const answer_queue = pgTable("answer_queue", {
 	id: text()
 		.primaryKey()
 		.references(() => questions.id, { onDelete: "cascade" }),
+});
+
+export const programs = pgTable("programs", {
+	program: text().primaryKey(),
+	open: boolean().notNull()
 });
 
 // const excludedId = sql`excluded.id`;
