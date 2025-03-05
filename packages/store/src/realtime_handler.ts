@@ -245,7 +245,7 @@ export class RealtimeHandler<T extends SupabaseClient> {
 					);
 					this.resubscribeToChannel(topic);
 				} else {
-					this.logger.error({ error }, `Channel error in '${topic}': `);
+					this.logger.error({ error }, `Channel error in '${topic}'`);
 				}
 				const subscriptionEventCallbacks =
 					this.subscriptionEventCallbacks.get(topic);

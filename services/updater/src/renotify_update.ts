@@ -19,7 +19,7 @@ export const doRenotifyUpdate = async (_logger: Logger) => {
 	}
 
 	const broadcastResponse = await supabase()
-		.channel(QnaplusChannels.DbChanges)
+		.channel(QnaplusChannels.RenotifyQueue)
 		.send({
 			type: "broadcast",
 			event: QnaplusEvents.RenotifyQueueFlush,

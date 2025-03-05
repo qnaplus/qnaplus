@@ -109,7 +109,7 @@ export const onRenotify = (
 ) => {
 	const queue = createUpdateQueue(callback, logger);
 	return client
-		.channel(QnaplusChannels.DbChanges)
+		.channel(QnaplusChannels.RenotifyQueue)
 		.on<RenotifyPayload>(
 			"broadcast",
 			{ event: QnaplusEvents.RenotifyQueueFlush },
@@ -132,7 +132,6 @@ export const onRenotify = (
 				);
 			},
 		)
-		.subscribe();
 };
 
 export const onRenotifyQueueFlushAck = (
