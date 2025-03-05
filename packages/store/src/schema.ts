@@ -23,7 +23,6 @@ export const questions = pgTable("questions", {
 export const metadata = pgTable("metadata", {
 	id: integer().primaryKey(),
 	currentSeason: text().notNull(),
-	currentSeasonOpen: boolean().notNull(),
 	oldestUnansweredQuestion: text().notNull(),
 });
 
