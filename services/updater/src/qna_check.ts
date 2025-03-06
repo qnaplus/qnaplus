@@ -1,4 +1,4 @@
-import { type Season, checkIfReadOnly, pingQna } from "@qnaplus/scraper";
+import { type FetchClient, type FetchClientResponse, type Season, checkIfReadOnly, pingQna } from "@qnaplus/scraper";
 import { getAllPrograms, getMetadata, getQnaStates, updateQnaStates } from "@qnaplus/store";
 import type { Logger } from "pino";
 
@@ -15,7 +15,7 @@ const getNextSeason = (season: Season) => {
     return `${endYear}-${endYear + 1}`
 }
 
-export const doQnaCheck = async (logger: Logger) => {
+export const doQnaCheck = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
     logger.info("Starting programs update.");
     const programs = await getAllPrograms();
     if (!programs.ok) {
@@ -45,7 +45,7 @@ export const doQnaCheck = async (logger: Logger) => {
         const statesMapOpen = statesMap[program] ?? true;
         const open = statesMapOpen
             ? await checkIfReadOnly(program, season, { logger })
-            : await pingQna(program, getNextSeason(season), { logger });
+            : await pingQna(program, getNextSeason(season), { client, logger });
         if (open === null) {
             logger.warn(`Unable to check state for ${program} (${season}), skipping.`);
             continue;
