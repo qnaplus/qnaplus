@@ -37,13 +37,13 @@ export const doQnaCheck = async (logger: Logger) => {
         return map;
     }, {});
 
-    const season = metadata.result?.currentSeason as Season;
+    const season = metadata.result.currentSeason as Season;
     const newStates: ProgramState[] = [];
     for (const { program } of programs.result) {
-        if (statesMap[program] === undefined) {
-            continue;
-        }
-        const open = statesMap[program]
+        // get the 'open' state for a given program
+        // if there is none, default to true so we can initialize one
+        const statesMapOpen = statesMap[program] ?? true;
+        const open = statesMapOpen
             ? await checkIfReadOnly(program, season, { logger })
             : await pingQna(program, getNextSeason(season), { logger });
         if (open === null) {
