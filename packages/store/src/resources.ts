@@ -12,4 +12,5 @@ export const QnaplusChannels = {
 	DbChanges: "db-changes",
 	RenotifyQueue: "renotify-queue",
 	Precheck: "precheck",
+    ProgramStates: "program-states"
 };
