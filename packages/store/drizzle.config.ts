@@ -6,6 +6,6 @@ export default defineConfig({
 	schema: "./src/schema.ts",
 	dialect: "postgresql",
 	dbCredentials: {
-		url: getenv("SUPABASE_CONNECTION_STRING"),
+		url: getenv("SUPABASE_SESSION_STRING"),
 	},
 });
