@@ -1,0 +1,1 @@
+ALTER TABLE "programs" ALTER COLUMN "open" SET DEFAULT true;

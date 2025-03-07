@@ -44,7 +44,7 @@ export const answer_queue = pgTable("answer_queue", {
 
 export const programs = pgTable("programs", {
 	program: text().primaryKey(),
-	open: boolean().notNull()
+	open: boolean().notNull().default(true)
 });
 
 // const excludedId = sql`excluded.id`;

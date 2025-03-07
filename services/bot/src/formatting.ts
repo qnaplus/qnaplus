@@ -93,7 +93,7 @@ export const buildQuestionEmbed = (question: ChangeQuestion) => {
 export const buildQnaStateEmbed = (program: string, oldState: boolean, newState: boolean) => {
     const opened = !oldState && newState;
     const status = opened ? "opened" : "closed";
-    const message = `Q&A forum ${status} for ${program}}`;
+    const message = `Q&A forum ${status} for ${program}`;
     return new EmbedBuilder()
         .setTitle(message)
         .setColor(opened ? Colors.Green : Colors.DarkRed);
