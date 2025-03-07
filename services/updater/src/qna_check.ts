@@ -43,9 +43,8 @@ export const doQnaCheck = async (client: FetchClient<FetchClientResponse>, logge
         // get the 'open' state for a given program
         // if there is none, default to true so we can initialize one
         const statesMapOpen = statesMap[program] ?? true;
-        logger.info(statesMap[program])
         const open = statesMapOpen
-            ? await checkIfReadOnly(program, season, { client, logger })
+            ? !(await checkIfReadOnly(program, season, { client, logger }))
             : await pingQna(program, getNextSeason(season), { client, logger });
         if (open === null) {
             logger.warn(`Unable to check state for ${program} (${season}), skipping.`);
