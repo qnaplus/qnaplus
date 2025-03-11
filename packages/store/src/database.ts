@@ -7,7 +7,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-const pg = lazy(() => postgres(getenv("SUPABASE_TRANSACTION_STRING")));
+const pg = lazy(() => postgres(getenv("SUPABASE_TRANSACTION_URL")));
 export const db = lazy(() => drizzle({ schema, client: pg() }));
 export const supabase = lazy(() =>
 	createClient(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY")),
