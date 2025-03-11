@@ -17,7 +17,7 @@
 		"dotenv": "^16.3.1"
 	},
 	"devDependencies": {
-		"@qnaplus/typescript-config": "*"
+		"@qnaplus/typescript-config": "1.0.0"
 	},
 	"exports": {
 		".": {

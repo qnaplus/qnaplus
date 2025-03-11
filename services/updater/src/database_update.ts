@@ -19,6 +19,7 @@ import {
 	getQuestion,
 	saveMetadata,
 	updateFailures,
+	upsertQuestions,
 } from "@qnaplus/store";
 import { chunk, unique } from "@qnaplus/utils";
 import type { Logger } from "pino";
@@ -144,7 +145,7 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 	if (!newAnsweredQuestions.ok) {
 		logger.error(
 			{ error: newAnsweredQuestions.error },
-			"Unable to find newly answered questions from update, retrying on next run.",
+			"An error occurred while trying to find newly answered questions from update, retrying on next run.",
 		);
 		return;
 	}
@@ -164,6 +165,16 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 		logger?.info(
 			`Upserted ${questions.length} questions and updated answer queue.`,
 		);
+	} else {
+		const { ok, error } = await upsertQuestions(questions);
+		if (!ok) {
+			logger.error(
+				{ error },
+				"An error occurred while upserting questions, exiting.",
+			);
+			return;
+		}
+		logger?.info(`Upserted ${questions.length} questions.`);
 	}
 
 	const allFailures = unique([...failureUpdateResult.failures, ...failures]);

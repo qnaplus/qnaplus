@@ -18,26 +18,48 @@ export const questions = pgTable("questions", {
 	answeredTimestampMs: bigint({ mode: "number" }),
 	answered: boolean().notNull(),
 	tags: text().array().notNull(),
-});
+}).enableRLS();
 
 export const metadata = pgTable("metadata", {
 	id: integer().primaryKey(),
 	currentSeason: text().notNull(),
 	oldestUnansweredQuestion: text().notNull(),
-});
+}).enableRLS();
 
 export const failures = pgTable("failures", {
 	id: text().primaryKey(),
-});
+}).enableRLS();
 
 export const renotify_queue = pgTable("renotify_queue", {
 	id: text()
 		.primaryKey()
 		.references(() => questions.id, { onDelete: "cascade" }),
-});
+}).enableRLS();
 
 export const answer_queue = pgTable("answer_queue", {
 	id: text()
 		.primaryKey()
 		.references(() => questions.id, { onDelete: "cascade" }),
-});
+}).enableRLS();
+
+export const programs = pgTable("programs", {
+	program: text().primaryKey(),
+	open: boolean().notNull().default(true),
+}).enableRLS();
+
+// const excludedId = sql`excluded.id`;
+// const excludedUrl = sql`excluded.url`;
+// const excludedAuthor = sql`excluded.author`
+// const excludedProgram = sql`excluded.program`;
+// const excludedTitle = sql`excluded.title`;
+// const excludedQuestion = sql`excluded.question`;
+// const excludedQuestionRaw = sql`excluded."questionRaw"`;
+// const excludedAnswer = sql`excluded.answer`;
+// const excludedAnswerRaw = sql`excluded."answerRaw"`;
+// const excludedSeason = sql`excluded.season`;
+// const excludedAskedTimestamp = sql`excluded."askedTimestamp"`;
+// const excludedAskedTimestampMs = sql`excluded."askedTimestampMs"`;
+// const excludedAnsweredTimestamp = sql`excluded."answeredTimestamp"`;
+// const excludedAnsweredTimestampMs = sql`excluded."answeredTimestampMs"`;
+// const excludedAnswered = sql`excluded.answered`;
+// const excludedTags = sql`excluded.tags`;

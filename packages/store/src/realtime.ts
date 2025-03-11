@@ -4,18 +4,20 @@ import {
 	type Question,
 	buildQnaUrlWithId,
 } from "@qnaplus/scraper";
-import { trycatch } from "@qnaplus/utils";
+import { groupby, trycatch } from "@qnaplus/utils";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import deepEqual from "deep-equal";
 import { getTableName } from "drizzle-orm";
 import type { Logger } from "pino";
-import { type ChangeQuestion, classifyChanges } from "./change_classifier";
-import { supabase } from "./database";
+import { type UpdateCallback, createUpdateQueue } from "./change_classifier";
+import { clearRenotifyQueue, supabase } from "./database";
 import {
 	PayloadQueue,
 	type RenotifyPayload,
 	type UpdatePayload,
 } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents } from "./resources";
-import { questions } from "./schema";
+import { programs, questions } from "./schema";
 
 export const ACK_CONFIG = {
 	config: {
@@ -23,25 +25,60 @@ export const ACK_CONFIG = {
 	},
 };
 
-export type ChangeCallback = (items: ChangeQuestion[]) => void | Promise<void>;
+export const onDatabaseUpdate = (
+	client: SupabaseClient,
+	callback: UpdateCallback,
+	logger?: Logger,
+) => {
+	const queue = createUpdateQueue(callback, logger);
 
-export const onQuestionsChange = (
+	return client.channel(QnaplusChannels.DbUpdates).on<Question>(
+		"postgres_changes",
+		{
+			event: "UPDATE",
+			schema: "public",
+			table: getTableName(questions),
+		},
+		(payload) => queue.push({ old: payload.old, new: payload.new }),
+	);
+};
+
+export type ChangeCallback = () => void;
+
+export type DatabaseChange = {
+	type: "INSERT" | "UPDATE";
+	question: string;
+};
+
+export const onDatabaseChanges = (
+	client: SupabaseClient,
 	callback: ChangeCallback,
 	logger?: Logger,
 ) => {
-	const queue = new PayloadQueue<UpdatePayload<Question>>({
+	const queue = new PayloadQueue<DatabaseChange>({
 		onFlush(items) {
-			const changes = classifyChanges(items);
-			if (changes.length < 1) {
-				logger?.info("No changes detected.");
-				return;
-			}
-			logger?.info(`${changes.length} changes detected.`);
-			callback(changes);
+			const groups = groupby(items, (i) => i.type);
+			const inserts = (groups.INSERT ?? []).map((i) => i.question);
+			const updates = (groups.UPDATE ?? []).map((u) => u.question);
+			logger?.info(
+				{ inserts, updates },
+				`Detected ${inserts.length} insert and ${updates.length} update changes to database.`,
+			);
+			callback();
 		},
 	});
-	return supabase()
+
+	return client
 		.channel(QnaplusChannels.DbChanges)
+		.on<Question>(
+			"postgres_changes",
+			{
+				event: "INSERT",
+				schema: "public",
+				table: getTableName(questions),
+			},
+			(payload) => queue.push({ type: "INSERT", question: payload.new.id }),
+		)
 		.on<Question>(
 			"postgres_changes",
 			{
@@ -49,8 +86,30 @@ export const onQuestionsChange = (
 				schema: "public",
 				table: getTableName(questions),
 			},
-			(payload) => queue.push({ old: payload.old, new: payload.new }),
-		)
+			(payload) => {
+				if (deepEqual(payload.new, payload.old)) {
+					return;
+				}
+				// raw content gets finnicky and triggers false alarms, so ignore them
+				if (
+					payload.new.answerRaw !== payload.old.answerRaw ||
+					payload.new.questionRaw !== payload.old.questionRaw
+				) {
+					return;
+				}
+				queue.push({ type: "UPDATE", question: payload.new.id });
+			},
+		);
+};
+
+export const onRenotify = (
+	client: SupabaseClient,
+	callback: UpdateCallback,
+	logger?: Logger,
+) => {
+	const queue = createUpdateQueue(callback, logger);
+	return client
+		.channel(QnaplusChannels.RenotifyQueue)
 		.on<RenotifyPayload>(
 			"broadcast",
 			{ event: QnaplusEvents.RenotifyQueueFlush },
@@ -72,8 +131,35 @@ export const onQuestionsChange = (
 					`Sent renotify queue acknowledgement with result '${result}'`,
 				);
 			},
-		)
-		.subscribe();
+		);
+};
+
+export const onRenotifyQueueFlushAck = (
+	client: SupabaseClient,
+	_logger: Logger,
+) => {
+	const logger = _logger.child({ label: "renotifyQueueAck" });
+	logger.info("Registering listener for RenotifyQueueFlushAck");
+
+	return client
+		.channel(QnaplusChannels.RenotifyQueue)
+		.on(
+			"broadcast",
+			{ event: QnaplusEvents.RenotifyQueueFlushAck },
+			async () => {
+				const { ok, error, result } = await clearRenotifyQueue();
+				if (!ok) {
+					logger.error(
+						{ error },
+						"An error occurred while clearing renotify queue.",
+					);
+					return;
+				}
+				logger.info(
+					`Successfully cleared ${result.length} questions from the renotify queue.`,
+				);
+			},
+		);
 };
 
 export type PrecheckRequestPayload = {
@@ -92,39 +178,91 @@ const handlePayload = async (
 ) => {
 	logger.info(`Received precheck request from ${room} for Q&A ${id}`);
 
-	const { status } = await client.fetch(
-		buildQnaUrlWithId({ id, program: "V5RC", season: "2020-2021" }),
+	const { ok, error, result } = await trycatch(
+		client.fetch(
+			buildQnaUrlWithId({ id, program: "V5RC", season: "2020-2021" }),
+		),
 	);
 
+	if (!ok) {
+		logger.error({ error }, `An error occurred during precheck for Q&A ${id}`);
+		return;
+	}
+
+	const { status } = result;
 	const response: PrecheckResponsePayload = { exists: status === 200 };
 	logger.info(`Precheck response for Q&A ${id}: ${response.exists}`);
 
 	const channel = supabase().channel(room, ACK_CONFIG);
-	const { error, ok } = await trycatch(
+	const precheckBroadcast = await trycatch(
 		channel.send({
 			type: "broadcast",
 			event: QnaplusEvents.PrecheckResponse,
 			payload: response,
 		}),
 	);
-	if (ok) {
+	if (precheckBroadcast.ok) {
 		logger.info("Precheck response sent.");
 	} else {
-		logger.error({ error }, "Failed to send precheck response.");
+		logger.error(
+			{ error: precheckBroadcast.error },
+			"Failed to send precheck response.",
+		);
 	}
 	supabase().removeChannel(channel);
 };
 
 export const handlePrecheckRequests = (
+	supabase: SupabaseClient,
 	client: FetchClient<FetchClientResponse>,
 	logger: Logger,
 ) => {
-	return supabase()
+	return supabase
 		.channel(QnaplusChannels.Precheck)
 		.on<PrecheckRequestPayload>(
 			"broadcast",
 			{ event: QnaplusEvents.PrecheckRequest },
 			({ payload }) => handlePayload(client, payload, logger),
-		)
-		.subscribe();
+		);
+};
+
+export type QnaStateChangeCallback = (
+	program: string,
+	oldState: boolean,
+	newState: boolean,
+	logger: Logger,
+) => void;
+
+export const onQnaStateChange = (
+	supabase: SupabaseClient,
+	callback: QnaStateChangeCallback,
+	logger: Logger,
+) => {
+	return supabase
+		.channel(QnaplusChannels.ProgramStates)
+		.on<typeof programs.$inferSelect>(
+			"postgres_changes",
+			{
+				event: "UPDATE",
+				schema: "public",
+				table: getTableName(programs),
+			},
+			(payload) => {
+				if (payload.old.open === undefined) {
+					logger.warn(
+						`Unable to read new Q&A status for ${payload.new.program} (new state is open: ${payload.new.open}), exiting.`,
+					);
+					return;
+				}
+				logger.info(
+					`Received Q&A state change. ${payload.new.program} state changed from ${payload.old.open} to ${payload.new.open}`,
+				);
+				callback(
+					payload.new.program,
+					payload.old.open,
+					payload.new.open,
+					logger,
+				);
+			},
+		);
 };

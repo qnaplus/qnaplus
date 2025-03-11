@@ -15,7 +15,7 @@
 		"check-types": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@qnaplus/typescript-config": "*"
+		"@qnaplus/typescript-config": "1.0.0"
 	},
 	"volta": {
 		"extends": "../../package.json"

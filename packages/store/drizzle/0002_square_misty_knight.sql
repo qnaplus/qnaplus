@@ -1,0 +1,1 @@
+ALTER TABLE "programs" RENAME COLUMN "readonly" TO "open";

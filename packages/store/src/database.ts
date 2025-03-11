@@ -2,12 +2,12 @@ import { getenv } from "@qnaplus/dotenv";
 import type { Question } from "@qnaplus/scraper";
 import { lazy, trycatch } from "@qnaplus/utils";
 import { createClient } from "@supabase/supabase-js";
-import { and, eq, gte, inArray, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-const pg = lazy(() => postgres(getenv("SUPABASE_CONNECTION_STRING")));
+const pg = lazy(() => postgres(getenv("SUPABASE_TRANSACTION_URL")));
 export const db = lazy(() => drizzle({ schema, client: pg() }));
 export const supabase = lazy(() =>
 	createClient(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY")),
@@ -94,6 +94,11 @@ export const upsertQuestions = async (data: Question[]) => {
 					answered: sql`excluded.answered`,
 					tags: sql`excluded.tags`,
 				},
+				setWhere: or(
+					sql`${schema.questions.question} != excluded.question`,
+					sql`${schema.questions.answer} != excluded.answer`,
+					sql`${schema.questions.answered} != excluded.answered`,
+				),
 			}),
 	);
 };
@@ -171,6 +176,11 @@ export const doFailureQuestionUpdate = async (questions: Question[]) => {
 						answered: sql`excluded.answered`,
 						tags: sql`excluded.tags`,
 					},
+					setWhere: or(
+						sql`${schema.questions.question} != excluded.question`,
+						sql`${schema.questions.answer} != excluded.answer`,
+						sql`${schema.questions.answered} != excluded.answered`,
+					),
 				});
 			await tx
 				.delete(schema.failures)
@@ -251,6 +261,11 @@ export const doDatabaseAnswerQueueUpdate = async (
 							answered: sql`excluded.answered`,
 							tags: sql`excluded.tags`,
 						},
+						setWhere: or(
+							sql`${schema.questions.question} != excluded.question`,
+							sql`${schema.questions.answer} != excluded.answer`,
+							sql`${schema.questions.answered} != excluded.answered`,
+						),
 					});
 			}
 			if (answeredIds.length !== 0) {
@@ -270,4 +285,34 @@ export const doDatabaseAnswerQueueUpdate = async (
 
 export const clearAnswerQueue = async () => {
 	return trycatch(db().delete(schema.answer_queue));
+};
+
+export const getAllPrograms = async () => {
+	return trycatch(
+		db()
+			.selectDistinct({ program: schema.questions.program })
+			.from(schema.questions),
+	);
+};
+
+export const getQnaStates = async () => {
+	return trycatch(db().select().from(schema.programs));
+};
+
+export const updateQnaStates = async (
+	states: (typeof schema.programs.$inferInsert)[],
+) => {
+	return trycatch(
+		db()
+			.insert(schema.programs)
+			.values(states)
+			.onConflictDoUpdate({
+				target: schema.programs.program,
+				set: {
+					program: sql`excluded.program`,
+					open: sql`excluded.open`,
+				},
+				setWhere: sql`${schema.programs.open} != excluded.open`,
+			}),
+	);
 };

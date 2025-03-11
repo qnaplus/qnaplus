@@ -1,0 +1,262 @@
+{
+	"id": "ac0c949f-3272-4281-bf91-fe69625da877",
+	"prevId": "ce81309f-1607-4c8a-bf2d-fda8efa735f7",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"public.answer_queue": {
+			"name": "answer_queue",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"answer_queue_id_questions_id_fk": {
+					"name": "answer_queue_id_questions_id_fk",
+					"tableFrom": "answer_queue",
+					"tableTo": "questions",
+					"columnsFrom": ["id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.failures": {
+			"name": "failures",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.metadata": {
+			"name": "metadata",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"currentSeason": {
+					"name": "currentSeason",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"oldestUnansweredQuestion": {
+					"name": "oldestUnansweredQuestion",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.programs": {
+			"name": "programs",
+			"schema": "",
+			"columns": {
+				"program": {
+					"name": "program",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"open": {
+					"name": "open",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.questions": {
+			"name": "questions",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"url": {
+					"name": "url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"program": {
+					"name": "program",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"season": {
+					"name": "season",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"author": {
+					"name": "author",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"question": {
+					"name": "question",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"questionRaw": {
+					"name": "questionRaw",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"answer": {
+					"name": "answer",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"answerRaw": {
+					"name": "answerRaw",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"askedTimestamp": {
+					"name": "askedTimestamp",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"askedTimestampMs": {
+					"name": "askedTimestampMs",
+					"type": "bigint",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"answeredTimestamp": {
+					"name": "answeredTimestamp",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "NULL"
+				},
+				"answeredTimestampMs": {
+					"name": "answeredTimestampMs",
+					"type": "bigint",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"answered": {
+					"name": "answered",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"tags": {
+					"name": "tags",
+					"type": "text[]",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.renotify_queue": {
+			"name": "renotify_queue",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"renotify_queue_id_questions_id_fk": {
+					"name": "renotify_queue_id_questions_id_fk",
+					"tableFrom": "renotify_queue",
+					"tableTo": "questions",
+					"columnsFrom": ["id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		}
+	},
+	"enums": {},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
+}

@@ -2,7 +2,7 @@
  <div align="center">
     <img src="./assets/qnaplus.png">
     <h1>qnaplus</h1>
-    <p>Quality of Life for the <a href="https://www.robotevents.com/V5RC/2024-2025/QA/">VEX Robotics Q&A</a>.
+    <p>Quality of Life service for the <a href="https://www.robotevents.com/V5RC/2024-2025/QA/">VEX Robotics Q&A</a>.
     </p>
     <a href="https://github.com/qnaplus/qnaplus/stargazers">
         <img src="https://img.shields.io/github/stars/qnaplus/qnaplus?color=577BB5&labelColor=1A1B26&style=for-the-badge">
@@ -26,9 +26,9 @@ qnaplus is a project with the purpose of improving the quality of life for the V
 - The `bot` subscribes to changes on the database, specifically listening for new answers.
 
 
-## Structure
+### Structure
 
-This project uses [Yarn Workspaces](https://yarnpkg.com/features/workspaces) and [Turborepo](https://turbo.build/repo/docs) to manage structure.
+This project uses [Yarn Workspaces](https://yarnpkg.com/features/workspaces) and [Turborepo](https://turbo.build/repo/docs) to manage structure and builds.
 
 - `packages`: Internal packages that are used by services.
   - `dotenv`: Type-safe library for accessing environment variables.

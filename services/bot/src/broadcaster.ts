@@ -1,8 +1,12 @@
 import { getenv } from "@qnaplus/dotenv";
 import {
 	type ChangeQuestion,
+	RealtimeHandler,
 	clearAnswerQueue,
-	onQuestionsChange,
+	onDatabaseUpdate,
+	onQnaStateChange,
+	onRenotify,
+	supabase,
 } from "@qnaplus/store";
 import { chunk, groupby, trycatch } from "@qnaplus/utils";
 import { container } from "@sapphire/framework";
@@ -12,13 +16,31 @@ import {
 	type NewsChannel,
 	channelMention,
 } from "discord.js";
-import type { Logger } from "pino";
-import { buildQuestionEmbed } from "./formatting";
+import { type Logger, P } from "pino";
+import { buildQnaStateEmbed, buildQuestionEmbed } from "./formatting";
 import type { PinoLoggerAdapter } from "./utils/logger_adapter";
 
 const channels = JSON.parse(getenv("BROADCASTER_CHANNELS"));
 
 const MAX_EMBEDS_PER_MESSAGE = 10;
+
+const getChannel = (program: string) => {
+	return trycatch<NewsChannel>(
+		(async () => {
+			const channelId = channels[program];
+			if (channelId === undefined) {
+				throw new Error(`No channel defined for ${program}.`);
+			}
+			const channel = await container.client.channels.fetch(channelId);
+			if (channel === null || channel.type !== ChannelType.GuildAnnouncement) {
+				throw new Error(
+					`Channel ${channelMention(channelId)} (${channelId}) is missing or is not an announcement channel.`,
+				);
+			}
+			return channel;
+		})(),
+	);
+};
 
 const broadcast = async (channel: NewsChannel, embeds: EmbedBuilder[]) => {
 	const message = await channel.send({ embeds });
@@ -106,6 +128,44 @@ export const handleOnChange = async (docs: ChangeQuestion[]) => {
 	logger.info("No answers for this update, skipping answer queue clear.");
 };
 
-export const startBroadcaster = (logger?: Logger) => {
-	onQuestionsChange(handleOnChange, logger);
+export const handleQnaStateChange = async (
+	program: string,
+	oldOpenState: boolean,
+	newOpenState: boolean,
+) => {
+	const logger = (container.logger as PinoLoggerAdapter).child({
+		label: "handleQnaStateChange",
+	});
+	const { ok, error, result: channel } = await getChannel(program);
+	if (!ok) {
+		logger.error(
+			{ error },
+			`An error occurred while fetching the channel for ${program}, exiting.`,
+		);
+		return;
+	}
+	const embed = buildQnaStateEmbed(program, oldOpenState, newOpenState);
+	const sent = await trycatch(broadcast(channel, [embed]));
+	if (!sent.ok) {
+		logger.error(
+			{ error },
+			`An error occurred while sending the state change for ${program}, exiting.`,
+		);
+		return;
+	}
+	logger.info(
+		`Successfully broadcasted state change from open: ${oldOpenState} to open: ${newOpenState} for ${program}.`,
+	);
+};
+
+export const startBroadcaster = (logger: Logger) => {
+	const realtime = new RealtimeHandler(supabase(), logger);
+	realtime.add((supabase) =>
+		onDatabaseUpdate(supabase, handleOnChange, logger),
+	);
+	realtime.add((supabase) => onRenotify(supabase, handleOnChange, logger));
+	realtime.add((supabase) =>
+		onQnaStateChange(supabase, handleQnaStateChange, logger),
+	);
+	return realtime.start();
 };

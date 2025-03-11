@@ -1,37 +1,10 @@
 import {
 	QnaplusChannels,
 	QnaplusEvents,
-	clearRenotifyQueue,
 	getRenotifyQueue,
 	supabase,
 } from "@qnaplus/store";
 import type { Logger } from "pino";
-
-export const onRenotifyQueueFlushAck = (_logger: Logger) => {
-	const logger = _logger.child({ label: "renotifyQueueAck" });
-	logger.info("Registering listener for RenotifyQueueFlushAck");
-
-	supabase()
-		.channel(QnaplusChannels.RenotifyQueue)
-		.on(
-			"broadcast",
-			{ event: QnaplusEvents.RenotifyQueueFlushAck },
-			async () => {
-				const { ok, error, result } = await clearRenotifyQueue();
-				if (!ok) {
-					logger.error(
-						{ error },
-						"An error occurred while clearing renotify queue.",
-					);
-					return;
-				}
-				logger.info(
-					`Successfully cleared ${result.length} questions from the renotify queue.`,
-				);
-			},
-		)
-		.subscribe();
-};
 
 export const doRenotifyUpdate = async (_logger: Logger) => {
 	const logger = _logger.child({ label: "doRenotifyUpdate" });
@@ -46,7 +19,7 @@ export const doRenotifyUpdate = async (_logger: Logger) => {
 	}
 
 	const broadcastResponse = await supabase()
-		.channel(QnaplusChannels.DbChanges)
+		.channel(QnaplusChannels.RenotifyQueue)
 		.send({
 			type: "broadcast",
 			event: QnaplusEvents.RenotifyQueueFlush,

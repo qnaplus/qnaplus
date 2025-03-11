@@ -1,6 +1,4 @@
-export const QnaplusBuckets = {
-	Data: "data",
-};
+export const QNAPLUS_BUCKET = "qnaplus";
 
 export const QnaplusEvents = {
 	RenotifyQueueFlush: "renotify_queue_flush",
@@ -10,7 +8,9 @@ export const QnaplusEvents = {
 };
 
 export const QnaplusChannels = {
+	DbUpdates: "db-updates",
 	DbChanges: "db-changes",
 	RenotifyQueue: "renotify-queue",
 	Precheck: "precheck",
+	ProgramStates: "program-states",
 };

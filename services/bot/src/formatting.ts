@@ -8,11 +8,13 @@ import { chunk } from "@qnaplus/utils";
 import { capitalizeFirstLetter } from "@sapphire/utilities";
 import {
 	type ColorResolvable,
+	Colors,
 	EmbedBuilder,
 	bold,
 	codeBlock,
 	hyperlink,
 } from "discord.js";
+import type { Logger } from "pino";
 
 const ProgramColorMap: Record<string, ColorResolvable> = {
 	V5RC: "#f54242",
@@ -86,4 +88,17 @@ export const buildQuestionEmbed = (question: ChangeQuestion) => {
 			((_: never) => {})(question);
 	}
 	return base;
+};
+
+export const buildQnaStateEmbed = (
+	program: string,
+	oldState: boolean,
+	newState: boolean,
+) => {
+	const opened = !oldState && newState;
+	const status = opened ? "opened" : "closed";
+	const message = `Q&A forum ${status} for ${program}`;
+	return new EmbedBuilder()
+		.setTitle(message)
+		.setColor(opened ? Colors.Green : Colors.DarkRed);
 };

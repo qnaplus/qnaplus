@@ -14,12 +14,12 @@
 		"check-types": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@qnaplus/dotenv": "*",
-		"pino": "^9.0.0",
+		"@qnaplus/dotenv": "1.0.0",
+		"pino": "^9.6.0",
 		"pino-loki": "^2.5.0"
 	},
 	"devDependencies": {
-		"@qnaplus/typescript-config": "*"
+		"@qnaplus/typescript-config": "1.0.0"
 	},
 	"exports": {
 		".": {
