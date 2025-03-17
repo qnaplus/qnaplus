@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@hono/arktype-validator": "^2.0.0",
+    "@qnaplus/utils": "workspace:1.0.0",
     "@scalar/hono-api-reference": "^0.5.175",
     "arktype": "^2.1.0",
     "drizzle-orm": "^0.40.0",
