@@ -6,7 +6,7 @@
 import type { RealtimeChannel, SupabaseClient } from "@supabase/supabase-js";
 import type { Logger } from "pino";
 
-import { REALTIME_SUBSCRIBE_STATES } from "@supabase/realtime-js";
+import { REALTIME_SUBSCRIBE_STATES } from "@supabase/supabase-js";
 
 export type Topic = string;
 

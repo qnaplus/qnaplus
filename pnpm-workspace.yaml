@@ -1,0 +1,13 @@
+packages:
+  - packages/*
+  - services/*
+catalog:
+  typescript: ^5.8.2
+  pino: ^9.6.0
+  pino-pretty: ^13.0.0
+  tsx: ^4.19.3
+onlyBuiltDependencies:
+  - '@biomejs/biome'
+  - esbuild
+  - sharp
+  - workerd
