@@ -18,7 +18,7 @@
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.750.0",
 		"@qnaplus/dotenv": "workspace:1.0.0",
-		"@qnaplus/scraper": "^2.0.3",
+		"@qnaplus/scraper": "catalog:",
 		"@qnaplus/utils": "workspace:1.0.0",
 		"@supabase/supabase-js": "^2.49.1",
 		"deep-equal": "^2.2.3",
@@ -28,7 +28,7 @@
 		"postgres": "^3.4.5"
 	},
 	"devDependencies": {
-		"@qnaplus/scraper-strategies": "^2.0.3",
+		"@qnaplus/scraper-strategies": "catalog:",
 		"@qnaplus/typescript-config": "workspace:1.0.0",
 		"@types/deep-equal": "^1.0.4",
 		"@types/diff": "^5.0.9",

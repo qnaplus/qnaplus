@@ -32,7 +32,7 @@
 	},
 	"devDependencies": {
 		"pino-pretty": "catalog:",
-		"@qnaplus/scraper": "^2.0.3"
+		"@qnaplus/scraper": "catalog:"
 	},
 	"volta": {
 		"extends": "../../package.json"

@@ -1,14 +1,11 @@
-import { drizzle } from "drizzle-orm/postgres-js";
+import { drizzle } from "drizzle-orm/d1";
 import { getContext } from "hono/context-storage";
-import postgres from "postgres";
-import * as schema from "./schema"
+import * as schema from "./schema";
 
-const pg = () => {
+export const db = () => {
     const ctx = getContext<{ Bindings: Env }>();
-    return postgres(ctx.env.DB_CONNECTION_URL);
-};
-
-export const db = () => drizzle({ schema, client: pg() });
+    return drizzle(ctx.env.DB, { schema });
+}
 
 export const selectSlimQuestion = () => {
     return db()

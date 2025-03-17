@@ -14,13 +14,13 @@
 		"check-types": "tsc --noEmit",
 		"clean": "rimraf dist .turbo",
 		"clean:modules": "rimraf node_modules",
-		"clean:full": "yarn clean && yarn clean:modules",
+		"clean:full": "pnpm clean && pnpm clean:modules",
 		"update_storage": "tsx scripts/update_storage.ts | pino-pretty"
 	},
 	"dependencies": {
 		"@qnaplus/logger": "workspace:1.0.0",
-		"@qnaplus/scraper": "^2.0.3",
-		"@qnaplus/scraper-strategies": "^2.0.3",
+		"@qnaplus/scraper": "catalog:",
+		"@qnaplus/scraper-strategies": "catalog:",
 		"@qnaplus/store": "workspace:1.0.0",
 		"@qnaplus/dotenv": "workspace:1.0.0",
 		"@qnaplus/utils": "workspace:1.0.0",

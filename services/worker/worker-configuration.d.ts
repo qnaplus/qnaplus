@@ -2,7 +2,7 @@
 
 interface Env {
 	ENVIRONMENT: "production" | "development";
-	DB_CONNECTION_URL: string;
 	qnaplus: R2Bucket;
+	DB: D1Database;
 	ASSETS: Fetcher;
 }

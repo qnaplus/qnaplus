@@ -2,7 +2,7 @@ FROM node:22.13.1-alpine3.21 AS base
 
 WORKDIR /app
 
-RUN yarn global add turbo@2.4.0
+RUN pnpm add -G turbo@2.4.0
 
 COPY . .
 
@@ -18,15 +18,15 @@ COPY --from=base /app/out/json/ .
 COPY --from=base /app/.env.vault .
 
 
-RUN yarn install --frozen-lockfile
+RUN pnpm i --frozen-lockfile
 
 COPY --from=base /app/out/full/ .
-RUN yarn turbo run build:production
+RUN pnpm turbo run build:production
 
 RUN find . -name node_modules -exec rm -rf {} +;
 
 ENV NODE_ENV=production
-RUN yarn install --production
+RUN pnpm install --prod
 
 # =======================================================
 
