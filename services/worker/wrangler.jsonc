@@ -30,6 +30,14 @@
       "bucket_name": "qnaplus"
     }
   ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "qnaplus",
+      "database_id": "prod.qnaplus",
+      "migrations_dir": "drizzle/migrations"
+    }
+  ],
   "routes": [
     {
       "pattern": "api.qnapl.us",
@@ -45,6 +53,14 @@
         {
           "binding": "qnaplus",
           "bucket_name": "qnaplus"
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "qnaplus_dev",
+          "database_id": "dev.qnaplus",
+          "migrations_dir": "drizzle/migrations"
         }
       ],
       "routes": [

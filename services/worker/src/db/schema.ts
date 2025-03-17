@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, integer, pgTable, text } from "drizzle-orm/pg-core";
+import { text, integer, sqliteTable } from "drizzle-orm/sqlite-core";
 
-export const questions = pgTable("questions", {
+export const questions = sqliteTable("questions", {
 	id: text().primaryKey(),
 	url: text().notNull(),
 	program: text().notNull(),
@@ -13,31 +13,31 @@ export const questions = pgTable("questions", {
 	answer: text(),
 	answerRaw: text(),
 	askedTimestamp: text().notNull(),
-	askedTimestampMs: bigint({ mode: "number" }).notNull(),
+	askedTimestampMs: integer({ mode: "number" }).notNull(),
 	answeredTimestamp: text().default(sql`NULL`),
-	answeredTimestampMs: bigint({ mode: "number" }),
-	answered: boolean().notNull(),
-	tags: text().array().notNull(),
+	answeredTimestampMs: integer({ mode: "number" }),
+	answered: integer({ mode: "boolean" }).notNull(),
+	tags: text({ mode: "json" }).$type<string[]>().notNull(),
 });
 
-export const metadata = pgTable("metadata", {
+export const metadata = sqliteTable("metadata", {
 	id: integer().primaryKey(),
 	currentSeason: text().notNull(),
 	oldestUnansweredQuestion: text().notNull(),
 });
 
-export const failures = pgTable("failures", {
+export const failures = sqliteTable("failures", {
 	id: text().primaryKey(),
 });
 
-export const renotify_queue = pgTable("renotify_queue", {
+export const renotify_queue = sqliteTable("renotify_queue", {
 	id: text()
 		.primaryKey()
 		.references(() => questions.id, { onDelete: "cascade" }),
 });
 
-export const answer_queue = pgTable("answer_queue", {
+export const answer_queue = sqliteTable("answer_queue", {
 	id: text()
 		.primaryKey()
-		.references(() => questions.id, { onDelete: "cascade" }),
+		.references(() => questions.id, { onDelete: "cascade" })
 });
