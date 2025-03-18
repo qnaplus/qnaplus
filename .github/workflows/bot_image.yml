@@ -23,6 +23,7 @@ on:
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
       - .gitignore
+      - .npmrc
       - docker-compose.yml
   pull_request:
     types: [opened, reopened, edited, synchronize]
