@@ -1,5 +1,0 @@
-{
-	"out": "drizzle",
-    "dialect": "sqlite",
-	"schema": "src/db/schema.ts"
-}
