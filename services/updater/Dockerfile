@@ -6,7 +6,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable
-RUN pnpm add -G turbo@2.4.0
+RUN pnpm add --global turbo@2.4.0
 
 WORKDIR /app
 COPY . .
