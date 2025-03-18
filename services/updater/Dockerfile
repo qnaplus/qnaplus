@@ -26,7 +26,7 @@ COPY --from=pruned /app/out/json/ .
 COPY --from=pruned /app/.env.vault .
 COPY --from=base /app/.npmrc .
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i
 
 COPY --from=pruned /app/out/full/ .
 RUN pnpm turbo run build:production
