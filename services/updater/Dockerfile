@@ -1,31 +1,36 @@
 FROM node:22.13.1-alpine3.21 AS base
 
-WORKDIR /app
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 
+RUN corepack enable
 RUN pnpm add -G turbo@2.4.0
 
+WORKDIR /app
 COPY . .
+
+# =======================================================
+
+FROM base as pruned
 
 RUN turbo prune @qnaplus/updater --docker
 
 # =======================================================
 
-FROM node:22.13.1-alpine3.21 AS build
+FROM base AS build
 
-WORKDIR /app
+COPY --from=pruned /app/out/json/ .
+COPY --from=pruned /app/.env.vault .
 
-COPY --from=base /app/out/json/ .
-COPY --from=base /app/.env.vault .
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i --frozen-lockfile
 
-RUN pnpm i --frozen-lockfile
-
-COPY --from=base /app/out/full/ .
+COPY --from=pruned /app/out/full/ .
 RUN pnpm turbo run build:production
 
 RUN find . -name node_modules -exec rm -rf {} +;
 
 ENV NODE_ENV=production
-RUN pnpm i --prod
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i --prod
 
 # =======================================================
 
