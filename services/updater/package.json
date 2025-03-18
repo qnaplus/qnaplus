@@ -24,7 +24,7 @@
 		"@qnaplus/store": "workspace:1.0.0",
 		"@qnaplus/dotenv": "workspace:1.0.0",
 		"@qnaplus/utils": "workspace:1.0.0",
-		"croner": "^8.0.2"
+		"croner": "catalog:"
 	},
 	"devDependencies": {
 		"@qnaplus/typescript-config": "workspace:1.0.0",

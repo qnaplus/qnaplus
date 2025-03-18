@@ -12,6 +12,9 @@ catalogs:
     '@qnaplus/scraper-strategies':
       specifier: ^3.0.0
       version: 3.0.0
+    croner:
+      specifier: ^8.0.2
+      version: 8.1.2
     pino:
       specifier: ^9.6.0
       version: 9.6.0
@@ -167,7 +170,7 @@ importers:
         specifier: ^3.16.2
         version: 3.18.2
       croner:
-        specifier: ^8.0.2
+        specifier: 'catalog:'
         version: 8.1.2
       discord.js:
         specifier: 14.x
@@ -204,7 +207,7 @@ importers:
         specifier: workspace:1.0.0
         version: link:../../packages/utils
       croner:
-        specifier: ^8.0.2
+        specifier: 'catalog:'
         version: 8.1.2
     devDependencies:
       '@qnaplus/typescript-config':

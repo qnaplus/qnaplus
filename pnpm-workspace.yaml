@@ -8,6 +8,7 @@ catalog:
   tsx: ^4.19.3
   '@qnaplus/scraper': ^3.0.0
   '@qnaplus/scraper-strategies': ^3.0.0
+  croner: ^8.0.2
 onlyBuiltDependencies:
   - '@biomejs/biome'
   - canvas

@@ -1,12 +1,7 @@
 import { getenv } from "@qnaplus/dotenv";
 import {
 	type ChangeQuestion,
-	RealtimeHandler,
-	clearAnswerQueue,
-	onDatabaseUpdate,
-	onQnaStateChange,
-	onRenotify,
-	supabase,
+	clearAnswerQueue
 } from "@qnaplus/store";
 import { chunk, groupby, trycatch } from "@qnaplus/utils";
 import { container } from "@sapphire/framework";
@@ -16,9 +11,10 @@ import {
 	type NewsChannel,
 	channelMention,
 } from "discord.js";
-import { type Logger, P } from "pino";
+import type { Logger } from "pino";
 import { buildQnaStateEmbed, buildQuestionEmbed } from "./formatting";
 import type { PinoLoggerAdapter } from "./utils/logger_adapter";
+import Cron from "croner";
 
 const channels = JSON.parse(getenv("BROADCASTER_CHANNELS"));
 
@@ -62,15 +58,11 @@ const handleProgramBroadcast = async (
 		logger.warn(`No channel defined for ${program}, skipping broadcast.`);
 		return;
 	}
-	const {
-		ok,
-		error,
-		result: channel,
-	} = await trycatch(container.client.channels.fetch(channelId));
+	const { ok, error, result: channel } = await getChannel(program);
 	if (!ok) {
 		logger.error(
 			{ error },
-			`An error occurred while fetching the channel with id ${channelId}, skipping broadcast for ${program}.`,
+			`An error occurred while fetching the channel for ${program}, exiting.`,
 		);
 		return;
 	}
@@ -158,14 +150,8 @@ export const handleQnaStateChange = async (
 	);
 };
 
-export const startBroadcaster = (logger: Logger) => {
-	const realtime = new RealtimeHandler(supabase(), logger);
-	realtime.add((supabase) =>
-		onDatabaseUpdate(supabase, handleOnChange, logger),
-	);
-	realtime.add((supabase) => onRenotify(supabase, handleOnChange, logger));
-	realtime.add((supabase) =>
-		onQnaStateChange(supabase, handleQnaStateChange, logger),
-	);
-	return realtime.start();
+export const start = (logger: Logger) => {
+	Cron(getenv("DATABASE_UPDATE_INTERVAL"), async () => {
+		// TODO: pull events from event_queue
+	});
 };

@@ -3,13 +3,13 @@ import { type Change, diffSentences } from "diff";
 import type { Logger } from "pino";
 import { PayloadQueue, type UpdatePayload } from "./payload_queue";
 
-const CHANGE_EVENTS = ["answered", "answer_edited"] as const;
+export const EVENTS = ["answered", "answer_edited", "replay"] as const;
 
-export type ChangeEvent = (typeof CHANGE_EVENTS)[number];
+export type Event = (typeof EVENTS)[number];
 export type ChangeCondition<T> = (newItem: T, oldItem: Partial<T>) => boolean;
 export type ChangeHandler<T, U> = (newItem: T, oldItem: Partial<T>) => U;
 
-export type ChangeQuestion = AnsweredQuestion | AnswerEditedQuestion;
+export type ChangeQuestion = AnsweredQuestion | AnswerEditedQuestion | ReplayQuestion;
 
 export interface AnsweredQuestion extends Question {
 	changeType: "answered";
@@ -20,9 +20,12 @@ export interface AnswerEditedQuestion extends Question {
 	diff: Change[];
 }
 
+export interface ReplayQuestion extends Question {
+	changeType: "replay";
+}
+
 type ChangeMap<T> = {
-	[P in ChangeEvent]: {
-		matches: ChangeCondition<T>;
+	[P in Event]: {
 		format: ChangeHandler<T, ChangeTypeMap[P]>;
 	};
 };
@@ -30,25 +33,21 @@ type ChangeMap<T> = {
 export type ChangeTypeMap = {
 	answered: AnsweredQuestion;
 	answer_edited: AnswerEditedQuestion;
+	replay: ReplayQuestion;
 };
 
 const CHANGE_MAP: ChangeMap<Question> = {
 	answered: {
-		matches(newItem, oldItem) {
-			return oldItem.answered === false && newItem.answered;
-		},
 		format(newItem, _) {
 			return { ...newItem, changeType: "answered" };
 		},
 	},
-	answer_edited: {
-		matches(newItem, oldItem) {
-			return (
-				Boolean(oldItem.answer) &&
-				Boolean(newItem.answer) &&
-				oldItem.answer !== newItem.answer
-			);
+	replay: {
+		format(newItem, _) {
+			return { ...newItem, changeType: "replay" };
 		},
+	},
+	answer_edited: {
 		format(newItem, oldItem) {
 			// based on the above condition, we can safely use non-null assertion
 			// biome-ignore lint: style/noNonNullAssertion
@@ -61,10 +60,8 @@ const CHANGE_MAP: ChangeMap<Question> = {
 export const classifyChanges = (items: UpdatePayload<Question>[]) => {
 	const changes: ChangeQuestion[] = [];
 	for (const { old: oldQuestion, new: newQuestion } of items) {
-		for (const event of CHANGE_EVENTS) {
-			if (CHANGE_MAP[event].matches(newQuestion, oldQuestion)) {
-				changes.push(CHANGE_MAP[event].format(newQuestion, oldQuestion));
-			}
+		for (const event of EVENTS) {
+			changes.push(CHANGE_MAP[event].format(newQuestion, oldQuestion));
 		}
 	}
 	return changes;

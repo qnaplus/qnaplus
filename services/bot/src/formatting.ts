@@ -1,8 +1,8 @@
 import { getenv } from "@qnaplus/dotenv";
 import type {
-	ChangeEvent,
+	Event,
 	ChangeQuestion,
-	ChangeTypeMap,
+	ChangeTypeMap
 } from "@qnaplus/store";
 import { chunk } from "@qnaplus/utils";
 import { capitalizeFirstLetter } from "@sapphire/utilities";
@@ -14,7 +14,6 @@ import {
 	codeBlock,
 	hyperlink,
 } from "discord.js";
-import type { Logger } from "pino";
 
 const ProgramColorMap: Record<string, ColorResolvable> = {
 	V5RC: "#f54242",
@@ -38,11 +37,16 @@ const baseEmbedDescription = ({
 };
 
 type ChangeFormatMap = {
-	[P in ChangeEvent]: (embed: EmbedBuilder, question: ChangeTypeMap[P]) => void;
+	[P in Event]: (embed: EmbedBuilder, question: ChangeTypeMap[P]) => void;
 };
 
 const embedFormatter: ChangeFormatMap = {
 	answered(embed, q) {
+		embed
+			.setTitle(`New ${capitalizeFirstLetter(q.program)} Q&A response`)
+			.setDescription(baseEmbedDescription(q));
+	},
+	replay(embed, q) {
 		embed
 			.setTitle(`New ${capitalizeFirstLetter(q.program)} Q&A response`)
 			.setDescription(baseEmbedDescription(q));
@@ -84,6 +88,9 @@ export const buildQuestionEmbed = (question: ChangeQuestion) => {
 		case "answered":
 			embedFormatter.answered(base, question);
 			break;
+			case "replay":
+				embedFormatter.replay(base, question);
+				break;
 		default:
 			((_: never) => {})(question);
 	}

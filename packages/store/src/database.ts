@@ -3,7 +3,7 @@ import type { Question } from "@qnaplus/scraper";
 import { lazy, trycatch } from "@qnaplus/utils";
 import { createClient } from "@supabase/supabase-js";
 import { and, eq, gte, inArray, or, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
+import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
@@ -22,13 +22,13 @@ export const disconnectPgClient = async () => {
 
 export const METADATA_ROW_ID = 0;
 
-export const testConnection = async () => {
-	return trycatch(db().execute(sql`select 1`));
+export const testConnection = async (d: PostgresJsDatabase<typeof schema> = db()) => {
+	return trycatch(d.execute(sql`select 1`));
 };
 
-export const getQuestion = async (id: Question["id"]) => {
+export const getQuestion = async (id: Question["id"], d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(
-		db().query.questions.findFirst({ where: eq(schema.questions.id, id) }),
+		d.query.questions.findFirst({ where: eq(schema.questions.id, id) }),
 	);
 };
 
@@ -36,9 +36,9 @@ export const getAllQuestions = async () => {
 	return trycatch(db().select().from(schema.questions));
 };
 
-export const getAnsweredQuestionsNewerThanDate = async (ms: number) => {
+export const getAnsweredQuestionsNewerThanDate = async (ms: number, d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(
-		db()
+		d
 			.select()
 			.from(schema.questions)
 			.where(
@@ -50,138 +50,90 @@ export const getAnsweredQuestionsNewerThanDate = async (ms: number) => {
 	);
 };
 
-export const findNewAnsweredQuestions = async (questions: Question[]) => {
-	const ids = questions.filter((q) => q.answered).map((q) => q.id);
-	return trycatch(
-		db()
-			.select()
-			.from(schema.questions)
-			.where(
-				and(
-					eq(schema.questions.answered, false),
-					inArray(schema.questions.id, ids),
-				),
-			),
-	);
+export const insertQuestions = async (data: Question[], d: PostgresJsDatabase<typeof schema> = db()) => {
+	return trycatch(d.insert(schema.questions).values(data));
 };
 
-export const insertQuestions = async (data: Question[]) => {
-	return trycatch(db().insert(schema.questions).values(data));
+const EXCLUDED_QUESTION = {
+	id: sql`excluded.id`,
+	url: sql`excluded.url`,
+	author: sql`excluded.author`,
+	program: sql`excluded.program`,
+	title: sql`excluded.title`,
+	question: sql`excluded.question`,
+	questionRaw: sql`excluded."questionRaw"`,
+	answer: sql`excluded.answer`,
+	answerRaw: sql`excluded."answerRaw"`,
+	season: sql`excluded.season`,
+	askedTimestamp: sql`excluded."askedTimestamp"`,
+	askedTimestampMs: sql`excluded."askedTimestampMs"`,
+	answeredTimestamp: sql`excluded."answeredTimestamp"`,
+	answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
+	answered: sql`excluded.answered`,
+	tags: sql`excluded.tags`,
 };
 
-export const upsertQuestions = async (data: Question[]) => {
+const QUESTION_UPDATED_QUERY = or(
+	sql`${schema.questions.question} != excluded.question`,
+	sql`${schema.questions.answer} IS DISTINCT FROM excluded.answer`,
+	sql`${schema.questions.answered} != excluded.answered`,
+);
+
+export const updateQuestions = async (data: Question[], d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(
-		db()
+		d
 			.insert(schema.questions)
 			.values(data)
 			.onConflictDoUpdate({
 				target: schema.questions.id,
-				set: {
-					id: sql`excluded.id`,
-					url: sql`excluded.url`,
-					author: sql`excluded.author`,
-					program: sql`excluded.program`,
-					title: sql`excluded.title`,
-					question: sql`excluded.question`,
-					questionRaw: sql`excluded."questionRaw"`,
-					answer: sql`excluded.answer`,
-					answerRaw: sql`excluded."answerRaw"`,
-					season: sql`excluded.season`,
-					askedTimestamp: sql`excluded."askedTimestamp"`,
-					askedTimestampMs: sql`excluded."askedTimestampMs"`,
-					answeredTimestamp: sql`excluded."answeredTimestamp"`,
-					answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
-					answered: sql`excluded.answered`,
-					tags: sql`excluded.tags`,
-				},
-				setWhere: or(
-					sql`${schema.questions.question} != excluded.question`,
-					sql`${schema.questions.answer} != excluded.answer`,
-					sql`${schema.questions.answered} != excluded.answered`,
-				),
-			}),
+				set: EXCLUDED_QUESTION,
+				setWhere: QUESTION_UPDATED_QUERY,
+			})
+			.returning()
 	);
 };
 
-export const getMetadata = async () => {
+export const getMetadata = async (d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(
-		db().query.metadata.findFirst({
+		d.query.metadata.findFirst({
 			where: eq(schema.metadata.id, METADATA_ROW_ID),
 		}),
 	);
 };
 
-export const saveMetadata = async (
-	data: typeof schema.metadata.$inferInsert,
+export const updateMetadata = async (
+	data: Omit<typeof schema.metadata.$inferInsert, "id">,
+	d: PostgresJsDatabase<typeof schema> = db()
 ) => {
 	return trycatch(
-		db()
-			.insert(schema.metadata)
-			.values({ ...data, id: METADATA_ROW_ID })
-			.onConflictDoUpdate({
-				target: schema.metadata.id,
-				set: {
-					id: METADATA_ROW_ID,
-					currentSeason: data.currentSeason,
-					oldestUnansweredQuestion: data.oldestUnansweredQuestion,
-				},
-			}),
+		d
+			.update(schema.metadata)
+			.set({ ...data })
+			.where(eq(schema.metadata.id, METADATA_ROW_ID))
 	);
 };
 
-export const getFailures = async () => {
-	return trycatch(db().select().from(schema.failures));
+export const getFailures = async (d: PostgresJsDatabase<typeof schema> = db()) => {
+	return trycatch(d.select().from(schema.failures));
 };
 
 export const updateFailures = async (
 	data: (typeof schema.failures.$inferInsert)[],
+	d: PostgresJsDatabase<typeof schema> = db()
 ) => {
 	return trycatch(
-		db()
+		d
 			.insert(schema.failures)
 			.values(data)
-			.onConflictDoUpdate({
-				target: schema.failures.id,
-				set: {
-					id: sql`excluded.id`,
-				},
-			}),
+			.onConflictDoNothing()
 	);
 };
 
-export const doFailureQuestionUpdate = async (questions: Question[]) => {
+export const doFailureQuestionUpdate = async (questions: Question[], d: PostgresJsDatabase<typeof schema> = db()) => {
 	const oldFailures = questions.map((q) => q.id);
 	return trycatch(
-		db().transaction(async (tx) => {
-			await tx
-				.insert(schema.questions)
-				.values(questions)
-				.onConflictDoUpdate({
-					target: schema.questions.id,
-					set: {
-						id: sql`excluded.id`,
-						url: sql`excluded.url`,
-						author: sql`excluded.author`,
-						program: sql`excluded.program`,
-						title: sql`excluded.title`,
-						question: sql`excluded.question`,
-						questionRaw: sql`excluded."questionRaw"`,
-						answer: sql`excluded.answer`,
-						answerRaw: sql`excluded."answerRaw"`,
-						season: sql`excluded.season`,
-						askedTimestamp: sql`excluded."askedTimestamp"`,
-						askedTimestampMs: sql`excluded."askedTimestampMs"`,
-						answeredTimestamp: sql`excluded."answeredTimestamp"`,
-						answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
-						answered: sql`excluded.answered`,
-						tags: sql`excluded.tags`,
-					},
-					setWhere: or(
-						sql`${schema.questions.question} != excluded.question`,
-						sql`${schema.questions.answer} != excluded.answer`,
-						sql`${schema.questions.answered} != excluded.answered`,
-					),
-				});
+		d.transaction(async (tx) => {
+			await updateQuestions(questions, tx);
 			await tx
 				.delete(schema.failures)
 				.where(inArray(schema.failures.id, oldFailures));
@@ -189,127 +141,82 @@ export const doFailureQuestionUpdate = async (questions: Question[]) => {
 	);
 };
 
-export const getRenotifyQueue = async () => {
+export const getRenotifyQueue = async (d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(
-		db()
+		d
 			.select({ question: schema.questions })
-			.from(schema.renotify_queue)
+			.from(schema.event_queue)
 			.innerJoin(
 				schema.questions,
-				eq(schema.renotify_queue.id, schema.questions.id),
+				eq(schema.event_queue.event, "replay"),
 			),
 	);
 };
 
-export const clearRenotifyQueue = async () => {
-	return trycatch(db().delete(schema.renotify_queue));
+export const clearRenotifyQueue = async (d: PostgresJsDatabase<typeof schema> = db()) => {
+	return trycatch(d.delete(schema.event_queue).where(eq(schema.event_queue.event, "replay")));
 };
 
-export const insertRenotifyQueue = async (ids: { id: string }[]) => {
+export const insertRenotifyQueue = async (ids: typeof schema.event_queue.$inferInsert[], d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(
-		db()
-			.insert(schema.renotify_queue)
+		d
+			.insert(schema.event_queue)
 			.values(ids)
-			.onConflictDoUpdate({
-				target: schema.renotify_queue.id,
-				set: {
-					id: sql`excluded.id`,
-				},
-			}),
+			.onConflictDoNothing()
 	);
 };
 
-export const getAnswerQueue = async () => {
+export const getAnswerQueue = async (d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(
-		db()
+		d
 			.select({ question: schema.questions })
-			.from(schema.answer_queue)
+			.from(schema.event_queue)
 			.innerJoin(
 				schema.questions,
-				eq(schema.answer_queue.id, schema.questions.id),
+				or(
+					eq(schema.event_queue.event, "answered"),
+					eq(schema.event_queue.event, "answer_edited")
+				)
 			),
 	);
 };
 
-export const doDatabaseAnswerQueueUpdate = async (
-	questions: Question[],
-	answeredIds: (typeof schema.answer_queue.$inferInsert)[],
-) => {
+export const clearAnswerQueue = async (d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(
-		db().transaction(async (tx) => {
-			if (questions.length !== 0) {
-				await tx
-					.insert(schema.questions)
-					.values(questions)
-					.onConflictDoUpdate({
-						target: schema.questions.id,
-						set: {
-							id: sql`excluded.id`,
-							url: sql`excluded.url`,
-							author: sql`excluded.author`,
-							program: sql`excluded.program`,
-							title: sql`excluded.title`,
-							question: sql`excluded.question`,
-							questionRaw: sql`excluded."questionRaw"`,
-							answer: sql`excluded.answer`,
-							answerRaw: sql`excluded."answerRaw"`,
-							season: sql`excluded.season`,
-							askedTimestamp: sql`excluded."askedTimestamp"`,
-							askedTimestampMs: sql`excluded."askedTimestampMs"`,
-							answeredTimestamp: sql`excluded."answeredTimestamp"`,
-							answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
-							answered: sql`excluded.answered`,
-							tags: sql`excluded.tags`,
-						},
-						setWhere: or(
-							sql`${schema.questions.question} != excluded.question`,
-							sql`${schema.questions.answer} != excluded.answer`,
-							sql`${schema.questions.answered} != excluded.answered`,
-						),
-					});
-			}
-			if (answeredIds.length !== 0) {
-				await tx
-					.insert(schema.answer_queue)
-					.values(answeredIds)
-					.onConflictDoUpdate({
-						target: schema.answer_queue.id,
-						set: {
-							id: sql`excluded.id`,
-						},
-					});
-			}
-		}),
+		d
+			.delete(schema.event_queue)
+			.where(
+				or(
+					eq(schema.event_queue.event, "answered"),
+					eq(schema.event_queue.event, "answer_edited")
+				)
+			)
 	);
 };
 
-export const clearAnswerQueue = async () => {
-	return trycatch(db().delete(schema.answer_queue));
-};
-
-export const getAllPrograms = async () => {
+export const getAllPrograms = async (d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(
-		db()
+		d
 			.selectDistinct({ program: schema.questions.program })
 			.from(schema.questions),
 	);
 };
 
-export const getQnaStates = async () => {
-	return trycatch(db().select().from(schema.programs));
+export const getQnaStates = async (d: PostgresJsDatabase<typeof schema> = db()) => {
+	return trycatch(d.select().from(schema.programs));
 };
 
 export const updateQnaStates = async (
 	states: (typeof schema.programs.$inferInsert)[],
+	d: PostgresJsDatabase<typeof schema> = db()
 ) => {
 	return trycatch(
-		db()
+		d
 			.insert(schema.programs)
 			.values(states)
 			.onConflictDoUpdate({
 				target: schema.programs.program,
 				set: {
-					program: sql`excluded.program`,
 					open: sql`excluded.open`,
 				},
 				setWhere: sql`${schema.programs.open} != excluded.open`,
