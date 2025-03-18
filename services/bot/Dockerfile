@@ -15,7 +15,7 @@ COPY . .
 
 FROM base AS pruned
 
-RUN turbo prune @qnaplus/updater --docker
+RUN turbo prune @qnaplus/bot --docker
 
 # =======================================================
 
