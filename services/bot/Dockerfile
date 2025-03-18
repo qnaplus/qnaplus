@@ -13,7 +13,7 @@ COPY . .
 
 # =======================================================
 
-FROM base as pruned
+FROM base AS pruned
 
 RUN turbo prune @qnaplus/updater --docker
 
@@ -25,7 +25,7 @@ WORKDIR /app
 
 COPY --from=pruned /app/out/json/ .
 COPY --from=pruned /app/.env.vault .
-
+COPY --from=base /app/.npmrc .
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i --frozen-lockfile
 
