@@ -1,8 +1,9 @@
 import { getenv } from "@qnaplus/dotenv";
-import { Question } from "@qnaplus/scraper";
 import {
     type Event,
-    type ForumState,
+    type EventQueueItem,
+    EventQueueItemMap,
+    type PayloadMap,
     getEventQueue
 } from "@qnaplus/store";
 import { chunk, groupby, trycatch } from "@qnaplus/utils";
@@ -122,7 +123,7 @@ const onReplay = async (payload: PayloadMap["replay"][]) => {
 }
 
 const onForumChange = async (payload: PayloadMap["forum_change"][]) => {
-    
+
 }
 
 export const handleQnaStateChange = async (
@@ -155,28 +156,15 @@ export const handleQnaStateChange = async (
     );
 };
 
-export type PayloadMap = {
-    answered: {
-        question: Question;
-    };
-    answer_edited: {
-        before: Question;
-        after: Question;
-    };
-    replay: {
-        question: Question;
-    };
-    forum_change: {
-        before: ForumState;
-        after: ForumState;
-    };
+type GroupingStrategyMap = {
+    [K in Event]: (payload: PayloadMap[K]) => string;
 }
 
-const EventMap = {
-    answered: (payload: PayloadMap["answered"][]) => onAnswered(payload),
-    answer_edited: (payload: PayloadMap["answer_edited"][]) => onAnswerEdited(payload),
-    replay: (payload: PayloadMap["replay"][]) => onReplay(payload),
-    forum_change: (payload: PayloadMap["forum_change"][]) => onForumChange(payload),
+const BroadcastGroupingKey: GroupingStrategyMap = {
+    answered: p => p.question.program,
+    answer_edited: p => p.after.program,
+    replay: p => p.question.program,
+    forum_change: p => p.after.program,
 }
 
 const processEventQueue = async (logger: Logger) => {
@@ -185,10 +173,14 @@ const processEventQueue = async (logger: Logger) => {
         logger.error({ error: events.error }, "An error occurred while getting the event queue, retrying on next run.");
         return;
     }
-    const groups = groupby(events.result, e => e.event);
+    const groups = groupby(events.result as EventQueueItem[], e => e.event);
     for (const [event, events] of Object.entries(groups)) {
-        const payloads = events.map(e => e.payload);
-        for (const [] of Object.entries(groupby(payloads, p => p)))
+        const pk = BroadcastGroupingKey[event as Event](events[0].payload);
+        const programs = groupby(events, pk)
+        //     for (const entry of Object.entries(strategy(payloads))) {
+
+        //     }
+        // }
     }
 }
 

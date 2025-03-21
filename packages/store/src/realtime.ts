@@ -1,16 +1,7 @@
-import type {
-	Question
-} from "@qnaplus/scraper";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getTableName } from "drizzle-orm";
 import type { Logger } from "pino";
-import { clearRenotifyQueue, supabase } from "./database";
-import { type UpdateCallback, createUpdateQueue } from "./event_queue";
-import type {
-	RenotifyPayload,
-	UpdatePayload
-} from "./payload_queue";
-import { QnaplusChannels, QnaplusEvents } from "./resources";
+import { QnaplusChannels } from "./resources";
 import { forum_state } from "./schema";
 
 export const ACK_CONFIG = {
@@ -19,37 +10,37 @@ export const ACK_CONFIG = {
 	},
 };
 
-export const  onRenotify = (
-	client: SupabaseClient,
-	callback: UpdateCallback,
-	logger?: Logger,
-) => {
-	const queue = createUpdateQueue(callback, logger);
-	return client
-		.channel(QnaplusChannels.RenotifyQueue)
-		.on<RenotifyPayload>(
-			"broadcast",
-			{ event: QnaplusEvents.RenotifyQueueFlush },
-			async ({ payload }) => {
-				const { questions } = payload;
-				const items = questions.map<UpdatePayload<Question>>((p) => ({
-					old: { ...p, answered: false },
-					new: p,
-				}));
-				queue.push(...items);
-				const result = await supabase()
-					.channel(QnaplusChannels.RenotifyQueue)
-					.send({
-						type: "broadcast",
-						event: QnaplusEvents.RenotifyQueueFlushAck,
-						payload: {},
-					});
-				logger?.info(
-					`Sent renotify queue acknowledgement with result '${result}'`,
-				);
-			},
-		);
-};
+// export const  onRenotify = (
+// 	client: SupabaseClient,
+// 	callback: UpdateCallback,
+// 	logger?: Logger,
+// ) => {
+	// const queue = createUpdateQueue(callback, logger);
+	// return client
+	// 	.channel(QnaplusChannels.RenotifyQueue)
+	// 	.on<RenotifyPayload>(
+	// 		"broadcast",
+	// 		{ event: QnaplusEvents.RenotifyQueueFlush },
+	// 		async ({ payload }) => {
+	// 			const { questions } = payload;
+	// 			const items = questions.map<UpdatePayload<Question>>((p) => ({
+	// 				old: { ...p, answered: false },
+	// 				new: p,
+	// 			}));
+	// 			queue.push(...items);
+	// 			const result = await supabase()
+	// 				.channel(QnaplusChannels.RenotifyQueue)
+	// 				.send({
+	// 					type: "broadcast",
+	// 					event: QnaplusEvents.RenotifyQueueFlushAck,
+	// 					payload: {},
+	// 				});
+	// 			logger?.info(
+	// 				`Sent renotify queue acknowledgement with result '${result}'`,
+	// 			);
+	// 		},
+	// 	);
+// };
 
 export type QnaStateChangeCallback = (
 	program: string,

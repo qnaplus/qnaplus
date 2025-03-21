@@ -14,7 +14,7 @@ import {
     codeBlock,
     hyperlink,
 } from "discord.js";
-import type { PayloadMap } from "./broadcaster";
+import type { PayloadMap } from "@qnaplus/store";
 
 const colors: Record<string, ColorResolvable> = {
     V5RC: "#f54242",
@@ -38,7 +38,7 @@ const baseEmbedDescription = ({
 };
 
 type ChangeFormatMap = {
-    [P in Event]: (data: PayloadMap[P]) => EmbedBuilder;
+    [K in Event]: (data: PayloadMap[K]) => EmbedBuilder;
 };
 
 const formats: ChangeFormatMap = {
