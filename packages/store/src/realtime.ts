@@ -11,7 +11,7 @@ import type {
 	UpdatePayload
 } from "./payload_queue";
 import { QnaplusChannels, QnaplusEvents } from "./resources";
-import { programs } from "./schema";
+import { forum_state } from "./schema";
 
 export const ACK_CONFIG = {
 	config: {
@@ -65,12 +65,12 @@ export const onQnaStateChange = (
 ) => {
 	return supabase
 		.channel(QnaplusChannels.ProgramStates)
-		.on<typeof programs.$inferSelect>(
+		.on<typeof forum_state.$inferSelect>(
 			"postgres_changes",
 			{
 				event: "UPDATE",
 				schema: "public",
-				table: getTableName(programs),
+				table: getTableName(forum_state),
 			},
 			(payload) => {
 				if (payload.old.open === undefined) {

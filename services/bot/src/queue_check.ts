@@ -5,7 +5,7 @@ import {
 	testConnection,
 } from "@qnaplus/store";
 import { trycatch } from "@qnaplus/utils";
-import { handleOnChange } from "./broadcaster";
+import { onAnswered } from "./broadcaster";
 import type { PinoLoggerAdapter } from "./utils/logger_adapter";
 
 export const doQueueCheck = async (_logger: PinoLoggerAdapter) => {
@@ -40,7 +40,7 @@ export const doQueueCheck = async (_logger: PinoLoggerAdapter) => {
 		changeType: "answered",
 	}));
 	const { ok: handleOk, error: handleError } = await trycatch(
-		handleOnChange(changeQuestions),
+		onAnswered(changeQuestions),
 	);
 	if (!handleOk) {
 		logger.error(

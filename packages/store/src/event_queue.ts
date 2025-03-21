@@ -3,7 +3,7 @@ import { type Change, diffSentences } from "diff";
 import type { Logger } from "pino";
 import { PayloadQueue, type UpdatePayload } from "./payload_queue";
 
-export const EVENTS = ["answered", "answer_edited", "replay"] as const;
+export const EVENTS = ["answered", "answer_edited", "replay", "forum_change"] as const;
 
 export type Event = (typeof EVENTS)[number];
 export type ChangeCondition<T> = (newItem: T, oldItem: Partial<T>) => boolean;

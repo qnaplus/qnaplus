@@ -172,6 +172,9 @@ importers:
       croner:
         specifier: 'catalog:'
         version: 8.1.2
+      diff:
+        specifier: ^5.1.0
+        version: 5.2.0
       discord.js:
         specifier: 14.x
         version: 14.18.0
@@ -182,6 +185,9 @@ importers:
       '@qnaplus/scraper':
         specifier: 'catalog:'
         version: 3.0.0
+      '@types/diff':
+        specifier: ^5.0.9
+        version: 5.2.3
       pino-pretty:
         specifier: 'catalog:'
         version: 13.0.0

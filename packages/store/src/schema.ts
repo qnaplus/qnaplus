@@ -1,44 +1,44 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, integer, pgTable, text } from "drizzle-orm/pg-core";
+import { bigint, boolean, integer, jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
 import { EVENTS } from "./event_queue";
-import { jsonb } from "drizzle-orm/pg-core";
+import type { EventQueuePayload } from "./schema_types";
 
 export const questions = pgTable("questions", {
-	id: text().primaryKey(),
-	url: text().notNull(),
-	program: text().notNull(),
-	season: text().notNull(),
-	author: text().notNull(),
-	title: text().notNull(),
-	question: text().notNull(),
-	questionRaw: text().notNull(),
-	answer: text(),
-	answerRaw: text(),
-	askedTimestamp: text().notNull(),
-	askedTimestampMs: bigint({ mode: "number" }).notNull(),
-	answeredTimestamp: text().default(sql`NULL`),
-	answeredTimestampMs: bigint({ mode: "number" }),
-	answered: boolean().notNull(),
-	tags: text().array().notNull(),
+    id: text().primaryKey(),
+    url: text().notNull(),
+    program: text().notNull(),
+    season: text().notNull(),
+    author: text().notNull(),
+    title: text().notNull(),
+    question: text().notNull(),
+    questionRaw: text().notNull(),
+    answer: text(),
+    answerRaw: text(),
+    askedTimestamp: text().notNull(),
+    askedTimestampMs: bigint({ mode: "number" }).notNull(),
+    answeredTimestamp: text().default(sql`NULL`),
+    answeredTimestampMs: bigint({ mode: "number" }),
+    answered: boolean().notNull(),
+    tags: text().array().notNull(),
 }).enableRLS();
 
 export const metadata = pgTable("metadata", {
-	id: integer().primaryKey(),
-	currentSeason: text().notNull(),
-	oldestUnansweredQuestion: text().notNull(),
+    id: integer().primaryKey(),
+    currentSeason: text().notNull(),
+    oldestUnansweredQuestion: text().notNull(),
 }).enableRLS();
 
 export const failures = pgTable("failures", {
-	id: text().primaryKey(),
+    id: text().primaryKey(),
 }).enableRLS();
 
 export const event_queue = pgTable("event_queue", {
-	event: text({ enum: EVENTS }).primaryKey(),
-	before: jsonb().notNull(),
-	after: jsonb().notNull()
-});
+    id: uuid().defaultRandom().primaryKey(),
+    event: text({ enum: EVENTS }).notNull(),
+    payload: jsonb().$type<EventQueuePayload>().notNull(),
+}).enableRLS();
 
-export const programs = pgTable("programs", {
-	program: text().primaryKey(),
-	open: boolean().notNull().default(true),
+export const forum_state = pgTable("forum_state", {
+    program: text().primaryKey(),
+    open: boolean().notNull().default(true),
 }).enableRLS();
