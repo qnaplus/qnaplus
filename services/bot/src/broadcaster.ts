@@ -156,32 +156,22 @@ export const handleQnaStateChange = async (
     );
 };
 
-type GroupingStrategyMap = {
-    [K in Event]: (payload: PayloadMap[K]) => string;
-}
-
-const BroadcastGroupingKey: GroupingStrategyMap = {
-    answered: p => p.question.program,
-    answer_edited: p => p.after.program,
-    replay: p => p.question.program,
-    forum_change: p => p.after.program,
-}
-
 const processEventQueue = async (logger: Logger) => {
     const events = await getEventQueue();
     if (!events.ok) {
         logger.error({ error: events.error }, "An error occurred while getting the event queue, retrying on next run.");
         return;
     }
-    const groups = groupby(events.result as EventQueueItem[], e => e.event);
-    for (const [event, events] of Object.entries(groups)) {
-        const pk = BroadcastGroupingKey[event as Event](events[0].payload);
-        const programs = groupby(events, pk)
-        //     for (const entry of Object.entries(strategy(payloads))) {
+    const [{ queue }] = events.result;
+    // const groups = groupby(events.result as EventQueueItem[], e => e.event);
+    // for (const [event, events] of Object.entries(groups)) {
+    //     const pk = BroadcastGroupingKey[event as Event](events[0].payload);
+    //     const programs = groupby(events, pk)
+    //     //     for (const entry of Object.entries(strategy(payloads))) {
 
-        //     }
-        // }
-    }
+    //     //     }
+    //     // }
+    // }
 }
 
 export const start = (logger: Logger) => {

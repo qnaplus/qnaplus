@@ -6,6 +6,7 @@ import { and, eq, gte, inArray, or, sql } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import type { EventQueueAggregation } from "./schema_types";
 
 const pg = lazy(() => postgres(getenv("SUPABASE_TRANSACTION_URL")));
 export const db = lazy(() => drizzle({ schema, client: pg() }));
@@ -94,10 +95,34 @@ export const updateQuestions = async (data: Question[], d: PostgresJsDatabase<ty
 };
 
 export const getEventQueue = async (d: PostgresJsDatabase<typeof schema> = db()) => {
+    const formattedPayloads = d
+        .$with("formatted_payloads")
+        .as(
+            d
+                .select({
+                    event: schema.event_queue.event,
+                    payload: sql`jsonb_build_object('id', ${schema.event_queue.id}, 'payload', ${schema.event_queue.payload})`
+                })
+                .from(schema.event_queue)
+        );
+    const aggregatedPayloads = d
+        .$with("aggregated_payloads")
+        .as(
+            d
+                .select({
+                    event: schema.event_queue.event,
+                    payloads: sql`array_agg(${schema.event_queue.payload})`.as("payloads")
+                })
+                .from(formattedPayloads)
+                .groupBy(schema.event_queue.event)
+        );
     return trycatch(
         d
-            .select()
-            .from(schema.event_queue)
+            .with(aggregatedPayloads)
+            .select({
+                queue: sql<EventQueueAggregation>`jsonb_object_agg(${schema.event_queue.event}, ${aggregatedPayloads.payloads})`
+            })
+            .from(aggregatedPayloads)
     )
 }
 

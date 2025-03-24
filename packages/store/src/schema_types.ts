@@ -9,43 +9,17 @@ export type AnsweredPayload = {
     question: Question;
 };
 
-export type AnsweredEventQueueItem = Pick<BasicEventQueueItem, "id"> & {
-    event: "answered";
-    payload: AnsweredPayload;
-}
-
 export type AnswerEditedPayload = {
     before: Question;
     after: Question;
 };
 
-export type AnswerEditedEventQueueItem = Pick<BasicEventQueueItem, "id"> & {
-    event: "answer_edited";
-    payload: AnswerEditedPayload;
-}
-
 export type ReplayPayload = AnsweredPayload;
-
-export type ReplayEventQueueItem = Pick<BasicEventQueueItem, "id"> & {
-    event: "replay";
-    payload: ReplayPayload;
-};
 
 export type ForumChangePayload = {
     before: ForumState;
     after: ForumState;
 };
-
-export type ForumChangeEventQueueItem = Pick<BasicEventQueueItem, "id"> & {
-    event: "forum_change";
-    payload: ForumChangePayload;
-};
-
-export type EventQueueItem =
-    | AnsweredEventQueueItem
-    | AnswerEditedEventQueueItem
-    | ReplayEventQueueItem
-    | ForumChangeEventQueueItem;
 
 export type EventQueuePayload =
     | AnsweredPayload
@@ -53,16 +27,28 @@ export type EventQueuePayload =
     | ReplayPayload
     | ForumChangePayload;
 
-export type PayloadMap = {
-    answered: AnsweredPayload;
-    answer_edited: AnswerEditedPayload;
-    replay: ReplayPayload;
-    forum_change: ForumChangePayload;
+export enum EventQueueType {
+    Answered = "answered",
+    AnswerEdited = "answer_edited",
+    Replay = "replay",
+    ForumChange = "forum_change"
 }
 
-export type EventQueueItemMap = {
-    answered: AnsweredEventQueueItem;
-    answer_edited: AnsweredEventQueueItem;
-    replay: ReplayEventQueueItem;
-    forum_change: ForumChangeEventQueueItem;
+export type PayloadMap = {
+    [EventQueueType.Answered]: AnsweredPayload;
+    [EventQueueType.AnswerEdited]: AnswerEditedPayload;
+    [EventQueueType.Replay]: ReplayPayload;
+    [EventQueueType.ForumChange]: ForumChangePayload;
+}
+
+type EventQueueItem<T extends EventQueueType> = {
+    id: string;
+    payload: AnsweredPayload;
+}
+
+export type EventQueueAggregation = {
+    answered: EventQueueItem<EventQueueType.Answered>[];
+    answer_edited: EventQueueItem<EventQueueType.AnswerEdited>[];
+    replay: EventQueueItem<EventQueueType.Replay>[];
+    forum_change: EventQueueItem<EventQueueType.ForumChange>[];
 }
