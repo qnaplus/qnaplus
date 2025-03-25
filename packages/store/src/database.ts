@@ -196,7 +196,7 @@ export const getReplayEvents = async (
 		d
 			.select({ question: schema.questions })
 			.from(schema.event_queue)
-			.innerJoin(schema.questions, eq(schema.event_queue.event, "replay")),
+			.innerJoin(schema.questions, eq(schema.event_queue.event, EventQueueType.Replay)),
 	);
 };
 
@@ -204,12 +204,9 @@ export const insertReplayEvents = async (
 	questions: Question[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	const events = questions.map((q) => ({
+	const events = questions.map((question) => ({
 		event: EventQueueType.Replay,
-		payload: {
-			before: { ...q, answer: null, answered: false, answerRaw: null },
-			after: q,
-		},
+		payload: { question },
 	}));
 	return trycatch(
 		d.insert(schema.event_queue).values(events).onConflictDoNothing(),
@@ -220,7 +217,7 @@ export const clearReplayEvents = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
 	return trycatch(
-		d.delete(schema.event_queue).where(eq(schema.event_queue.event, "replay")),
+		d.delete(schema.event_queue).where(eq(schema.event_queue.event, EventQueueType.Replay)),
 	);
 };
 
