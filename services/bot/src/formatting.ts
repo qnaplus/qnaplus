@@ -1,7 +1,8 @@
 import { getenv } from "@qnaplus/dotenv";
 import type { Question } from "@qnaplus/scraper";
+import type { EventQueueAggregation, PayloadMap } from "@qnaplus/store";
 import type {
-    Event
+    EventQueueType
 } from "@qnaplus/store";
 import { chunk } from "@qnaplus/utils";
 import { capitalizeFirstLetter } from "@sapphire/utilities";
@@ -14,7 +15,6 @@ import {
     codeBlock,
     hyperlink,
 } from "discord.js";
-import type { PayloadMap } from "@qnaplus/store";
 
 const colors: Record<string, ColorResolvable> = {
     V5RC: "#f54242",
@@ -37,8 +37,12 @@ const baseEmbedDescription = ({
     return `Asked by ${author} on ${askedTimestamp}\n${bold("Question")}: ${hyperlink(title, buildQuestionUrl(id))}`;
 };
 
+type UnwrapArray<T> = T extends (infer U)[] ? U : never;
+
+
+
 type ChangeFormatMap = {
-    [K in Event]: (data: PayloadMap[K]) => EmbedBuilder;
+    [K in EventQueueType]: (data: UnwrapArray<EventQueueAggregation[K]>["payload"]) => EmbedBuilder;
 };
 
 const formats: ChangeFormatMap = {
@@ -92,6 +96,6 @@ const formats: ChangeFormatMap = {
     }
 } as const;
 
-export const buildEventEmbed = <T extends Event>(event: T, data: PayloadMap[T]) => {
-    return formats[event](data);
+export const buildEventEmbed = <T extends EventQueueType>(event: T, data: UnwrapArray<EventQueueAggregation[T]>) => {
+    return formats[event](data.payload);
 };

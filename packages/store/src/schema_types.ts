@@ -43,12 +43,12 @@ export type PayloadMap = {
 
 type EventQueueItem<T extends EventQueueType> = {
     id: string;
-    payload: AnsweredPayload;
+    payload: PayloadMap[T];
 }
 
 export type EventQueueAggregation = {
-    answered: EventQueueItem<EventQueueType.Answered>[];
-    answer_edited: EventQueueItem<EventQueueType.AnswerEdited>[];
-    replay: EventQueueItem<EventQueueType.Replay>[];
-    forum_change: EventQueueItem<EventQueueType.ForumChange>[];
+    [EventQueueType.Answered]: EventQueueItem<EventQueueType.Answered>[];
+    [EventQueueType.AnswerEdited]: EventQueueItem<EventQueueType.AnswerEdited>[];
+    [EventQueueType.Replay]: EventQueueItem<EventQueueType.Replay>[];
+    [EventQueueType.ForumChange]: EventQueueItem<EventQueueType.ForumChange>[];
 }

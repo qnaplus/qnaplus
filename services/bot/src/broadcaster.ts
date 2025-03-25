@@ -1,12 +1,11 @@
 import { getenv } from "@qnaplus/dotenv";
 import {
-    type Event,
-    type EventQueueItem,
-    EventQueueItemMap,
+    type EventQueueAggregation,
+    EventQueueType,
     type PayloadMap,
     getEventQueue
 } from "@qnaplus/store";
-import { chunk, groupby, trycatch } from "@qnaplus/utils";
+import { chunk, entries, groupby, trycatch } from "@qnaplus/utils";
 import { container } from "@sapphire/framework";
 import Cron from "croner";
 import {
@@ -48,10 +47,27 @@ const broadcast = async (channel: NewsChannel, embeds: EmbedBuilder[]) => {
     }
 };
 
-const broadcastToProgram = async <T extends Event>(
+type EventGroupingMap = {
+    [K in EventQueueType]: (payloads: EventQueueAggregation[K]) => Record<string, EventQueueAggregation[K]>;
+}
+
+const EventGroupingKeyMap: EventGroupingMap = {
+    [EventQueueType.Answered]: (payloads) => groupby(payloads, p => p.payload.question.program),
+    [EventQueueType.AnswerEdited]: (payloads) => groupby(payloads, p => p.payload.after.program),
+    [EventQueueType.Replay]: (payloads) => groupby(payloads, p => p.payload.question.program),
+    [EventQueueType.ForumChange]: (payloads) => groupby(payloads, p => p.payload.after.program),
+}
+
+const broadcastEvent = async <T extends EventQueueType>(event: T, agg: EventQueueAggregation[T]) => {
+    for (const [program, payloads] of entries(EventGroupingKeyMap[event](agg))) {
+        await broadcastToProgram(event, program, payloads);
+    }
+}
+
+const broadcastToProgram = async <T extends EventQueueType>(
     event: T,
     program: string,
-    data: PayloadMap[T][],
+    data: EventQueueAggregation[T],
 ) => {
     const logger = (container.logger as PinoLoggerAdapter).child({
         label: "handleProgramBroadcast",
@@ -82,17 +98,17 @@ const broadcastToProgram = async <T extends Event>(
             );
         }
     }
-    logger.info(`Successfully completed broadcast for ${program}`);
+    logger.info(`Completed broadcast for ${program}`);
 };
 
 const onAnswered = async (payload: PayloadMap["answered"][]) => {
     const logger = (container.logger as PinoLoggerAdapter).child({
         label: "onAnswered",
     });
-    const grouped = groupby(payload, (p) => p.question.program);
-    for (const program in grouped) {
-        await broadcastToProgram("answered", program, grouped[program]);
-    }
+    // const grouped = groupby(payload, (p) => p.question.program);
+    // for (const program in grouped) {
+    //     await broadcastToProgram("answered", program, grouped[program]);
+    // }
     // if (answers.length !== 0) {
     //     const { ok: deleteOk, error: deleteError } = await clearAnswerQueue();
     //     if (!deleteOk) {
@@ -107,24 +123,6 @@ const onAnswered = async (payload: PayloadMap["answered"][]) => {
     // }
     // logger.info("No answers for this update, skipping answer queue clear.");
 };
-
-const onAnswerEdited = async (payload: PayloadMap["answer_edited"][]) => {
-    const logger = (container.logger as PinoLoggerAdapter).child({
-        label: "onAnswered",
-    });
-    const grouped = groupby(payload, (p) => p.after.program);
-    for (const program in grouped) {
-        await broadcastToProgram("answer_edited", program, grouped[program]);
-    }
-}
-
-const onReplay = async (payload: PayloadMap["replay"][]) => {
-    return onAnswered(payload);
-}
-
-const onForumChange = async (payload: PayloadMap["forum_change"][]) => {
-
-}
 
 export const handleQnaStateChange = async (
     program: string,
@@ -163,15 +161,9 @@ const processEventQueue = async (logger: Logger) => {
         return;
     }
     const [{ queue }] = events.result;
-    // const groups = groupby(events.result as EventQueueItem[], e => e.event);
-    // for (const [event, events] of Object.entries(groups)) {
-    //     const pk = BroadcastGroupingKey[event as Event](events[0].payload);
-    //     const programs = groupby(events, pk)
-    //     //     for (const entry of Object.entries(strategy(payloads))) {
-
-    //     //     }
-    //     // }
-    // }
+    for (const [event, payloads] of entries(queue)) {
+        await broadcastEvent(event, payloads);
+    }
 }
 
 export const start = (logger: Logger) => {
