@@ -1,9 +1,7 @@
 import type { Question } from "@qnaplus/scraper";
-import type { event_queue, forum_state } from "./schema";
+import type { forum_state } from "./schema";
 
 export type ForumState = typeof forum_state.$inferSelect;
-
-export type BasicEventQueueItem = typeof event_queue.$inferSelect;
 
 export type AnsweredPayload = {
     question: Question;
@@ -41,7 +39,7 @@ export type PayloadMap = {
     [EventQueueType.ForumChange]: ForumChangePayload;
 }
 
-type EventQueueItem<T extends EventQueueType> = {
+export type EventQueueItem<T extends EventQueueType> = {
     id: string;
     payload: PayloadMap[T];
 }

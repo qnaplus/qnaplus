@@ -49,8 +49,8 @@ const cancel = new SlashCommandSubcommandBuilder()
 	.setName("cancel")
 	.setDescription("Cancels all questions queued for renotification, if any.");
 
-const renotifyCommand = new SlashCommandBuilder()
-	.setName("renotify")
+const replayCommand = new SlashCommandBuilder()
+	.setName("replay")
 	.setDescription("Queue already answered questions for renotification.")
 	.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 	.addSubcommand(id)
@@ -60,7 +60,7 @@ const renotifyCommand = new SlashCommandBuilder()
 	.addSubcommand(cancel);
 
 export default {
-	interaction: renotifyCommand,
+	interaction: replayCommand,
 	commands: {
 		id,
 		bulkId,

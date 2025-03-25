@@ -1,8 +1,8 @@
 import { getenv } from "@qnaplus/dotenv";
 import {
+    clearEventQueue,
     type EventQueueAggregation,
     EventQueueType,
-    type PayloadMap,
     getEventQueue
 } from "@qnaplus/store";
 import { chunk, entries, groupby, trycatch } from "@qnaplus/utils";
@@ -47,28 +47,11 @@ const broadcast = async (channel: NewsChannel, embeds: EmbedBuilder[]) => {
     }
 };
 
-type EventGroupingMap = {
-    [K in EventQueueType]: (payloads: EventQueueAggregation[K]) => Record<string, EventQueueAggregation[K]>;
-}
-
-const EventGroupingKeyMap: EventGroupingMap = {
-    [EventQueueType.Answered]: (payloads) => groupby(payloads, p => p.payload.question.program),
-    [EventQueueType.AnswerEdited]: (payloads) => groupby(payloads, p => p.payload.after.program),
-    [EventQueueType.Replay]: (payloads) => groupby(payloads, p => p.payload.question.program),
-    [EventQueueType.ForumChange]: (payloads) => groupby(payloads, p => p.payload.after.program),
-}
-
-const broadcastEvent = async <T extends EventQueueType>(event: T, agg: EventQueueAggregation[T]) => {
-    for (const [program, payloads] of entries(EventGroupingKeyMap[event](agg))) {
-        await broadcastToProgram(event, program, payloads);
-    }
-}
-
 const broadcastToProgram = async <T extends EventQueueType>(
     event: T,
     program: string,
     data: EventQueueAggregation[T],
-) => {
+): Promise<string[]> => {
     const logger = (container.logger as PinoLoggerAdapter).child({
         label: "handleProgramBroadcast",
         program,
@@ -79,11 +62,17 @@ const broadcastToProgram = async <T extends EventQueueType>(
             { error },
             `An error occurred while fetching the channel for ${program}, exiting.`,
         );
-        return;
+        return [];
     }
 
-    const embeds = data.map(d => buildEventEmbed(event, d));
+    const { embeds, ids } = data.reduce<{ embeds: EmbedBuilder[], ids: string[] }>((agg, d) => {
+        agg.embeds.push(buildEventEmbed(event, d));
+        agg.ids.push(d.id);
+        return agg;
+    }, { embeds: [], ids: [] });
     const embedSlices = chunk(embeds, MAX_EMBEDS_PER_MESSAGE);
+    const idSlices = chunk(ids, MAX_EMBEDS_PER_MESSAGE);
+    const passed: string[] = [];
     for (let i = 0; i < embedSlices.length; i++) {
         const embeds = embedSlices[i];
         const { ok, error } = await trycatch(broadcast(channel, embeds));
@@ -91,6 +80,7 @@ const broadcastToProgram = async <T extends EventQueueType>(
             logger.info(
                 `Successfully sent chunk ${i + 1} of ${embedSlices.length} chunks (${embeds.length} items in chunk).`,
             );
+            passed.push(...idSlices[i]);
         } else {
             logger.error(
                 { error },
@@ -99,60 +89,29 @@ const broadcastToProgram = async <T extends EventQueueType>(
         }
     }
     logger.info(`Completed broadcast for ${program}`);
+    return passed;
 };
 
-const onAnswered = async (payload: PayloadMap["answered"][]) => {
-    const logger = (container.logger as PinoLoggerAdapter).child({
-        label: "onAnswered",
-    });
-    // const grouped = groupby(payload, (p) => p.question.program);
-    // for (const program in grouped) {
-    //     await broadcastToProgram("answered", program, grouped[program]);
-    // }
-    // if (answers.length !== 0) {
-    //     const { ok: deleteOk, error: deleteError } = await clearAnswerQueue();
-    //     if (!deleteOk) {
-    //         logger.error(
-    //             { error: deleteError },
-    //             "An error occurred while trying to clear answer queue.",
-    //         );
-    //         return;
-    //     }
-    //     logger.info("Answer queue successfully cleared.");
-    //     return;
-    // }
-    // logger.info("No answers for this update, skipping answer queue clear.");
-};
 
-export const handleQnaStateChange = async (
-    program: string,
-    oldOpenState: boolean,
-    newOpenState: boolean,
-) => {
-    const logger = (container.logger as PinoLoggerAdapter).child({
-        label: "handleQnaStateChange",
-    });
-    const { ok, error, result: channel } = await getChannel(program);
-    if (!ok) {
-        logger.error(
-            { error },
-            `An error occurred while fetching the channel for ${program}, exiting.`,
-        );
-        return;
+type IEventGroupMap = {
+    [K in EventQueueType]: (payloads: EventQueueAggregation[K]) => Record<string, EventQueueAggregation[K]>;
+}
+
+const EventGroupMap: IEventGroupMap = {
+    [EventQueueType.Answered]: (payloads) => groupby(payloads, p => p.payload.question.program),
+    [EventQueueType.AnswerEdited]: (payloads) => groupby(payloads, p => p.payload.after.program),
+    [EventQueueType.Replay]: (payloads) => groupby(payloads, p => p.payload.question.program),
+    [EventQueueType.ForumChange]: (payloads) => groupby(payloads, p => p.payload.after.program),
+}
+
+const broadcastEvent = async <T extends EventQueueType>(event: T, agg: EventQueueAggregation[T]) => {
+    const passed: string[] = [];
+    for (const [program, payloads] of entries(EventGroupMap[event](agg))) {
+        const results = await broadcastToProgram(event, program, payloads);
+        passed.push(...results);
     }
-    const embed = buildQnaStateEmbed(program, oldOpenState, newOpenState);
-    const sent = await trycatch(broadcast(channel, [embed]));
-    if (!sent.ok) {
-        logger.error(
-            { error },
-            `An error occurred while sending the state change for ${program}, exiting.`,
-        );
-        return;
-    }
-    logger.info(
-        `Successfully broadcasted state change from open: ${oldOpenState} to open: ${newOpenState} for ${program}.`,
-    );
-};
+    return passed;
+}
 
 const processEventQueue = async (logger: Logger) => {
     const events = await getEventQueue();
@@ -160,12 +119,31 @@ const processEventQueue = async (logger: Logger) => {
         logger.error({ error: events.error }, "An error occurred while getting the event queue, retrying on next run.");
         return;
     }
+    const passed: string[] = [];
     const [{ queue }] = events.result;
     for (const [event, payloads] of entries(queue)) {
-        await broadcastEvent(event, payloads);
+        const results = await broadcastEvent(event, payloads);
+        passed.push(...results);
     }
+    const cleared = await trycatch(clearEventQueue(passed));
+    if (!cleared.ok) {
+        logger.error({ error: cleared.error }, "An error occurred while clearing the event queue, retrying on next run.");
+        return;
+    }
+    logger.info("Successfully cleared the event queue.");
 }
 
 export const start = (logger: Logger) => {
-    Cron(getenv("DATABASE_UPDATE_INTERVAL"), () => processEventQueue(logger));
+    const job = Cron(
+        getenv("DATABASE_UPDATE_INTERVAL"),
+        () => processEventQueue(logger),
+        {
+            name: "event_queue_broadcaster",
+            protect: true,
+            catch(e) {
+                logger.error({ error: e }, "An error occurred while processing the event queue.");
+            }
+        }
+    );
+    job.trigger();
 };

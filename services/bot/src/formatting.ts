@@ -1,9 +1,6 @@
 import { getenv } from "@qnaplus/dotenv";
 import type { Question } from "@qnaplus/scraper";
-import type { EventQueueAggregation, PayloadMap } from "@qnaplus/store";
-import type {
-    EventQueueType
-} from "@qnaplus/store";
+import type { EventQueueAggregation, EventQueueItem, EventQueueType } from "@qnaplus/store";
 import { chunk } from "@qnaplus/utils";
 import { capitalizeFirstLetter } from "@sapphire/utilities";
 import { diffSentences } from "diff";
@@ -96,6 +93,6 @@ const formats: ChangeFormatMap = {
     }
 } as const;
 
-export const buildEventEmbed = <T extends EventQueueType>(event: T, data: UnwrapArray<EventQueueAggregation[T]>) => {
+export const buildEventEmbed = <T extends EventQueueType>(event: T, data: EventQueueItem<EventQueueType>) => {
     return formats[event](data.payload);
 };

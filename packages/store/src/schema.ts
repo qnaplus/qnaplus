@@ -1,7 +1,6 @@
 import { sql } from "drizzle-orm";
 import { bigint, boolean, integer, jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
-import { EVENTS, type Event } from "./event_queue";
-import type { EventQueuePayload, PayloadMap } from "./schema_types";
+import { EVENTS } from "./event_queue";
 
 export const questions = pgTable("questions", {
 	id: text().primaryKey(),

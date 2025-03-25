@@ -3,10 +3,10 @@ import type { Question } from "@qnaplus/scraper";
 import { lazy, trycatch } from "@qnaplus/utils";
 import { createClient } from "@supabase/supabase-js";
 import { and, eq, gte, inArray, or, sql } from "drizzle-orm";
-import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
-import type { EventQueueAggregation } from "./schema_types";
+import { type EventQueueAggregation, EventQueueType } from "./schema_types";
 
 const pg = lazy(() => postgres(getenv("SUPABASE_TRANSACTION_URL")));
 export const db = lazy(() => drizzle({ schema, client: pg() }));
@@ -126,6 +126,14 @@ export const getEventQueue = async (d: PostgresJsDatabase<typeof schema> = db())
     )
 }
 
+export const clearEventQueue = async (ids: string[], d: PostgresJsDatabase<typeof schema> = db()) => {
+    return trycatch(
+        d
+            .delete(schema.event_queue)
+            .where(inArray(schema.event_queue.id, ids))
+    );
+}
+
 export const getMetadata = async (d: PostgresJsDatabase<typeof schema> = db()) => {
     return trycatch(
         d.query.metadata.findFirst({
@@ -190,11 +198,18 @@ export const clearRenotifyQueue = async (d: PostgresJsDatabase<typeof schema> = 
     return trycatch(d.delete(schema.event_queue).where(eq(schema.event_queue.event, "replay")));
 };
 
-export const insertRenotifyQueue = async (ids: typeof schema.event_queue.$inferInsert[], d: PostgresJsDatabase<typeof schema> = db()) => {
+export const insertReplayEvents = async (questions: Question[], d: PostgresJsDatabase<typeof schema> = db()) => {
+    const events = questions.map((q) => ({
+        event: EventQueueType.Replay,
+        payload: {
+            before: { ...q, answer: null, answered: false, answerRaw: null },
+            after: q,
+        },
+    }));
     return trycatch(
         d
             .insert(schema.event_queue)
-            .values(ids)
+            .values(events)
             .onConflictDoNothing()
     );
 };

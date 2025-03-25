@@ -8,4 +8,4 @@ export interface SubcommandBundle {
 	commands: Record<string, SlashCommandSubcommandBuilder>;
 }
 
-export { default as renotify } from "./renotify";
+export { default } from "./replay";
