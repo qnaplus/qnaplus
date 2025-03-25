@@ -23,21 +23,19 @@ const channels = JSON.parse(getenv("BROADCASTER_CHANNELS"));
 const MAX_EMBEDS_PER_MESSAGE = 10;
 
 const getChannel = (program: string) => {
-    return trycatch<NewsChannel>(
-        (async () => {
-            const channelId = channels[program];
-            if (channelId === undefined) {
-                throw new Error(`No channel defined for ${program}.`);
-            }
-            const channel = await container.client.channels.fetch(channelId);
-            if (channel === null || channel.type !== ChannelType.GuildAnnouncement) {
-                throw new Error(
-                    `Channel ${channelMention(channelId)} (${channelId}) is missing or is not an announcement channel.`,
-                );
-            }
-            return channel;
-        })(),
-    );
+    return trycatch<NewsChannel>(async () => {
+        const channelId = channels[program];
+        if (channelId === undefined) {
+            throw new Error(`No channel defined for ${program}.`);
+        }
+        const channel = await container.client.channels.fetch(channelId);
+        if (channel === null || channel.type !== ChannelType.GuildAnnouncement) {
+            throw new Error(
+                `Channel ${channelMention(channelId)} (${channelId}) is missing or is not an announcement channel.`,
+            );
+        }
+        return channel;
+    });
 };
 
 const broadcast = async (channel: NewsChannel, embeds: EmbedBuilder[]) => {
@@ -56,10 +54,10 @@ const broadcastToProgram = async <T extends EventQueueType>(
         label: "handleProgramBroadcast",
         program,
     });
-    const { ok, error, result: channel } = await getChannel(program);
-    if (!ok) {
+    const [channelError, channel] = await getChannel(program);
+    if (channelError) {
         logger.error(
-            { error },
+            { error: channelError },
             `An error occurred while fetching the channel for ${program}, exiting.`,
         );
         return [];
@@ -75,18 +73,18 @@ const broadcastToProgram = async <T extends EventQueueType>(
     const passed: string[] = [];
     for (let i = 0; i < embedSlices.length; i++) {
         const embeds = embedSlices[i];
-        const { ok, error } = await trycatch(broadcast(channel, embeds));
-        if (ok) {
-            logger.info(
-                `Successfully sent chunk ${i + 1} of ${embedSlices.length} chunks (${embeds.length} items in chunk).`,
-            );
-            passed.push(...idSlices[i]);
-        } else {
+        const [broadcastError] = await trycatch(broadcast(channel, embeds));
+        if (broadcastError) {
             logger.error(
-                { error },
+                { error: broadcastError },
                 `An error occurred while sending chunk ${i + 1} of ${embedSlices.length} (${embeds.length} items in chunk).`,
             );
+            continue;
         }
+        logger.info(
+            `Successfully sent chunk ${i + 1} of ${embedSlices.length} chunks (${embeds.length} items in chunk).`,
+        );
+        passed.push(...idSlices[i]);
     }
     logger.info(`Completed broadcast for ${program}`);
     return passed;
@@ -114,20 +112,20 @@ const broadcastEvent = async <T extends EventQueueType>(event: T, agg: EventQueu
 }
 
 const processEventQueue = async (logger: Logger) => {
-    const events = await getEventQueue();
-    if (!events.ok) {
-        logger.error({ error: events.error }, "An error occurred while getting the event queue, retrying on next run.");
+    const [eventsError, events] = await getEventQueue();
+    if (eventsError) {
+        logger.error({ error: eventsError }, "An error occurred while getting the event queue, retrying on next run.");
         return;
     }
     const passed: string[] = [];
-    const [{ queue }] = events.result;
+    const [{ queue }] = events;
     for (const [event, payloads] of entries(queue)) {
         const results = await broadcastEvent(event, payloads);
         passed.push(...results);
     }
-    const cleared = await trycatch(clearEventQueue(passed));
-    if (!cleared.ok) {
-        logger.error({ error: cleared.error }, "An error occurred while clearing the event queue, retrying on next run.");
+    const [clearedError] = await clearEventQueue(passed);
+    if (clearedError) {
+        logger.error({ error: clearedError }, "An error occurred while clearing the event queue, retrying on next run.");
         return;
     }
     logger.info("Successfully cleared the event queue.");

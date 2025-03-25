@@ -45,8 +45,5 @@ export type EventQueueItem<T extends EventQueueType> = {
 }
 
 export type EventQueueAggregation = {
-    [EventQueueType.Answered]: EventQueueItem<EventQueueType.Answered>[];
-    [EventQueueType.AnswerEdited]: EventQueueItem<EventQueueType.AnswerEdited>[];
-    [EventQueueType.Replay]: EventQueueItem<EventQueueType.Replay>[];
-    [EventQueueType.ForumChange]: EventQueueItem<EventQueueType.ForumChange>[];
+    [K in EventQueueType]: EventQueueItem<K>[];
 }

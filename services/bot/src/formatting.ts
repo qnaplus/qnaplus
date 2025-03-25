@@ -1,6 +1,6 @@
 import { getenv } from "@qnaplus/dotenv";
 import type { Question } from "@qnaplus/scraper";
-import type { EventQueueAggregation, EventQueueItem, EventQueueType } from "@qnaplus/store";
+import type { EventQueueItem, EventQueueType } from "@qnaplus/store";
 import { chunk } from "@qnaplus/utils";
 import { capitalizeFirstLetter } from "@sapphire/utilities";
 import { diffSentences } from "diff";
@@ -34,12 +34,8 @@ const baseEmbedDescription = ({
     return `Asked by ${author} on ${askedTimestamp}\n${bold("Question")}: ${hyperlink(title, buildQuestionUrl(id))}`;
 };
 
-type UnwrapArray<T> = T extends (infer U)[] ? U : never;
-
-
-
 type ChangeFormatMap = {
-    [K in EventQueueType]: (data: UnwrapArray<EventQueueAggregation[K]>["payload"]) => EmbedBuilder;
+    [K in EventQueueType]: (data: EventQueueItem<K>["payload"]) => EmbedBuilder;
 };
 
 const formats: ChangeFormatMap = {
@@ -93,6 +89,6 @@ const formats: ChangeFormatMap = {
     }
 } as const;
 
-export const buildEventEmbed = <T extends EventQueueType>(event: T, data: EventQueueItem<EventQueueType>) => {
+export const buildEventEmbed = <T extends EventQueueType>(event: T, data: EventQueueItem<T>) => {
     return formats[event](data.payload);
 };

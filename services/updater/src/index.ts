@@ -7,14 +7,14 @@ import {
 } from "@qnaplus/store";
 import Cron from "croner";
 import type { Logger } from "pino";
-import { doDatabaseUpdate } from "./database_update";
+import { updateDatabase } from "./database_update";
 import { doQnaCheck } from "./qna_check";
-import { doStorageUpdate } from "./storage_update";
+import { updateStorage } from "./storage_update";
 
 const update = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
-	const status = await doDatabaseUpdate(logger);
+	const status = await updateDatabase(client, logger);
 	if (status.updateStorage) {
-		doStorageUpdate(logger);
+		updateStorage(logger);
 	}
 	await doQnaCheck(client, logger);
 }
@@ -42,8 +42,8 @@ const start = async (
 	const logger = getLoggerInstance("qnaplus-updater");
 	logger.info("Starting updater service");
 
-	const { ok, error } = await testConnection();
-	if (!ok) {
+	const [error] = await testConnection();
+	if (error) {
 		logger.error(
 			{ error },
 			"Unable to establish database connection, exiting.",

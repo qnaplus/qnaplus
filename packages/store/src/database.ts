@@ -1,7 +1,6 @@
 import { getenv } from "@qnaplus/dotenv";
 import type { Question } from "@qnaplus/scraper";
 import { lazy, trycatch } from "@qnaplus/utils";
-import { createClient } from "@supabase/supabase-js";
 import { and, eq, gte, inArray, or, sql } from "drizzle-orm";
 import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -10,9 +9,6 @@ import { type EventQueueAggregation, EventQueueType } from "./schema_types";
 
 const pg = lazy(() => postgres(getenv("SUPABASE_TRANSACTION_URL")));
 export const db = lazy(() => drizzle({ schema, client: pg() }));
-export const supabase = lazy(() =>
-    createClient(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY")),
-);
 
 export const disconnectPgClient = async () => {
     const client = pg();
@@ -135,15 +131,11 @@ export const clearEventQueue = async (ids: string[], d: PostgresJsDatabase<typeo
 }
 
 export const getMetadata = async (d: PostgresJsDatabase<typeof schema> = db()) => {
-    return trycatch(
-        d.query.metadata.findFirst({
-            where: eq(schema.metadata.id, METADATA_ROW_ID),
-        }),
-    );
+    return trycatch(d.query.metadata.findFirst());
 };
 
 export const updateMetadata = async (
-    data: Omit<typeof schema.metadata.$inferInsert, "id">,
+    data: Partial<Omit<typeof schema.metadata.$inferInsert, "id">>,
     d: PostgresJsDatabase<typeof schema> = db()
 ) => {
     return trycatch(
@@ -182,7 +174,7 @@ export const doFailureQuestionUpdate = async (questions: Question[], d: Postgres
     );
 };
 
-export const getRenotifyQueue = async (d: PostgresJsDatabase<typeof schema> = db()) => {
+export const getReplayEvents = async (d: PostgresJsDatabase<typeof schema> = db()) => {
     return trycatch(
         d
             .select({ question: schema.questions })
@@ -192,10 +184,6 @@ export const getRenotifyQueue = async (d: PostgresJsDatabase<typeof schema> = db
                 eq(schema.event_queue.event, "replay"),
             ),
     );
-};
-
-export const clearRenotifyQueue = async (d: PostgresJsDatabase<typeof schema> = db()) => {
-    return trycatch(d.delete(schema.event_queue).where(eq(schema.event_queue.event, "replay")));
 };
 
 export const insertReplayEvents = async (questions: Question[], d: PostgresJsDatabase<typeof schema> = db()) => {
@@ -214,32 +202,8 @@ export const insertReplayEvents = async (questions: Question[], d: PostgresJsDat
     );
 };
 
-export const getAnswerQueue = async (d: PostgresJsDatabase<typeof schema> = db()) => {
-    return trycatch(
-        d
-            .select({ question: schema.questions })
-            .from(schema.event_queue)
-            .innerJoin(
-                schema.questions,
-                or(
-                    eq(schema.event_queue.event, "answered"),
-                    eq(schema.event_queue.event, "answer_edited")
-                )
-            ),
-    );
-};
-
-export const clearAnswerQueue = async (d: PostgresJsDatabase<typeof schema> = db()) => {
-    return trycatch(
-        d
-            .delete(schema.event_queue)
-            .where(
-                or(
-                    eq(schema.event_queue.event, "answered"),
-                    eq(schema.event_queue.event, "answer_edited")
-                )
-            )
-    );
+export const clearReplayEvents = async (d: PostgresJsDatabase<typeof schema> = db()) => {
+    return trycatch(d.delete(schema.event_queue).where(eq(schema.event_queue.event, "replay")));
 };
 
 export const getAllPrograms = async (d: PostgresJsDatabase<typeof schema> = db()) => {

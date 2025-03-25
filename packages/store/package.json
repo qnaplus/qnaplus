@@ -20,9 +20,6 @@
 		"@qnaplus/dotenv": "workspace:1.0.0",
 		"@qnaplus/scraper": "catalog:",
 		"@qnaplus/utils": "workspace:1.0.0",
-		"@supabase/supabase-js": "^2.49.1",
-		"deep-equal": "^2.2.3",
-		"diff": "^5.1.0",
 		"drizzle-orm": "^0.39.1",
 		"pino": "catalog:",
 		"postgres": "^3.4.5"
@@ -30,8 +27,6 @@
 	"devDependencies": {
 		"@qnaplus/scraper-strategies": "catalog:",
 		"@qnaplus/typescript-config": "workspace:1.0.0",
-		"@types/deep-equal": "^1.0.4",
-		"@types/diff": "^5.0.9",
 		"drizzle-kit": "^0.30.4",
 		"pino-pretty": "catalog:",
 		"tsx": "catalog:"

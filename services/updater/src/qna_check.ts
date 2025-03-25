@@ -31,31 +31,31 @@ export const doQnaCheck = async (
 	logger: Logger,
 ) => {
 	logger.info("Starting programs update.");
-	const programs = await getAllPrograms();
-	if (!programs.ok) {
+	const [programsError, programs] = await getAllPrograms();
+	if (programsError) {
 		logger.error(
-			{ error: programs.error },
+			{ error: programsError },
 			"An error occurred while trying to aggregate all programs, exiting.",
 		);
 		return;
 	}
-	const metadata = await getMetadata();
-	if (!metadata.ok || metadata.result === undefined) {
+	const [metadataError, metadata] = await getMetadata();
+	if (metadataError || metadata === undefined) {
 		logger.error(
-			{ error: metadata.error },
+			{ error: metadataError },
 			"An error occurred while retrieving metadata, exiting.",
 		);
 		return;
 	}
-	const oldStates = await getQnaStates();
-	if (!oldStates.ok) {
+	const [statesError, states] = await getQnaStates();
+	if (statesError) {
 		logger.error(
-			{ error: oldStates.error },
+			{ error: statesError },
 			"An error occurred while trying to fetch existing Q&A states, exiting.",
 		);
 		return;
 	}
-	const statesMap = oldStates.result.reduce<Record<string, boolean>>(
+	const statesMap = states.reduce<Record<string, boolean>>(
 		(map, s) => {
 			map[s.program] = s.open;
 			return map;
@@ -63,9 +63,9 @@ export const doQnaCheck = async (
 		{},
 	);
 
-	const season = metadata.result.currentSeason as Season;
+	const season = metadata.currentSeason;
 	const newStates: ProgramState[] = [];
-	for (const { program } of programs.result) {
+	for (const { program } of programs) {
 		// get the 'open' state for a given program
 		// if there is none, default to true so we can initialize one
 		const statesMapOpen = statesMap[program] ?? true;
@@ -88,10 +88,10 @@ export const doQnaCheck = async (
 
 		newStates.push({ program, open });
 	}
-	const updated = await updateQnaStates(newStates);
-	if (!updated.ok) {
+	const [updatedError] = await updateQnaStates(newStates);
+	if (updatedError) {
 		logger.error(
-			{ error: updated.error },
+			{ error: updatedError },
 			"An error occurred while updating program states, exiting.",
 		);
 		return;

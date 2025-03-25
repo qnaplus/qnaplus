@@ -1,10 +1,10 @@
 import { getenv } from "@qnaplus/dotenv";
 import type { Question } from "@qnaplus/scraper";
 import {
-	clearRenotifyQueue,
+	clearReplayEvents,
 	getAnsweredQuestionsNewerThanDate,
 	getQuestion,
-	getRenotifyQueue,
+	getReplayEvents,
 	insertReplayEvents,
 } from "@qnaplus/store";
 import { formatDDMMMYYYY, isValidDate, mmmToMonthNumber } from "@qnaplus/utils";
@@ -67,13 +67,13 @@ export class Replay extends LoggerSubcommand {
 		});
 		const id = interaction.options.getString("id", true);
 
-		const { ok, error, result: question } = await getQuestion(id);
-		if (!ok) {
+		const [questionError, question] = await getQuestion(id);
+		if (questionError) {
 			this.logErrorAndReply(
 				logger,
 				interaction,
 				`An error occurred while attempting to retreive question with id ${id}, exiting.`,
-				{ error },
+				{ error: questionError },
 			);
 			return;
 		}
@@ -86,13 +86,13 @@ export class Replay extends LoggerSubcommand {
 			return;
 		}
 
-		const { ok: insertOk, error: insertError } = await insertReplayEvents([question]);
-		if (!insertOk) {
+		const [replayError] = await insertReplayEvents([question]);
+		if (!replayError) {
 			this.logErrorAndReply(
 				logger,
 				interaction,
 				`Unable to queue question with id '${id}' for renotification`,
-				{ error: insertError },
+				{ error: replayError },
 			);
 			return;
 		}
@@ -110,13 +110,13 @@ export class Replay extends LoggerSubcommand {
 			label: "renotifyBulkId",
 		});
 		const id = interaction.options.getString("id", true);
-		const { ok, error, result: question } = await getQuestion(id);
-		if (!ok) {
+		const [ questionError, question ] = await getQuestion(id);
+		if (questionError) {
 			this.logErrorAndReply(
 				logger,
 				interaction,
 				`An error occurred while attempting to retreive question with id ${id}, exiting.`,
-				{ error },
+				{ error: questionError },
 			);
 			return;
 		}
@@ -204,17 +204,17 @@ export class Replay extends LoggerSubcommand {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
 			label: "renotifyList",
 		});
-		const { ok, error, result } = await getRenotifyQueue();
-		if (!ok) {
+		const [replayError, replayEvents] = await getReplayEvents();
+		if (replayError) {
 			this.logErrorAndReply(
 				logger,
 				interaction,
 				"Error retreiving renotify queue.",
-				{ error },
+				{ error: replayError },
 			);
 			return;
 		}
-		const questions = result.map((r) => r.question);
+		const questions = replayEvents.map((r) => r.question);
 		if (questions.length === 0) {
 			this.logInfoAndReply(
 				logger,
@@ -249,38 +249,34 @@ export class Replay extends LoggerSubcommand {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
 			label: "renotifyCancel",
 		});
-		const { ok, error, result } = await clearRenotifyQueue();
-		if (!ok) {
+		const [clearError, clearResult] = await clearReplayEvents();
+		if (clearError) {
 			this.logErrorAndReply(
 				logger,
 				interaction,
 				"An error occurred while clearing renotify queue.",
-				{ error },
+				{ error: clearError },
 			);
 			return;
 		}
 		this.logInfoAndReply(
 			logger,
 			interaction,
-			`Successfully cleared ${result.length} questions from the renotify queue.`,
+			`Successfully cleared ${clearResult.length} questions from the renotify queue.`,
 		);
 	}
 
 	private async doReplayBulkDate(dateMs: number) {
-		const { ok, error, result: questions } =
+		const [questionsError, questions] =
 			await getAnsweredQuestionsNewerThanDate(dateMs);
-		if (!ok) {
-			throw { error };
+		if (questionsError) {
+			throw questionsError;
 		}
 		if (questions.length === 0) {
 			return 0;
 		}
-		const {
-			ok: renotifyOk,
-			error: renotifyError,
-			result: renotifyResult,
-		} = await insertReplayEvents(questions);
-		if (!renotifyOk) {
+		const [ renotifyError, renotifyResult] = await insertReplayEvents(questions);
+		if (renotifyError) {
 			throw { error: renotifyError };
 		}
 		return renotifyResult.length;
