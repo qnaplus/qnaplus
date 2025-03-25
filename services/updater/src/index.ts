@@ -11,23 +11,31 @@ import { doDatabaseUpdate } from "./database_update";
 import { doQnaCheck } from "./qna_check";
 import { doStorageUpdate } from "./storage_update";
 
-const start = async (
-	client: FetchClient<FetchClientResponse>,
-	logger: Logger,
-) => {
+const update = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
 	const status = await doDatabaseUpdate(logger);
 	if (status.updateStorage) {
 		doStorageUpdate(logger);
 	}
 	await doQnaCheck(client, logger);
+}
+
+const start = async (
+	client: FetchClient<FetchClientResponse>,
+	logger: Logger,
+) => {
 	logger.info("Starting database update job");
-	Cron(getenv("DATABASE_UPDATE_INTERVAL"), async () => {
-		const status = await doDatabaseUpdate(logger);
-		if (status.updateStorage) {
-			doStorageUpdate(logger);
-		}
-		await doQnaCheck(client, logger);
-	});
+	const job = Cron(
+		getenv("DATABASE_UPDATE_INTERVAL"),
+		() => update(client, logger),
+		{
+			name: "updater",
+			protect: true,
+			catch(e) {
+				logger.error({ error: e }, "An error occurred while updating database.");
+			},
+		},
+	);
+	job.trigger();
 };
 
 (async () => {
