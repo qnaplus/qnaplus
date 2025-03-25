@@ -196,7 +196,10 @@ export const getReplayEvents = async (
 		d
 			.select({ question: schema.questions })
 			.from(schema.event_queue)
-			.innerJoin(schema.questions, eq(schema.event_queue.event, EventQueueType.Replay)),
+			.innerJoin(
+				schema.questions,
+				eq(schema.event_queue.event, EventQueueType.Replay),
+			),
 	);
 };
 
@@ -217,7 +220,9 @@ export const clearReplayEvents = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
 	return trycatch(
-		d.delete(schema.event_queue).where(eq(schema.event_queue.event, EventQueueType.Replay)),
+		d
+			.delete(schema.event_queue)
+			.where(eq(schema.event_queue.event, EventQueueType.Replay)),
 	);
 };
 
