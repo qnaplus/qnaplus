@@ -2,8 +2,6 @@ import * as path from "node:path";
 import { config } from "dotenv";
 
 const ENV_VARIABLES = [
-	"SUPABASE_URL",
-	"SUPABASE_KEY", // TODO figure out RLS or how to get the correct permissions to access the database
 	"SUPABASE_TRANSACTION_URL",
 	"SUPABASE_SESSION_URL",
 	"DISCORD_TOKEN",
