@@ -20,10 +20,7 @@ export const updateStorage = async (_logger: Logger) => {
 		upload(getenv("CF_QUESTIONS_KEY"), buffer, logger),
 	);
 	if (uploadError) {
-		logger?.error(
-			{ error: uploadError },
-			"Error while updating storage json",
-		);
+		logger?.error({ error: uploadError }, "Error while updating storage json");
 		return;
 	}
 	logger.info("Successfully completed storage update.");

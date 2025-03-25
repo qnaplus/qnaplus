@@ -110,7 +110,7 @@ export class Replay extends LoggerSubcommand {
 			label: "renotifyBulkId",
 		});
 		const id = interaction.options.getString("id", true);
-		const [ questionError, question ] = await getQuestion(id);
+		const [questionError, question] = await getQuestion(id);
 		if (questionError) {
 			this.logErrorAndReply(
 				logger,
@@ -198,9 +198,7 @@ export class Replay extends LoggerSubcommand {
 		}
 	}
 
-	public async replayList(
-		interaction: Subcommand.ChatInputCommandInteraction,
-	) {
+	public async replayList(interaction: Subcommand.ChatInputCommandInteraction) {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
 			label: "renotifyList",
 		});
@@ -275,7 +273,7 @@ export class Replay extends LoggerSubcommand {
 		if (questions.length === 0) {
 			return 0;
 		}
-		const [ renotifyError, renotifyResult] = await insertReplayEvents(questions);
+		const [renotifyError, renotifyResult] = await insertReplayEvents(questions);
 		if (renotifyError) {
 			throw { error: renotifyError };
 		}

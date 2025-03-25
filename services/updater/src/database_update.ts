@@ -16,7 +16,7 @@ import {
 	getQuestion,
 	updateFailures,
 	updateMetadata,
-	updateQuestions
+	updateQuestions,
 } from "@qnaplus/store";
 import { chunk, unique } from "@qnaplus/utils";
 import type { Logger } from "pino";
@@ -82,7 +82,10 @@ const handleFailureUpdate = async (
 
 	const [updateError] = await doFailureQuestionUpdate(questions);
 	if (updateError) {
-		logger?.error({ error: updateError }, "Unable to perform failure-question update.");
+		logger?.error(
+			{ error: updateError },
+			"Unable to perform failure-question update.",
+		);
 		return { oldest: undefined, failures };
 	}
 	logger?.info(
@@ -98,11 +101,14 @@ export interface DatabaseUpdateStatus {
 	updateStorage: boolean;
 }
 
-export const updateDatabase = async (client: FetchClient<FetchClientResponse>, _logger: Logger): Promise<DatabaseUpdateStatus> => {
+export const updateDatabase = async (
+	client: FetchClient<FetchClientResponse>,
+	_logger: Logger,
+): Promise<DatabaseUpdateStatus> => {
 	const logger = _logger?.child({ label: "doDatabaseUpdate" });
 	const status: DatabaseUpdateStatus = {
-		updateStorage: false
-	}
+		updateStorage: false,
+	};
 	logger.info("Starting database update.");
 	const [metadataError, metadata] = await getMetadata();
 	if (metadataError) {
@@ -133,9 +139,9 @@ export const updateDatabase = async (client: FetchClient<FetchClientResponse>, _
 	const start =
 		failureUpdateResult.oldest !== undefined
 			? Math.min(
-				Number.parseInt(failureUpdateResult.oldest.id),
-				Number.parseInt(oldestUnansweredQuestion),
-			)
+					Number.parseInt(failureUpdateResult.oldest.id),
+					Number.parseInt(oldestUnansweredQuestion),
+				)
 			: Number.parseInt(oldestUnansweredQuestion);
 
 	logger?.info(`Starting update from Q&A ${start}`);
@@ -168,8 +174,7 @@ export const updateDatabase = async (client: FetchClient<FetchClientResponse>, _
 		`${failureUpdateResult.failures.length} failures in database, ${failures.length} failures found for this update, ${validFailures.length} questions extracted from failures.`,
 	);
 	const finalFailures = validFailures.map((id) => ({ id }));
-	const [failureError] =
-		await updateFailures(finalFailures);
+	const [failureError] = await updateFailures(finalFailures);
 	if (failureError) {
 		logger?.error(
 			{ error: failureError },
@@ -209,9 +214,9 @@ export const updateDatabase = async (client: FetchClient<FetchClientResponse>, _
 	const oldest =
 		failureUpdateResult.oldest !== undefined
 			? getOldestUnansweredQuestion(
-				[failureUpdateResult.oldest, oldestUnansweredFromUpdate],
-				currentSeason as Season,
-			)
+					[failureUpdateResult.oldest, oldestUnansweredFromUpdate],
+					currentSeason as Season,
+				)
 			: oldestUnansweredFromUpdate;
 	if (oldest === undefined) {
 		logger?.info(

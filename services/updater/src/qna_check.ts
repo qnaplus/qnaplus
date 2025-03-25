@@ -55,13 +55,10 @@ export const doQnaCheck = async (
 		);
 		return;
 	}
-	const statesMap = states.reduce<Record<string, boolean>>(
-		(map, s) => {
-			map[s.program] = s.open;
-			return map;
-		},
-		{},
-	);
+	const statesMap = states.reduce<Record<string, boolean>>((map, s) => {
+		map[s.program] = s.open;
+		return map;
+	}, {});
 
 	const season = metadata.currentSeason;
 	const newStates: ProgramState[] = [];

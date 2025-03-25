@@ -1,7 +1,15 @@
-import { sql } from "drizzle-orm";
-import { bigint, boolean, integer, jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
-import { EventQueueType } from "./schema_types";
 import type { Season } from "@qnaplus/scraper";
+import { sql } from "drizzle-orm";
+import {
+	bigint,
+	boolean,
+	integer,
+	jsonb,
+	pgTable,
+	text,
+	uuid,
+} from "drizzle-orm/pg-core";
+import { EventQueueType } from "./schema_types";
 
 export const questions = pgTable("questions", {
 	id: text().primaryKey(),

@@ -57,13 +57,11 @@ export const populateWithMetadata = async (
 			if (questions.length !== 0) {
 				await insertQuestions(questions, tx);
 			}
-			await tx
-				.insert(schema.metadata)
-				.values({
-					id: METADATA_ROW_ID,
-					currentSeason,
-					oldestUnansweredQuestion: oldestQuestionId,
-				})
+			await tx.insert(schema.metadata).values({
+				id: METADATA_ROW_ID,
+				currentSeason,
+				oldestUnansweredQuestion: oldestQuestionId,
+			});
 		}),
 	);
 	if (error) {

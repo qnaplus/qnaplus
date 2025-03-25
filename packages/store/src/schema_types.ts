@@ -4,46 +4,46 @@ import type { forum_state } from "./schema";
 export type ForumState = typeof forum_state.$inferSelect;
 
 export type AnsweredPayload = {
-    question: Question;
+	question: Question;
 };
 
 export type AnswerEditedPayload = {
-    before: Question;
-    after: Question;
+	before: Question;
+	after: Question;
 };
 
 export type ReplayPayload = AnsweredPayload;
 
 export type ForumChangePayload = {
-    before: ForumState;
-    after: ForumState;
+	before: ForumState;
+	after: ForumState;
 };
 
 export type EventQueuePayload =
-    | AnsweredPayload
-    | AnswerEditedPayload
-    | ReplayPayload
-    | ForumChangePayload;
+	| AnsweredPayload
+	| AnswerEditedPayload
+	| ReplayPayload
+	| ForumChangePayload;
 
 export enum EventQueueType {
-    Answered = "answered",
-    AnswerEdited = "answer_edited",
-    Replay = "replay",
-    ForumChange = "forum_change"
+	Answered = "answered",
+	AnswerEdited = "answer_edited",
+	Replay = "replay",
+	ForumChange = "forum_change",
 }
 
 export type PayloadMap = {
-    [EventQueueType.Answered]: AnsweredPayload;
-    [EventQueueType.AnswerEdited]: AnswerEditedPayload;
-    [EventQueueType.Replay]: ReplayPayload;
-    [EventQueueType.ForumChange]: ForumChangePayload;
-}
+	[EventQueueType.Answered]: AnsweredPayload;
+	[EventQueueType.AnswerEdited]: AnswerEditedPayload;
+	[EventQueueType.Replay]: ReplayPayload;
+	[EventQueueType.ForumChange]: ForumChangePayload;
+};
 
 export type EventQueueItem<T extends EventQueueType> = {
-    id: string;
-    payload: PayloadMap[T];
-}
+	id: string;
+	payload: PayloadMap[T];
+};
 
 export type EventQueueAggregation = {
-    [K in EventQueueType]: EventQueueItem<K>[];
-}
+	[K in EventQueueType]: EventQueueItem<K>[];
+};

@@ -2,22 +2,23 @@ import { getenv } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
 import type { FetchClient, FetchClientResponse } from "@qnaplus/scraper";
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
-import {
-	testConnection
-} from "@qnaplus/store";
+import { testConnection } from "@qnaplus/store";
 import Cron from "croner";
 import type { Logger } from "pino";
 import { updateDatabase } from "./database_update";
 import { doQnaCheck } from "./qna_check";
 import { updateStorage } from "./storage_update";
 
-const update = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
+const update = async (
+	client: FetchClient<FetchClientResponse>,
+	logger: Logger,
+) => {
 	const status = await updateDatabase(client, logger);
 	if (status.updateStorage) {
 		updateStorage(logger);
 	}
 	await doQnaCheck(client, logger);
-}
+};
 
 const start = async (
 	client: FetchClient<FetchClientResponse>,
@@ -31,7 +32,10 @@ const start = async (
 			name: "updater",
 			protect: true,
 			catch(e) {
-				logger.error({ error: e }, "An error occurred while updating database.");
+				logger.error(
+					{ error: e },
+					"An error occurred while updating database.",
+				);
 			},
 		},
 	);
