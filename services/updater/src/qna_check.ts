@@ -7,9 +7,9 @@ import {
 } from "@qnaplus/scraper";
 import {
 	getAllPrograms,
+	getForumStates,
 	getMetadata,
-	getQnaStates,
-	updateQnaStates,
+	updateForumStates,
 } from "@qnaplus/store";
 import type { Logger } from "pino";
 
@@ -47,7 +47,7 @@ export const doQnaCheck = async (
 		);
 		return;
 	}
-	const [statesError, states] = await getQnaStates();
+	const [statesError, states] = await getForumStates();
 	if (statesError) {
 		logger.error(
 			{ error: statesError },
@@ -85,7 +85,7 @@ export const doQnaCheck = async (
 
 		newStates.push({ program, open });
 	}
-	const [updatedError] = await updateQnaStates(newStates);
+	const [updatedError] = await updateForumStates(newStates);
 	if (updatedError) {
 		logger.error(
 			{ error: updatedError },

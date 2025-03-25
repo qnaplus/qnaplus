@@ -236,13 +236,13 @@ export const getAllPrograms = async (
 	);
 };
 
-export const getQnaStates = async (
+export const getForumStates = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
 	return trycatch(d.select().from(schema.forum_state));
 };
 
-export const updateQnaStates = async (
+export const updateForumStates = async (
 	states: (typeof schema.forum_state.$inferInsert)[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
