@@ -1,0 +1,1 @@
+ALTER TABLE "event_queue" ADD COLUMN "timestamp" timestamp DEFAULT now() NOT NULL;
