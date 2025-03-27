@@ -28,9 +28,9 @@
 		"updater:dev": "pnpm --filter=@qnaplus/updater run dev",
 		"store:populate": "pnpm --filter=@qnaplus/store run populate",
 		"store:populate-metadata": "pnpm --filter=@qnaplus/store run populate_metadata",
-        "vault:remove-previous": "rimraf .env.previous .env.production.previous",
-        "vault:pull": "dotenv-vault pull && dotenv-vault pull production && pnpm vault:remove-previous",
-        "vault:push": "dotenv-vault push && dotenv-vault push production && pnpm vault:pull"
+		"vault:remove-previous": "rimraf .env.previous .env.production.previous",
+		"vault:pull": "dotenv-vault pull && dotenv-vault pull production && pnpm vault:remove-previous",
+		"vault:push": "dotenv-vault push && dotenv-vault push production && pnpm vault:pull"
 	},
 	"volta": {
 		"pnpm": "10.5.2",

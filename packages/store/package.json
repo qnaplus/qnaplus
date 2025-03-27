@@ -14,8 +14,8 @@
 		"populate": "tsx scripts/populate.ts | pino-pretty",
 		"populate_metadata": "tsx scripts/populate.ts --metadata | pino-pretty",
 		"check-types": "tsc --noEmit",
-        "db:push": "drizzle-kit push",
-        "db:gen": "drizzle-kit generate"
+		"db:push": "drizzle-kit push",
+		"db:gen": "drizzle-kit generate"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.750.0",

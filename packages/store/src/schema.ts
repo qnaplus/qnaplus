@@ -7,8 +7,8 @@ import {
 	jsonb,
 	pgTable,
 	text,
+	timestamp,
 	uuid,
-    timestamp,
 } from "drizzle-orm/pg-core";
 import { EventQueueType } from "./schema_types";
 
@@ -44,7 +44,7 @@ export const failures = pgTable("failures", {
 export const event_queue = pgTable("event_queue", {
 	id: uuid().defaultRandom().primaryKey(),
 	event: text({ enum: Object.values(EventQueueType) as [string] }).notNull(),
-    timestamp: timestamp().notNull().defaultNow(),
+	timestamp: timestamp().notNull().defaultNow(),
 	payload: jsonb().notNull(),
 }).enableRLS();
 
