@@ -133,7 +133,8 @@ export const getEventQueue = async (
 						"payload",
 					),
 			})
-			.from(schema.event_queue),
+			.from(schema.event_queue)
+			.orderBy(schema.event_queue.timestamp),
 	);
 
 	const aggregatedPayloads = d.$with("aggregated_payloads").as(
