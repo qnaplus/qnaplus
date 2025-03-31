@@ -19,7 +19,7 @@ RUN pnpm i
 RUN pnpm build
 
 ENV NODE_ENV=production
-RUN pnpm --filter @qnaplus/updater --prod deploy pruned
+RUN pnpm --filter @qnaplus/bot --prod deploy pruned
 
 # =======================================================
 
