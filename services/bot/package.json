@@ -12,7 +12,7 @@
 		"build": "tsc",
 		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
 		"check-types": "tsc --noEmit",
-		"clean": "rimraf dist .turbo",
+		"clean": "rimraf dist tsconfig.tsbuildinfo",
 		"clean:modules": "rimraf node_modules",
 		"clean:full": "pnpm clean && pnpm clean:modules"
 	},
@@ -33,6 +33,7 @@
 	},
 	"devDependencies": {
 		"@qnaplus/scraper": "catalog:",
+		"@qnaplus/typescript-config": "workspace:1.0.0",
 		"@types/diff": "^5.0.9",
 		"pino-pretty": "catalog:"
 	},

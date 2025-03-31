@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": [".turbo", "dist", "node_modules", "drizzle"]
+		"ignore": ["dist", "node_modules", "drizzle"]
 	},
 	"formatter": {
 		"enabled": true,

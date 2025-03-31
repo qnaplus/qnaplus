@@ -8,184 +8,37 @@ settings:
 importers:
 
   .:
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 1.9.4
-        version: 1.9.4
-      dotenv-vault:
-        specifier: ^1.26.2
-        version: 1.26.2(@types/node@22.13.14)(typescript@5.8.2)
-      rimraf:
-        specifier: ^6.0.1
-        version: 6.0.1
-      syncpack:
-        specifier: ^13.0.2
-        version: 13.0.3(typescript@5.8.2)
-      tsx:
-        specifier: ^4.19.3
-        version: 4.19.3
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
-
-  packages/dotenv:
-    dependencies:
-      dotenv:
-        specifier: ^16.3.1
-        version: 16.4.7
-    devDependencies:
-      '@qnaplus/typescript-config':
-        specifier: workspace:1.0.0
-        version: link:../typescript-config
-
-  packages/logger:
     dependencies:
       '@qnaplus/dotenv':
-        specifier: workspace:1.0.0
-        version: link:../dotenv
-      pino:
-        specifier: 'catalog:'
-        version: 9.6.0
-      pino-loki:
-        specifier: ^2.5.0
-        version: 2.5.0
-    devDependencies:
-      '@qnaplus/typescript-config':
-        specifier: workspace:1.0.0
-        version: link:../typescript-config
-
-  packages/store:
-    dependencies:
-      '@aws-sdk/client-s3':
-        specifier: ^3.750.0
-        version: 3.777.0
-      '@qnaplus/dotenv':
-        specifier: workspace:1.0.0
-        version: link:../dotenv
-      '@qnaplus/scraper':
-        specifier: 'catalog:'
-        version: 3.1.0
-      '@qnaplus/utils':
-        specifier: workspace:1.0.0
-        version: link:../utils
-      drizzle-orm:
-        specifier: ^0.39.1
-        version: 0.39.3(postgres@3.4.5)
-      pino:
-        specifier: 'catalog:'
-        version: 9.6.0
-      postgres:
-        specifier: ^3.4.5
-        version: 3.4.5
-    devDependencies:
-      '@qnaplus/scraper-strategies':
-        specifier: 'catalog:'
-        version: 3.1.0
-      '@qnaplus/typescript-config':
-        specifier: workspace:1.0.0
-        version: link:../typescript-config
-      drizzle-kit:
-        specifier: ^0.30.4
-        version: 0.30.6
-      pino-pretty:
-        specifier: 'catalog:'
-        version: 13.0.0
-
-  packages/typescript-config: {}
-
-  packages/utils:
-    devDependencies:
-      '@qnaplus/typescript-config':
-        specifier: workspace:1.0.0
-        version: link:../typescript-config
-
-  services/bot:
-    dependencies:
-      '@qnaplus/dotenv':
-        specifier: workspace:1.0.0
-        version: link:../../packages/dotenv
+        specifier: '@qnaplus/dotenv@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/dotenv'
+        version: '@qnaplus/dotenv@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/dotenv'
       '@qnaplus/logger':
-        specifier: workspace:1.0.0
-        version: link:../../packages/logger
-      '@qnaplus/store':
-        specifier: workspace:1.0.0
-        version: link:../../packages/store
-      '@qnaplus/utils':
-        specifier: workspace:1.0.0
-        version: link:../../packages/utils
-      '@sapphire/decorators':
-        specifier: ^6.1.0
-        version: 6.1.1
-      '@sapphire/discord.js-utilities':
-        specifier: ^7.3.0
-        version: 7.3.2
-      '@sapphire/framework':
-        specifier: ^5.2.1
-        version: 5.3.2
-      '@sapphire/plugin-subcommands':
-        specifier: ^6.0.3
-        version: 6.0.3
-      '@sapphire/utilities':
-        specifier: ^3.16.2
-        version: 3.18.2
-      croner:
-        specifier: 'catalog:'
-        version: 8.1.2
-      diff:
-        specifier: ^5.1.0
-        version: 5.2.0
-      discord.js:
-        specifier: 14.x
-        version: 14.18.0
-      pino:
-        specifier: 'catalog:'
-        version: 9.6.0
-    devDependencies:
+        specifier: '@qnaplus/logger@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/logger'
+        version: '@qnaplus/logger@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/logger'
       '@qnaplus/scraper':
-        specifier: 'catalog:'
-        version: 3.1.0
-      '@qnaplus/typescript-config':
-        specifier: workspace:1.0.0
-        version: link:../../packages/typescript-config
-      '@types/diff':
-        specifier: ^5.0.9
-        version: 5.2.3
-      pino-pretty:
-        specifier: 'catalog:'
-        version: 13.0.0
-
-  services/updater:
-    dependencies:
-      '@qnaplus/dotenv':
-        specifier: workspace:1.0.0
-        version: link:../../packages/dotenv
-      '@qnaplus/logger':
-        specifier: workspace:1.0.0
-        version: link:../../packages/logger
-      '@qnaplus/scraper':
-        specifier: 'catalog:'
+        specifier: 3.1.0
         version: 3.1.0
       '@qnaplus/scraper-strategies':
-        specifier: 'catalog:'
+        specifier: 3.1.0
         version: 3.1.0
       '@qnaplus/store':
-        specifier: workspace:1.0.0
-        version: link:../../packages/store
+        specifier: '@qnaplus/store@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/store'
+        version: '@qnaplus/store@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/store'
       '@qnaplus/utils':
-        specifier: workspace:1.0.0
-        version: link:../../packages/utils
+        specifier: '@qnaplus/utils@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/utils'
+        version: '@qnaplus/utils@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/utils'
       croner:
-        specifier: 'catalog:'
+        specifier: 8.1.2
         version: 8.1.2
     devDependencies:
       '@qnaplus/typescript-config':
-        specifier: workspace:1.0.0
-        version: link:../../packages/typescript-config
+        specifier: '@qnaplus/typescript-config@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/typescript-config'
+        version: '@qnaplus/typescript-config@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/typescript-config'
       pino:
-        specifier: 'catalog:'
+        specifier: 9.6.0
         version: 9.6.0
       pino-pretty:
-        specifier: 'catalog:'
+        specifier: 13.0.0
         version: 13.0.0
 
 packages:
@@ -975,6 +828,15 @@ packages:
   '@petamoriken/float16@3.9.2':
     resolution: {integrity: sha512-VgffxawQde93xKxT3qap3OH+meZf7VaSB5Sqd4Rqc+FP5alWbpOyan/7tRbOAvynjpG3GpdtAuGU/NdhQpmrog==}
 
+  '@qnaplus/bot@file:///C:/Users/esanoluwamayo/repos/qnaplus/services/bot':
+    resolution: {directory: ../services/bot, type: directory}
+
+  '@qnaplus/dotenv@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/dotenv':
+    resolution: {directory: ../packages/dotenv, type: directory}
+
+  '@qnaplus/logger@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/logger':
+    resolution: {directory: ../packages/logger, type: directory}
+
   '@qnaplus/node-curl-impersonate@1.0.1':
     resolution: {integrity: sha512-nAX3/EpTAYpx4IyNJ+GAYhSENd6n/JRQBOG2LuTK3uz/0bYZjRC/J7vQMPpXQ00VumkjCUriMFpNbJw+f47pFQ==}
 
@@ -983,6 +845,15 @@ packages:
 
   '@qnaplus/scraper@3.1.0':
     resolution: {integrity: sha512-NjuTp+M0TQOK1Hg/7A+OS4o72FRc5tQgoG9T05HBIeCNRyLAVs17BylYGJPp970F1kwF020HWa9TCVNZtsF8SQ==}
+
+  '@qnaplus/store@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/store':
+    resolution: {directory: ../packages/store, type: directory}
+
+  '@qnaplus/typescript-config@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/typescript-config':
+    resolution: {directory: ../packages/typescript-config, type: directory}
+
+  '@qnaplus/utils@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/utils':
+    resolution: {directory: ../packages/utils, type: directory}
 
   '@sapphire/async-queue@1.5.5':
     resolution: {integrity: sha512-cvGzxbba6sav2zZkH8GPf2oGk9yYoD5qrNWdu9fRehifgnFZJMV+nuy2nON2roRO4yQQ+v7MK/Pktl/HgfsUXg==}
@@ -2659,6 +2530,9 @@ packages:
   pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
 
+  qnaplus@file:///C:/Users/esanoluwamayo/repos/qnaplus:
+    resolution: {directory: .., type: directory}
+
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
@@ -4167,6 +4041,32 @@ snapshots:
 
   '@petamoriken/float16@3.9.2': {}
 
+  '@qnaplus/bot@file:///C:/Users/esanoluwamayo/repos/qnaplus/services/bot':
+    dependencies:
+      '@qnaplus/dotenv': '@qnaplus/dotenv@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/dotenv'
+      '@qnaplus/logger': '@qnaplus/logger@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/logger'
+      '@qnaplus/store': '@qnaplus/store@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/store'
+      '@qnaplus/utils': '@qnaplus/utils@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/utils'
+      '@sapphire/decorators': 6.1.1
+      '@sapphire/discord.js-utilities': 7.3.2
+      '@sapphire/framework': 5.3.2
+      '@sapphire/plugin-subcommands': 6.0.3
+      '@sapphire/utilities': 3.18.2
+      croner: 8.1.2
+      diff: 5.2.0
+      discord.js: 14.18.0
+      pino: 9.6.0
+
+  '@qnaplus/dotenv@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/dotenv':
+    dependencies:
+      dotenv: 16.4.7
+
+  '@qnaplus/logger@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/logger':
+    dependencies:
+      '@qnaplus/dotenv': '@qnaplus/dotenv@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/dotenv'
+      pino: 9.6.0
+      pino-loki: 2.5.0
+
   '@qnaplus/node-curl-impersonate@1.0.1': {}
 
   '@qnaplus/scraper-strategies@3.1.0':
@@ -4193,6 +4093,20 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  '@qnaplus/store@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/store':
+    dependencies:
+      '@aws-sdk/client-s3': 3.777.0
+      '@qnaplus/dotenv': '@qnaplus/dotenv@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/dotenv'
+      '@qnaplus/scraper': 3.1.0
+      '@qnaplus/utils': '@qnaplus/utils@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/utils'
+      drizzle-orm: 0.39.3(postgres@3.4.5)
+      pino: 9.6.0
+      postgres: 3.4.5
+
+  '@qnaplus/typescript-config@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/typescript-config': {}
+
+  '@qnaplus/utils@file:///C:/Users/esanoluwamayo/repos/qnaplus/packages/utils': {}
 
   '@sapphire/async-queue@1.5.5': {}
 
@@ -6044,6 +5958,8 @@ snapshots:
       once: 1.4.0
 
   pure-rand@6.1.0: {}
+
+  qnaplus@file:///C:/Users/esanoluwamayo/repos/qnaplus: {}
 
   queue-microtask@1.2.3: {}
 

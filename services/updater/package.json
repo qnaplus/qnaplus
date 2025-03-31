@@ -10,9 +10,9 @@
 		"start": "node dist/index.js",
 		"dev": "node dist/index.js",
 		"build": "tsc",
-		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
+		"build:production": "tsc --declaration false --noCheck true",
 		"check-types": "tsc --noEmit",
-		"clean": "rimraf dist .turbo",
+		"clean": "rimraf dist tsconfig.tsbuildinfo",
 		"clean:modules": "rimraf node_modules",
 		"clean:full": "pnpm clean && pnpm clean:modules",
 		"update_storage": "tsx scripts/update_storage.ts | pino-pretty"
@@ -29,9 +29,7 @@
 	"devDependencies": {
 		"@qnaplus/typescript-config": "workspace:1.0.0",
 		"pino": "catalog:",
-		"pino-pretty": "catalog:",
-		"tsx": "catalog:",
-		"typescript": "catalog:"
+		"pino-pretty": "catalog:"
 	},
 	"volta": {
 		"extends": "../../package.json"

@@ -17,8 +17,8 @@
 qnaplus is a project with the purpose of improving the quality of life for the VEX Robotics Q&A. The VEX Robotics Q&A system allows competitors to ask clarifying questions in regards to the current season's game and receive authoritative answers. Because these answers are extensions of the game manual, knowing when questions are answered is pivotal. There is no built-in system for receiving notifications from the Q&A, which is where qnaplus comes in.
 
 ## Features
-- **Discord Bot:** qnaplus informs competitors of updates through a Discord bot, which is the primary means of communication for most competitors. The notifications come through on the [VRC Nexus](https://discord.gg/2SNGQXuQCs), a server hub for VEX-related news and information, and competitors can subscribe receive updates in their own servers.
-- **Web Client:** qnaplus comes with a [web client](https://qnaplus.pages.dev) that has improved rendering. The client is offline first and comes as a PWA (you can install it as an "app" on your phone), making it an ideal tool in competitions where internet connection is flaky.
+- **Discord Bot:** qnaplus informs competitors of updates through a Discord bot, which is the primary means of communication for most competitors. The notifications come through on the [VRC Nexus](https://nexus.qnapl.us), a server hub for VEX-related news and information, and competitors can subscribe receive updates in their own servers.
+- **Web Client:** qnaplus comes with a [web client](https://qnapl.us) that has improved rendering. The client is offline first and comes as a PWA (you can install it as an "app" on your phone), making it an ideal tool in competitions where internet connection is flaky.
 
 ## Architecture
 
@@ -28,7 +28,7 @@ qnaplus is a project with the purpose of improving the quality of life for the V
 
 ### Structure
 
-This project uses [Yarn Workspaces](https://yarnpkg.com/features/workspaces) and [Turborepo](https://turbo.build/repo/docs) to manage structure and builds.
+This project uses [PNPM Workspaces](https://pnpm.io/workspaces) to manage structure and builds.
 
 - `packages`: Internal packages that are used by services.
   - `dotenv`: Type-safe library for accessing environment variables.

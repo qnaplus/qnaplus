@@ -7,8 +7,8 @@
 	"license": "GPL-3.0",
 	"scripts": {
 		"build": "tsc",
-		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
-		"clean": "rimraf dist .turbo",
+		"build:production": "tsc --declaration false --noCheck true",
+		"clean": "rimraf dist tsconfig.tsbuildinfo",
 		"clean:modules": "rimraf node_modules",
 		"clean:full": "pnpm clean && pnpm clean:modules",
 		"populate": "tsx scripts/populate.ts | pino-pretty",
@@ -30,8 +30,7 @@
 		"@qnaplus/scraper-strategies": "catalog:",
 		"@qnaplus/typescript-config": "workspace:1.0.0",
 		"drizzle-kit": "^0.30.4",
-		"pino-pretty": "catalog:",
-		"tsx": "catalog:"
+		"pino-pretty": "catalog:"
 	},
 	"exports": {
 		".": {
