@@ -107,23 +107,6 @@ export const updateQuestions = async (
 export const getEventQueue = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	// return trycatch(
-	//     d.execute(
-	//         sql<EventQueueAggregation>`
-	//         WITH formatted_payloads AS (
-	//             SELECT event, jsonb_build_object('id', id, 'payload', payload) AS payload
-	//             FROM event_queue
-	//         ),
-	//         aggregated_payloads AS (
-	//             SELECT event, array_agg(payload) AS payloads
-	//             FROM formatted_payloads e
-	//             GROUP BY e.event
-	//         )
-	//         SELECT jsonb_object_agg(event, payloads) AS event_payloads
-	//         FROM aggregated_payloads;
-	//     `
-	//     )
-	// );
 	const formattedPayloads = d.$with("formatted_payloads").as(
 		d
 			.select({
