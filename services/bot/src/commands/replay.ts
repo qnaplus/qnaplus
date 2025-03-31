@@ -63,7 +63,7 @@ export class Replay extends LoggerSubcommand {
 
 	public async replayId(interaction: Subcommand.ChatInputCommandInteraction) {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
-			label: "renotifyId",
+			label: "replayId",
 		});
 		const id = interaction.options.getString("id", true);
 
@@ -99,7 +99,7 @@ export class Replay extends LoggerSubcommand {
 		this.logInfoAndReply(
 			logger,
 			interaction,
-			`Queued question with id '${id}' for renotification.${this.getNextRuntimeString()} Cancel anytime using /renotify cancel.`,
+			`Queued question with id '${id}' for renotification.${this.getNextRuntimeString()} Cancel anytime using /replay cancel.`,
 		);
 	}
 
@@ -107,7 +107,7 @@ export class Replay extends LoggerSubcommand {
 		interaction: Subcommand.ChatInputCommandInteraction,
 	) {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
-			label: "renotifyBulkId",
+			label: "replayBulkId",
 		});
 		const id = interaction.options.getString("id", true);
 		const [questionError, question] = await getQuestion(id);
@@ -133,7 +133,7 @@ export class Replay extends LoggerSubcommand {
 			this.logInfoAndReply(
 				logger,
 				interaction,
-				`Successfully queued ${count} questions for renotification.${this.getNextRuntimeString()} Cancel anytime using /renotify cancel.`,
+				`Successfully queued ${count} questions for renotification.${this.getNextRuntimeString()} Cancel anytime using /replay cancel.`,
 			);
 		} catch (e) {
 			this.logErrorAndReply(
@@ -149,7 +149,7 @@ export class Replay extends LoggerSubcommand {
 		interaction: Subcommand.ChatInputCommandInteraction,
 	) {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
-			label: "renotifyBulkDate",
+			label: "replayBulkDate",
 		});
 		const date = interaction.options.getString("date", true);
 		const regex =
@@ -186,7 +186,7 @@ export class Replay extends LoggerSubcommand {
 			this.logInfoAndReply(
 				logger,
 				interaction,
-				`Successfully queued ${count} questions for renotification.${this.getNextRuntimeString()} Cancel anytime using /renotify cancel.`,
+				`Successfully queued ${count} questions for renotification.${this.getNextRuntimeString()} Cancel anytime using /replay cancel.`,
 			);
 		} catch (e) {
 			this.logErrorAndReply(
@@ -200,14 +200,14 @@ export class Replay extends LoggerSubcommand {
 
 	public async replayList(interaction: Subcommand.ChatInputCommandInteraction) {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
-			label: "renotifyList",
+			label: "replayList",
 		});
 		const [replayError, replayEvents] = await getReplayEvents();
 		if (replayError) {
 			this.logErrorAndReply(
 				logger,
 				interaction,
-				"Error retreiving renotify queue.",
+				"Error retreiving replay queue.",
 				{ error: replayError },
 			);
 			return;
@@ -232,7 +232,7 @@ export class Replay extends LoggerSubcommand {
 		};
 
 		new PaginatedFieldMessageEmbed<Question>()
-			.setTitleField("Renotify Queue")
+			.setTitleField("Replay Queue")
 			.setTemplate(template)
 			.setItems(questions)
 			.formatItems(formatter)
@@ -245,14 +245,14 @@ export class Replay extends LoggerSubcommand {
 		interaction: Subcommand.ChatInputCommandInteraction,
 	) {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
-			label: "renotifyCancel",
+			label: "replayCancel",
 		});
 		const [clearError, clearResult] = await clearReplayEvents();
 		if (clearError) {
 			this.logErrorAndReply(
 				logger,
 				interaction,
-				"An error occurred while clearing renotify queue.",
+				"An error occurred while clearing replay queue.",
 				{ error: clearError },
 			);
 			return;
@@ -260,7 +260,7 @@ export class Replay extends LoggerSubcommand {
 		this.logInfoAndReply(
 			logger,
 			interaction,
-			`Successfully cleared ${clearResult.length} questions from the renotify queue.`,
+			`Successfully cleared ${clearResult.length} questions from the replay queue.`,
 		);
 	}
 
@@ -273,11 +273,11 @@ export class Replay extends LoggerSubcommand {
 		if (questions.length === 0) {
 			return 0;
 		}
-		const [renotifyError, renotifyResult] = await insertReplayEvents(questions);
-		if (renotifyError) {
-			throw { error: renotifyError };
+		const [replayError, replayResult] = await insertReplayEvents(questions);
+		if (replayError) {
+			throw { error: replayError };
 		}
-		return renotifyResult.length;
+		return replayResult.length;
 	}
 
 	private getNextRuntimeString() {
