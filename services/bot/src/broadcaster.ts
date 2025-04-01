@@ -22,6 +22,10 @@ const channels = JSON.parse(getenv("BROADCASTER_CHANNELS"));
 
 const MAX_EMBEDS_PER_MESSAGE = 10;
 
+const hasChannel = (program: string) => {
+	return channels[program] !== undefined;
+}
+
 const getChannel = (program: string) => {
 	return trycatch<NewsChannel>(async () => {
 		const channelId = channels[program];
@@ -54,6 +58,10 @@ const broadcastToProgram = async <T extends EventQueueType>(
 		label: "handleProgramBroadcast",
 		program,
 	});
+	if (!hasChannel(program)) {
+		logger.warn(`No channel defined for '${program}', skipping broadcast.`);
+		return [];
+	}
 	const [channelError, channel] = await getChannel(program);
 	if (channelError) {
 		logger.error(
@@ -144,6 +152,11 @@ const processEventQueue = async (logger: Logger) => {
 		const results = await broadcastEvent(event, payloads);
 		passed.push(...results);
 	}
+	if (passed.length === 0) {
+		logger.info("No events to clear from the events queue, returning.");
+		return;
+	}
+
 	const [clearedError] = await clearEventQueue(passed);
 	if (clearedError) {
 		logger.error(
