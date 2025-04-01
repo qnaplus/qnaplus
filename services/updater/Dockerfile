@@ -13,23 +13,15 @@ COPY . .
 
 # =======================================================
 
-FROM base AS pruned
+FROM base AS build
 
 RUN pnpm i
 RUN pnpm build
 
 ENV NODE_ENV=production
-RUN pnpm --filter @qnaplus/updater --prod deploy pruned
-
-# =======================================================
-
-FROM base AS build
-
-WORKDIR /app
-
-COPY --from=pruned /app/pruned .
-COPY --from=pruned /app/.env.vault .
-COPY --from=base /app/.npmrc .
+RUN pnpm --filter @qnaplus/updater --prod deploy out \
+&& mv /app/.env.vault out \
+&& mv /app/.npmrc out
 
 # =======================================================
 
