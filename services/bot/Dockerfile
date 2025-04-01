@@ -15,11 +15,11 @@ COPY . .
 
 FROM base AS build
 
-RUN pnpm i
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i
 RUN pnpm build
 
 ENV NODE_ENV=production
-RUN pnpm --filter @qnaplus/bot --prod deploy out \
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm --filter @qnaplus/bot --prod deploy out \
 && mv /app/.env.vault out \
 && mv /app/.npmrc out
 
