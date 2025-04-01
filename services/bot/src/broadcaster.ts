@@ -24,7 +24,7 @@ const MAX_EMBEDS_PER_MESSAGE = 10;
 
 const hasChannel = (program: string) => {
 	return channels[program] !== undefined;
-}
+};
 
 const getChannel = (program: string) => {
 	return trycatch<NewsChannel>(async () => {
