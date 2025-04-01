@@ -41,7 +41,6 @@ jobs:
         with:
           do_not_skip: '["pull_request"]'
           cancel_others: true
-          concurrent_skipping: always
           skip_after_successful_duplicate: false
 
   docker:

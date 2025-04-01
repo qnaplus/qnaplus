@@ -31,7 +31,7 @@ RUN apt-get update
 RUN apt-get -y install libnss3-dev ca-certificates
 RUN update-ca-certificates
 
-COPY --from=build /app /app
+COPY --from=build /app/out /app
 WORKDIR /app
 
 CMD ["node", "dist/index.js"]
