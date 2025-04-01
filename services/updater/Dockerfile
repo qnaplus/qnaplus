@@ -42,4 +42,4 @@ RUN update-ca-certificates
 COPY --from=build /app /app
 WORKDIR /app
 
-CMD ["node", "services/updater/dist/index.js"]
+CMD ["node", "dist/index.js"]

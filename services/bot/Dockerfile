@@ -33,10 +33,10 @@ COPY --from=base /app/.npmrc .
 
 # =======================================================
 
-FROM gcr.io/distroless/nodejs22-debian12 AS prod
+FROM gcr.io/distroless/nodejs22-debian12:debug AS prod
 
 COPY --from=build /app /app
 
-WORKDIR /app/services/bot
+WORKDIR /app
 
 CMD ["dist/index.js"]
