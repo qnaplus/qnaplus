@@ -1,4 +1,3 @@
-import * as path from "node:path";
 import { config } from "dotenv";
 
 const ENV_VARIABLES = [
@@ -21,7 +20,7 @@ const ENV_VARIABLES = [
 type EnvVariable = (typeof ENV_VARIABLES)[number];
 
 const loadEnv = () => {
-	const { error } = config({ path: path.resolve(__dirname, "../../../.env") });
+	const { error } = config();
 	if (error) {
 		console.error(error);
 		throw Error("Environment variables could not be loaded, exiting");
