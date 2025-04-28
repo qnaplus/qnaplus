@@ -11,6 +11,7 @@ jobs:
     permissions: write-all
     steps:
     - uses: actions/checkout@v3
+      token: ${{ secrets.PAT_TOKEN }}
     - 
       name: Get package.json version
       id: package-version

@@ -20,8 +20,10 @@ on:
       - .env.vault
       - package.json
       - turbo.json
-      - yarn.lock
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
       - .gitignore
+      - .npmrc
       - docker-compose.yml
   pull_request:
     types: [opened, reopened, edited, synchronize]
@@ -39,7 +41,6 @@ jobs:
         with:
           do_not_skip: '["pull_request"]'
           cancel_others: true
-          concurrent_skipping: always
           skip_after_successful_duplicate: false
 
   docker:

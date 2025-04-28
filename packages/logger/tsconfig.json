@@ -1,8 +1,14 @@
 {
-	"extends": "@qnaplus/typescript-config/tsconfig.packages.json",
+	"extends": "@qnaplus/typescript-config/base.json",
 	"compilerOptions": {
+		"rootDir": "src",
 		"outDir": "dist"
 	},
+	"references": [
+		{
+			"path": "../dotenv"
+		}
+	],
 	"include": ["src"],
 	"exclude": ["node_modules"]
 }

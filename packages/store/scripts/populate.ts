@@ -52,22 +52,19 @@ export const populateWithMetadata = async (
 			? oldestUnansweredQuestion.id
 			: oldestQuestion.id;
 
-	const { ok, error } = await trycatch(
+	const [error] = await trycatch(
 		db().transaction(async (tx) => {
 			if (questions.length !== 0) {
-				await tx.insert(schema.questions).values(questions);
+				await insertQuestions(questions, tx);
 			}
-			await tx
-				.insert(schema.metadata)
-				.values({
-					id: METADATA_ROW_ID,
-					currentSeason,
-					oldestUnansweredQuestion: oldestQuestionId,
-				})
-				.onConflictDoNothing();
+			await tx.insert(schema.metadata).values({
+				id: METADATA_ROW_ID,
+				currentSeason,
+				oldestUnansweredQuestion: oldestQuestionId,
+			});
 		}),
 	);
-	if (!ok) {
+	if (error) {
 		logger?.error(
 			{ error },
 			"An error occurred while attempting to populate the database.",
@@ -82,8 +79,8 @@ export const populateWithMetadata = async (
 	const client = new CurlImpersonateScrapingClient(logger);
 	logger.info("Running populate script.");
 	logger.info("Testing database connection...");
-	const { ok, error } = await testConnection();
-	if (!ok) {
+	const [error] = await testConnection();
+	if (error) {
 		logger.error({ error }, "Unable to connect to database, exiting.");
 		return;
 	}

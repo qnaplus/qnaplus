@@ -8,14 +8,14 @@
 	"license": "ISC",
 	"scripts": {
 		"build": "tsc",
-		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
-		"clean": "rimraf dist .turbo",
+		"build:production": "tsc --declaration false --noCheck true",
+		"clean": "rimraf dist tsconfig.tsbuildinfo",
 		"clean:modules": "rimraf node_modules",
-		"clean:full": "yarn clean && yarn clean:modules",
+		"clean:full": "pnpm clean && pnpm clean:modules",
 		"check-types": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@qnaplus/typescript-config": "1.0.0"
+		"@qnaplus/typescript-config": "workspace:1.0.0"
 	},
 	"volta": {
 		"extends": "../../package.json"

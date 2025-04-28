@@ -20,3 +20,12 @@ export const groupby = <T>(arr: T[], keyFn: (item: T) => string) => {
 
 export const unique = <T>(items: T[]) =>
 	items.filter((item, idx, arr) => arr.indexOf(item) === idx);
+
+type Entries<T> = {
+	[K in keyof T]: [K, T[K]];
+}[keyof T][];
+
+export const entries = <T extends object>(obj: T): Entries<T> => {
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	return Object.entries(obj) as any;
+};

@@ -1,11 +1,9 @@
 import { getenv } from "@qnaplus/dotenv";
-import type {
-	ChangeEvent,
-	ChangeQuestion,
-	ChangeTypeMap,
-} from "@qnaplus/store";
+import type { Question } from "@qnaplus/scraper";
+import type { EventQueueItem, EventQueueType } from "@qnaplus/store";
 import { chunk } from "@qnaplus/utils";
 import { capitalizeFirstLetter } from "@sapphire/utilities";
+import { diffSentences } from "diff";
 import {
 	type ColorResolvable,
 	Colors,
@@ -14,9 +12,8 @@ import {
 	codeBlock,
 	hyperlink,
 } from "discord.js";
-import type { Logger } from "pino";
 
-const ProgramColorMap: Record<string, ColorResolvable> = {
+const colors: Record<string, ColorResolvable> = {
 	V5RC: "#f54242",
 	VURC: "#8a42f5",
 	VAIRC: "#42f569",
@@ -33,24 +30,44 @@ const baseEmbedDescription = ({
 	askedTimestamp,
 	title,
 	id,
-}: ChangeQuestion) => {
+}: Question) => {
 	return `Asked by ${author} on ${askedTimestamp}\n${bold("Question")}: ${hyperlink(title, buildQuestionUrl(id))}`;
 };
 
 type ChangeFormatMap = {
-	[P in ChangeEvent]: (embed: EmbedBuilder, question: ChangeTypeMap[P]) => void;
+	[K in EventQueueType]: (data: EventQueueItem<K>["payload"]) => EmbedBuilder;
 };
 
-const embedFormatter: ChangeFormatMap = {
-	answered(embed, q) {
-		embed
-			.setTitle(`New ${capitalizeFirstLetter(q.program)} Q&A response`)
-			.setDescription(baseEmbedDescription(q));
+const formats: ChangeFormatMap = {
+	answered({ question }) {
+		return new EmbedBuilder()
+			.setColor(colors[question.program])
+			.setFooter({
+				text:
+					question.tags.length > 0
+						? `🏷️ ${question.tags.join(", ")}`
+						: "No tags",
+			})
+			.setTitle(`New ${capitalizeFirstLetter(question.program)} Q&A response`)
+			.setDescription(baseEmbedDescription(question));
 	},
-	answer_edited(embed, q) {
-		const description = baseEmbedDescription(q);
-
-		const diffStrs = q.diff
+	replay({ question }) {
+		return new EmbedBuilder()
+			.setColor(colors[question.program])
+			.setFooter({
+				text:
+					question.tags.length > 0
+						? `🏷️ ${question.tags.join(", ")}`
+						: "No tags",
+			})
+			.setTitle(`New ${capitalizeFirstLetter(question.program)} Q&A response`)
+			.setDescription(baseEmbedDescription(question));
+	},
+	answer_edited({ before, after }) {
+		const description = baseEmbedDescription(after);
+		// biome-ignore lint: style/noNonNullAssertion
+		const diff = diffSentences(before.answer!, after.answer!);
+		const diffStrs = diff
 			.filter((p) => p.added || p.removed)
 			.map((p) => (p.added ? `+${p.value}` : `-${p.value}`));
 		for (let i = 0; i < diffStrs.length; i++) {
@@ -66,39 +83,27 @@ const embedFormatter: ChangeFormatMap = {
 			.map((c) => codeBlock("diff", c.join("\n")))
 			.join("\n");
 
-		embed
-			.setTitle(`${q.program} Q&A response edited`)
+		return new EmbedBuilder()
+			.setColor(colors[after.program])
+			.setFooter({
+				text: after.tags.length > 0 ? `🏷️ ${after.tags.join(", ")}` : "No tags",
+			})
+			.setTitle(`${after.program} Q&A response edited`)
 			.setDescription(`${description}\n${diffBlocks}`);
 	},
-};
+	forum_change({ before, after }) {
+		const opened = !before.open && after.open;
+		const status = opened ? "opened" : "closed";
+		const message = `Q&A forum ${status} for ${after.program}`;
+		return new EmbedBuilder()
+			.setTitle(message)
+			.setColor(opened ? Colors.Green : Colors.DarkRed);
+	},
+} as const;
 
-export const buildQuestionEmbed = (question: ChangeQuestion) => {
-	const { program, tags } = question;
-	const base = new EmbedBuilder()
-		.setColor(ProgramColorMap[program])
-		.setFooter({ text: tags.length > 0 ? `🏷️ ${tags.join(", ")}` : "No tags" });
-	switch (question.changeType) {
-		case "answer_edited":
-			embedFormatter.answer_edited(base, question);
-			break;
-		case "answered":
-			embedFormatter.answered(base, question);
-			break;
-		default:
-			((_: never) => {})(question);
-	}
-	return base;
-};
-
-export const buildQnaStateEmbed = (
-	program: string,
-	oldState: boolean,
-	newState: boolean,
+export const buildEventEmbed = <T extends EventQueueType>(
+	event: T,
+	data: EventQueueItem<T>,
 ) => {
-	const opened = !oldState && newState;
-	const status = opened ? "opened" : "closed";
-	const message = `Q&A forum ${status} for ${program}`;
-	return new EmbedBuilder()
-		.setTitle(message)
-		.setColor(opened ? Colors.Green : Colors.DarkRed);
+	return formats[event](data.payload);
 };

@@ -1,48 +1,69 @@
 {
-	"version": "7",
-	"dialect": "postgresql",
-	"entries": [
-		{
-			"idx": 0,
-			"version": "7",
-			"when": 1741123962612,
-			"tag": "0000_same_plazm",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "7",
-			"when": 1741295818143,
-			"tag": "0001_charming_mystique",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "7",
-			"when": 1741297910883,
-			"tag": "0002_square_misty_knight",
-			"breakpoints": true
-		},
-		{
-			"idx": 3,
-			"version": "7",
-			"when": 1741307693289,
-			"tag": "0003_many_tempest",
-			"breakpoints": true
-		},
-		{
-			"idx": 4,
-			"version": "7",
-			"when": 1741366480914,
-			"tag": "0004_polite_rictor",
-			"breakpoints": true
-		},
-		{
-			"idx": 5,
-			"version": "7",
-			"when": 1741625235739,
-			"tag": "0005_new-season-init",
-			"breakpoints": true
-		}
-	]
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1741123962612,
+      "tag": "0000_same_plazm",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1741295818143,
+      "tag": "0001_charming_mystique",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1741297910883,
+      "tag": "0002_square_misty_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1741307693289,
+      "tag": "0003_many_tempest",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1741366480914,
+      "tag": "0004_polite_rictor",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1741625235739,
+      "tag": "0005_new-season-init",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1742943644885,
+      "tag": "0006_breezy_norman_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1743008735555,
+      "tag": "0007_event-queue-fns",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1743022723221,
+      "tag": "0008_freezing_wilson_fisk",
+      "breakpoints": true
+    }
+  ]
 }

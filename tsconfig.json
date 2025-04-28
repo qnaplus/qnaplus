@@ -1,0 +1,11 @@
+{
+	"files": [],
+	"references": [
+		{
+			"path": "./services/bot"
+		},
+		{
+			"path": "./services/updater"
+		}
+	]
+}

@@ -1,38 +1,39 @@
 {
 	"name": "qnaplus",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "",
 	"private": true,
-	"workspaces": ["packages/*", "services/*"],
 	"author": "battlesqui_d",
 	"license": "GPL-3.0",
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"dotenv-vault": "^1.26.0",
+		"dotenv-vault": "^1.26.2",
 		"rimraf": "^6.0.1",
 		"syncpack": "^13.0.2",
-		"turbo": "^2.4.0",
-		"typescript": "^5.2.2"
+		"tsx": "^4.19.3",
+		"typescript": "^5.8.2"
 	},
 	"scripts": {
-		"build": "turbo run build",
-		"check-types": "turbo run check-types",
-		"clean": "turbo run clean",
-		"clean:full": "turbo run clean:full",
-		"format-and-lint": "biome check .",
-		"format-and-lint:fix": "biome check . --write",
-		"neat": "turbo run format-and-lint",
-		"neat:fix": "turbo run format-and-lint:fix",
-		"bot": "yarn workspace @qnaplus/bot run start",
-		"bot:dev": "yarn workspace @qnaplus/bot run dev",
-		"updater": "yarn workspace @qnaplus/updater run start",
-		"updater:dev": "yarn workspace @qnaplus/updater run dev",
-		"store:populate": "yarn workspace @qnaplus/store run populate",
-		"store:populate_metadata": "yarn workspace @qnaplus/store run populate_metadata"
+		"build": "tsc --build",
+		"check-types": "pnpm -r check-types",
+		"clean": "pnpm -r clean",
+		"clean:full": "pnpm -r clean:full",
+		"neat": "biome check .",
+		"neat:fix": "biome check . --write",
+		"bot": "pnpm --filter=@qnaplus/bot run start",
+		"bot:dev": "pnpm --filter=@qnaplus/bot run dev",
+		"updater": "pnpm --filter=@qnaplus/updater run start",
+		"updater:dev": "pnpm --filter=@qnaplus/updater run dev",
+		"updater:storage": "pnpm --filter=@qnaplus/updater run update_storage",
+		"store:populate": "pnpm --filter=@qnaplus/store run populate",
+		"store:populate-metadata": "pnpm --filter=@qnaplus/store run populate_metadata",
+		"vault:remove-previous": "rimraf .env.previous .env.production.previous",
+		"vault:pull": "dotenv-vault pull && dotenv-vault pull production && pnpm vault:remove-previous",
+		"vault:push": "dotenv-vault push && dotenv-vault push production && pnpm vault:pull"
 	},
 	"volta": {
-		"node": "22.13.1",
-		"yarn": "1.22.22"
+		"pnpm": "10.7.0",
+		"node": "22.14.0"
 	},
-	"packageManager": "yarn@1.22.22"
+	"packageManager": "pnpm@10.6.5"
 }

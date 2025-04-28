@@ -7,19 +7,19 @@
 	"license": "GPL-3.0",
 	"scripts": {
 		"build": "tsc",
-		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
-		"clean": "rimraf dist .turbo",
+		"build:production": "tsc --declaration false --noCheck true",
+		"clean": "rimraf dist tsconfig.tsbuildinfo",
 		"clean:modules": "rimraf node_modules",
-		"clean:full": "yarn clean && yarn clean:modules",
+		"clean:full": "pnpm clean && pnpm clean:modules",
 		"check-types": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@qnaplus/dotenv": "1.0.0",
-		"pino": "^9.6.0",
+		"@qnaplus/dotenv": "workspace:1.0.0",
+		"pino": "catalog:",
 		"pino-loki": "^2.5.0"
 	},
 	"devDependencies": {
-		"@qnaplus/typescript-config": "1.0.0"
+		"@qnaplus/typescript-config": "workspace:1.0.0"
 	},
 	"exports": {
 		".": {

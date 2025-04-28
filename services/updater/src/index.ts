@@ -2,42 +2,52 @@ import { getenv } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
 import type { FetchClient, FetchClientResponse } from "@qnaplus/scraper";
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
-import {
-	RealtimeHandler,
-	handlePrecheckRequests,
-	onDatabaseChanges,
-	onRenotifyQueueFlushAck,
-	supabase,
-	testConnection,
-} from "@qnaplus/store";
+import { testConnection } from "@qnaplus/store";
 import Cron from "croner";
 import type { Logger } from "pino";
-import { doDatabaseUpdate } from "./database_update";
+import { updateDatabase } from "./database_update";
 import { doQnaCheck } from "./qna_check";
-import { doRenotifyUpdate } from "./renotify_update";
-import { doStorageUpdate } from "./storage_update";
+import { updateStorage } from "./storage_update";
 
-const startDatabaseJob = async (
+const update = async (
 	client: FetchClient<FetchClientResponse>,
 	logger: Logger,
 ) => {
-	await doRenotifyUpdate(logger);
-	await doDatabaseUpdate(logger);
+	const status = await updateDatabase(client, logger);
+	if (status.updateStorage) {
+		updateStorage(logger);
+	}
 	await doQnaCheck(client, logger);
+};
+
+const start = async (
+	client: FetchClient<FetchClientResponse>,
+	logger: Logger,
+) => {
 	logger.info("Starting database update job");
-	Cron(getenv("DATABASE_UPDATE_INTERVAL"), async () => {
-		await doRenotifyUpdate(logger);
-		await doDatabaseUpdate(logger);
-		await doQnaCheck(client, logger);
-	});
+	const job = Cron(
+		getenv("DATABASE_UPDATE_INTERVAL"),
+		() => update(client, logger),
+		{
+			name: "updater",
+			protect: true,
+			catch(e) {
+				logger.error(
+					{ error: e },
+					"An error occurred while updating database.",
+				);
+			},
+		},
+	);
+	job.trigger();
 };
 
 (async () => {
 	const logger = getLoggerInstance("qnaplus-updater");
 	logger.info("Starting updater service");
 
-	const { ok, error } = await testConnection();
-	if (!ok) {
+	const [error] = await testConnection();
+	if (error) {
 		logger.error(
 			{ error },
 			"Unable to establish database connection, exiting.",
@@ -47,13 +57,5 @@ const startDatabaseJob = async (
 
 	const client = new CurlImpersonateScrapingClient(logger);
 
-	startDatabaseJob(client, logger);
-
-	const realtime = new RealtimeHandler(supabase(), logger);
-	realtime.add((supabase) => onRenotifyQueueFlushAck(supabase, logger));
-	realtime.add((supabase) =>
-		onDatabaseChanges(supabase, () => doStorageUpdate(logger), logger),
-	);
-	realtime.add((supabase) => handlePrecheckRequests(supabase, client, logger));
-	realtime.start();
+	start(client, logger);
 })();

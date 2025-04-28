@@ -12,26 +12,30 @@
 		"build": "tsc",
 		"build:production": "tsc --declarationMap false --declaration false --noCheck true",
 		"check-types": "tsc --noEmit",
-		"clean": "rimraf dist .turbo",
+		"clean": "rimraf dist tsconfig.tsbuildinfo",
 		"clean:modules": "rimraf node_modules",
-		"clean:full": "yarn clean && yarn clean:modules"
+		"clean:full": "pnpm clean && pnpm clean:modules"
 	},
 	"dependencies": {
-		"@qnaplus/logger": "1.0.0",
-		"@qnaplus/utils": "1.0.0",
-		"@qnaplus/store": "1.0.0",
+		"@qnaplus/dotenv": "workspace:1.0.0",
+		"@qnaplus/logger": "workspace:1.0.0",
+		"@qnaplus/store": "workspace:1.0.0",
+		"@qnaplus/utils": "workspace:1.0.0",
 		"@sapphire/decorators": "^6.1.0",
 		"@sapphire/discord.js-utilities": "^7.3.0",
 		"@sapphire/framework": "^5.2.1",
 		"@sapphire/plugin-subcommands": "^6.0.3",
 		"@sapphire/utilities": "^3.16.2",
-		"croner": "^8.0.2",
+		"croner": "catalog:",
+		"diff": "^5.1.0",
 		"discord.js": "14.x",
-		"pino": "^9.6.0"
+		"pino": "catalog:"
 	},
 	"devDependencies": {
-		"pino-pretty": "^13.0.0",
-		"@qnaplus/scraper": "^2.0.3"
+		"@qnaplus/scraper": "catalog:",
+		"@qnaplus/typescript-config": "workspace:1.0.0",
+		"@types/diff": "^5.0.9",
+		"pino-pretty": "catalog:"
 	},
 	"volta": {
 		"extends": "../../package.json"

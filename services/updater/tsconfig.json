@@ -1,8 +1,17 @@
 {
 	"extends": "@qnaplus/typescript-config/base.json",
 	"compilerOptions": {
+		"rootDir": "src",
 		"outDir": "dist"
 	},
+	"references": [
+		{
+			"path": "../../packages/store"
+		},
+		{
+			"path": "../../packages/logger"
+		}
+	],
 	"include": ["src"],
 	"exclude": ["node_modules"]
 }

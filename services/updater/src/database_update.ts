@@ -9,17 +9,14 @@ import {
 	getOldestUnansweredQuestion,
 	sleep,
 } from "@qnaplus/scraper";
-import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import {
-	doDatabaseAnswerQueueUpdate,
 	doFailureQuestionUpdate,
-	findNewAnsweredQuestions,
 	getFailures,
 	getMetadata,
 	getQuestion,
-	saveMetadata,
 	updateFailures,
-	upsertQuestions,
+	updateMetadata,
+	updateQuestions,
 } from "@qnaplus/store";
 import { chunk, unique } from "@qnaplus/utils";
 import type { Logger } from "pino";
@@ -43,24 +40,24 @@ const handleFailureUpdate = async (
 	logger?: Logger,
 ): Promise<FailureUpdateResult> => {
 	logger?.info("Starting failure update.");
-	const dbFailures = await getFailures();
-	if (!dbFailures.ok) {
+	const [failuresError, currentFailures] = await getFailures();
+	if (failuresError) {
 		logger?.error(
-			{ error: dbFailures.error },
+			{ error: failuresError },
 			"Error retrieving failures, continuing based on oldest unanswered question metadata.",
 		);
 		return { oldest: undefined, failures: [] };
 	}
 
-	if (dbFailures.result.length === 0) {
+	if (currentFailures.length === 0) {
 		logger?.info("No failures found during this failure update.");
 		return { oldest: undefined, failures: [] };
 	}
 
-	const failureNumbers = dbFailures.result.map((failure) =>
+	const failureIds = currentFailures.map((failure) =>
 		Number.parseInt(failure.id),
 	);
-	const chunks = chunk(failureNumbers, ITERATIVE_BATCH_COUNT);
+	const chunks = chunk(failureIds, ITERATIVE_BATCH_COUNT);
 	const questions: Question[] = [];
 	const failures: string[] = [];
 
@@ -83,9 +80,12 @@ const handleFailureUpdate = async (
 		`${questions.length} new questions resolved from failures.`,
 	);
 
-	const { ok, error } = await doFailureQuestionUpdate(questions);
-	if (!ok) {
-		logger?.error({ error }, "Unable to perform failure-question update.");
+	const [updateError] = await doFailureQuestionUpdate(questions);
+	if (updateError) {
+		logger?.error(
+			{ error: updateError },
+			"Unable to perform failure-question update.",
+		);
 		return { oldest: undefined, failures };
 	}
 	logger?.info(
@@ -97,24 +97,33 @@ const handleFailureUpdate = async (
 	return { oldest, failures };
 };
 
-export const doDatabaseUpdate = async (_logger: Logger) => {
+export interface DatabaseUpdateStatus {
+	updateStorage: boolean;
+}
+
+export const updateDatabase = async (
+	client: FetchClient<FetchClientResponse>,
+	_logger: Logger,
+): Promise<DatabaseUpdateStatus> => {
 	const logger = _logger?.child({ label: "doDatabaseUpdate" });
-	const client = new CurlImpersonateScrapingClient(logger);
+	const status: DatabaseUpdateStatus = {
+		updateStorage: false,
+	};
 	logger.info("Starting database update.");
-	const metadata = await getMetadata();
-	if (!metadata.ok) {
+	const [metadataError, metadata] = await getMetadata();
+	if (metadataError) {
 		logger?.error(
-			{ error: metadata.error },
+			{ error: metadataError },
 			"Error retrieving question metadata, exiting",
 		);
-		return;
+		return status;
 	}
-	if (metadata.result === undefined) {
+	if (metadata === undefined) {
 		logger?.error("No data found for metadata, exiting.");
-		return;
+		return status;
 	}
 
-	const { currentSeason, oldestUnansweredQuestion } = metadata.result;
+	const { currentSeason, oldestUnansweredQuestion } = metadata;
 	const failureUpdateResult = await handleFailureUpdate(
 		client,
 		currentSeason as Season,
@@ -141,40 +150,17 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 		logger,
 		start,
 	});
-	const newAnsweredQuestions = await findNewAnsweredQuestions(questions);
-	if (!newAnsweredQuestions.ok) {
-		logger.error(
-			{ error: newAnsweredQuestions.error },
-			"An error occurred while trying to find newly answered questions from update, retrying on next run.",
-		);
-		return;
-	}
-	logger.info(`${newAnsweredQuestions.result.length} new answers detected.`);
-	if (newAnsweredQuestions.result.length !== 0) {
-		const answerQueueUpdate = await doDatabaseAnswerQueueUpdate(
-			questions,
-			newAnsweredQuestions.result,
-		);
-		if (!answerQueueUpdate.ok) {
-			logger?.error(
-				{ error: answerQueueUpdate.error },
-				`Failed to upsert ${questions.length} questions and update answer queue, retrying on next run.`,
-			);
-			return;
-		}
-		logger?.info(
-			`Upserted ${questions.length} questions and updated answer queue.`,
-		);
-	} else {
-		const { ok, error } = await upsertQuestions(questions);
-		if (!ok) {
+	if (questions.length > 0) {
+		const [updateError, updates] = await updateQuestions(questions);
+		if (updateError) {
 			logger.error(
-				{ error },
-				"An error occurred while upserting questions, exiting.",
+				{ error: updateError },
+				`Failed to upsert ${questions.length} questions, retrying on next run.`,
 			);
-			return;
+			return status;
 		}
-		logger?.info(`Upserted ${questions.length} questions.`);
+		status.updateStorage = updates.length !== 0;
+		logger.info(`${updates.length} new updates detected.`);
 	}
 
 	const allFailures = unique([...failureUpdateResult.failures, ...failures]);
@@ -189,14 +175,13 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 		`${failureUpdateResult.failures.length} failures in database, ${failures.length} failures found for this update, ${validFailures.length} questions extracted from failures.`,
 	);
 	const finalFailures = validFailures.map((id) => ({ id }));
-	const { ok: failureOk, error: failureError } =
-		await updateFailures(finalFailures);
-	if (!failureOk) {
+	const [failureError] = await updateFailures(finalFailures);
+	if (failureError) {
 		logger?.error(
 			{ error: failureError },
 			"Error while updating failures list.",
 		);
-		return;
+		return status;
 	}
 
 	/*
@@ -204,15 +189,15 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 	*/
 	let oldestUnansweredFromUpdate: Question | undefined;
 	if (validFailures.includes(`${start}`)) {
-		const { ok, error, result } = await getQuestion(`${start}`);
-		if (!ok) {
+		const [questionError, question] = await getQuestion(`${start}`);
+		if (questionError) {
 			logger?.error(
-				{ error },
+				{ error: questionError },
 				"The valid failures in this update include the starting question, but an error occurred while retreiving it from the database.",
 			);
-			return;
+			return status;
 		}
-		oldestUnansweredFromUpdate = result;
+		oldestUnansweredFromUpdate = question;
 	} else {
 		oldestUnansweredFromUpdate = getOldestUnansweredQuestion(
 			questions,
@@ -224,7 +209,7 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 		logger?.info(
 			"Oldest unanswered question from update not found, skipping metadata update.",
 		);
-		return;
+		return status;
 	}
 
 	const oldest =
@@ -238,23 +223,24 @@ export const doDatabaseUpdate = async (_logger: Logger) => {
 		logger?.info(
 			"Unable to resolve an oldest unanswered question, skipping metadata update",
 		);
-		return;
+		return status;
 	}
 
-	const { ok: saveMetadataOk, error } = await saveMetadata({
-		...metadata.result,
+	const [updateMetadataError] = await updateMetadata({
 		oldestUnansweredQuestion: `${oldest.id}`,
 	});
-	if (!saveMetadataOk) {
+	if (updateMetadataError) {
 		logger?.error(
-			{ error, oldest_unanswered_id: oldest.id },
+			{ error: updateMetadataError, oldest_unanswered_id: oldest.id },
 			`Unable to save oldest unanswered question (${oldest.id}) to metadata`,
 		);
-		return;
+		return status;
 	}
 	logger?.info(
 		{ oldest_unanswered_id: oldest.id },
 		`Successfully updated metadata with oldest unanswered question (${oldest.id})`,
 	);
 	logger.info("Successfully completed database update.");
+
+	return status;
 };
