@@ -4,8 +4,8 @@ packages:
 catalog:
   pino: ^9.6.0
   pino-pretty: ^13.0.0
-  '@qnaplus/scraper': ^3.1.0
-  '@qnaplus/scraper-strategies': ^3.1.0
+  '@qnaplus/scraper': ^3.1.1
+  '@qnaplus/scraper-strategies': ^3.1.1
   croner: ^8.0.2
 onlyBuiltDependencies:
   - '@biomejs/biome'
