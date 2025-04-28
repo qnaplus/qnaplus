@@ -176,7 +176,9 @@ export const updateFailures = async (
 	data: (typeof schema.failures.$inferInsert)[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(() => d.insert(schema.failures).values(data).onConflictDoNothing());
+	return trycatch(() =>
+		d.insert(schema.failures).values(data).onConflictDoNothing(),
+	);
 };
 
 export const doFailureQuestionUpdate = async (
