@@ -28,7 +28,7 @@ export const upload = async (key: string, buffer: Buffer, logger: Logger) => {
 			version: randomUUID(),
 		},
 	});
-	const [error] = await trycatch(r2().send(command));
+	const [error] = await trycatch(() => r2().send(command));
 	if (error) {
 		logger.error(
 			{ error },

@@ -22,27 +22,27 @@ export const METADATA_ROW_ID = 0;
 export const testConnection = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(d.execute(sql`select 1`));
+	return trycatch(() => d.execute(sql`select 1`));
 };
 
 export const getQuestion = async (
 	id: Question["id"],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(
+	return trycatch(() =>
 		d.query.questions.findFirst({ where: eq(schema.questions.id, id) }),
 	);
 };
 
 export const getAllQuestions = async () => {
-	return trycatch(db().select().from(schema.questions));
+	return trycatch(() => db().select().from(schema.questions));
 };
 
 export const getAnsweredQuestionsNewerThanDate = async (
 	ms: number,
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(
+	return trycatch(() =>
 		d
 			.select()
 			.from(schema.questions)
@@ -59,7 +59,7 @@ export const insertQuestions = async (
 	data: Question[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(d.insert(schema.questions).values(data));
+	return trycatch(() => d.insert(schema.questions).values(data));
 };
 
 const EXCLUDED_QUESTION = {
@@ -91,7 +91,7 @@ export const updateQuestions = async (
 	data: Question[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(
+	return trycatch(() =>
 		d
 			.insert(schema.questions)
 			.values(data)
@@ -129,7 +129,7 @@ export const getEventQueue = async (
 			.from(formattedPayloads)
 			.groupBy(formattedPayloads.event),
 	);
-	return trycatch(
+	return trycatch(() =>
 		d
 			.with(formattedPayloads, aggregatedPayloads)
 			.select({
@@ -143,7 +143,7 @@ export const clearEventQueue = async (
 	ids: string[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(
+	return trycatch(() =>
 		d.delete(schema.event_queue).where(inArray(schema.event_queue.id, ids)),
 	);
 };
@@ -151,14 +151,14 @@ export const clearEventQueue = async (
 export const getMetadata = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(d.query.metadata.findFirst());
+	return trycatch(() => d.query.metadata.findFirst());
 };
 
 export const updateMetadata = async (
 	data: Partial<Omit<typeof schema.metadata.$inferInsert, "id">>,
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(
+	return trycatch(() =>
 		d
 			.update(schema.metadata)
 			.set({ ...data })
@@ -169,14 +169,14 @@ export const updateMetadata = async (
 export const getFailures = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(d.select().from(schema.failures));
+	return trycatch(() => d.select().from(schema.failures));
 };
 
 export const updateFailures = async (
 	data: (typeof schema.failures.$inferInsert)[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(d.insert(schema.failures).values(data).onConflictDoNothing());
+	return trycatch(() => d.insert(schema.failures).values(data).onConflictDoNothing());
 };
 
 export const doFailureQuestionUpdate = async (
@@ -184,7 +184,7 @@ export const doFailureQuestionUpdate = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
 	const oldFailures = questions.map((q) => q.id);
-	return trycatch(
+	return trycatch(() =>
 		d.transaction(async (tx) => {
 			await updateQuestions(questions, tx);
 			await tx
@@ -197,7 +197,7 @@ export const doFailureQuestionUpdate = async (
 export const getReplayEvents = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(
+	return trycatch(() =>
 		d
 			.select({ question: schema.questions })
 			.from(schema.event_queue)
@@ -216,7 +216,7 @@ export const insertReplayEvents = async (
 		event: EventQueueType.Replay,
 		payload: { question },
 	}));
-	return trycatch(
+	return trycatch(() =>
 		d.insert(schema.event_queue).values(events).onConflictDoNothing(),
 	);
 };
@@ -224,7 +224,7 @@ export const insertReplayEvents = async (
 export const clearReplayEvents = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(
+	return trycatch(() =>
 		d
 			.delete(schema.event_queue)
 			.where(eq(schema.event_queue.event, EventQueueType.Replay)),
@@ -234,7 +234,7 @@ export const clearReplayEvents = async (
 export const getAllPrograms = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(
+	return trycatch(() =>
 		d
 			.selectDistinct({ program: schema.questions.program })
 			.from(schema.questions),
@@ -244,14 +244,14 @@ export const getAllPrograms = async (
 export const getForumStates = async (
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(d.select().from(schema.forum_state));
+	return trycatch(() => d.select().from(schema.forum_state));
 };
 
 export const updateForumStates = async (
 	states: (typeof schema.forum_state.$inferInsert)[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(
+	return trycatch(() =>
 		d
 			.insert(schema.forum_state)
 			.values(states)

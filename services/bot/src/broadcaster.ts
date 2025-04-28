@@ -87,7 +87,7 @@ const broadcastToProgram = async <T extends EventQueueType>(
 	const passed: string[] = [];
 	for (let i = 0; i < embedSlices.length; i++) {
 		const embeds = embedSlices[i];
-		const [broadcastError] = await trycatch(broadcast(channel, embeds));
+		const [broadcastError] = await trycatch(() => broadcast(channel, embeds));
 		if (broadcastError) {
 			logger.error(
 				{ error: broadcastError },

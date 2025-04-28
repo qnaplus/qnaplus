@@ -150,17 +150,18 @@ export const updateDatabase = async (
 		logger,
 		start,
 	});
-	const [updateError, updates] = await updateQuestions(questions);
-	if (updateError) {
-		logger.error(
-			{ error: updateError },
-			`Failed to upsert ${questions.length} questions, retrying on next run.`,
-		);
-		return status;
+	if (questions.length > 0) {
+		const [updateError, updates] = await updateQuestions(questions);
+		if (updateError) {
+			logger.error(
+				{ error: updateError },
+				`Failed to upsert ${questions.length} questions, retrying on next run.`,
+			);
+			return status;
+		}
+		status.updateStorage = updates.length !== 0;
+		logger.info(`${updates.length} new updates detected.`);
 	}
-	status.updateStorage = updates.length !== 0;
-
-	logger.info(`${updates.length} new updates detected.`);
 
 	const allFailures = unique([...failureUpdateResult.failures, ...failures]);
 
