@@ -65,9 +65,9 @@ export const doQnaCheck = async (
 	for (const { program } of programs) {
 		// get the 'open' state for a given program
 		// if there is none, default to true so we can initialize one
-		const statesMapOpen = statesMap[program] ?? true;
+		const currentOpenState = statesMap[program] ?? true;
 		let open: boolean;
-		if (statesMapOpen) {
+		if (currentOpenState || program.toLowerCase() === "judging") {
 			const readonly = await checkIfReadOnly(program, season, {
 				client,
 				logger,
