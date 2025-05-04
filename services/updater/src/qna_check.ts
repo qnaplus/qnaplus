@@ -1,5 +1,4 @@
 import {
-    Constants,
 	type FetchClient,
 	type FetchClientResponse,
 	type Season,
@@ -82,7 +81,7 @@ export const doQnaCheck = async (
 			open = !readonly;
 		} else {
 			open = await pingQna(program, getNextSeason(season), { client, logger });
-        }
+		}
 
 		newStates.push({ program, open });
 	}
