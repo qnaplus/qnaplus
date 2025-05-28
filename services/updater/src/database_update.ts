@@ -175,14 +175,16 @@ export const updateDatabase = async (
 		`${failureUpdateResult.failures.length} failures in database, ${failures.length} failures found for this update, ${validFailures.length} questions extracted from failures.`,
 	);
 	const finalFailures = validFailures.map((id) => ({ id }));
-	const [failureError] = await updateFailures(finalFailures);
-	if (failureError) {
-		logger?.error(
-			{ error: failureError },
-			"Error while updating failures list.",
-		);
-		return status;
-	}
+    if (finalFailures.length > 0) {
+        const [failureError] = await updateFailures(finalFailures);
+        if (failureError) {
+            logger?.error(
+                { error: failureError },
+                "Error while updating failures list.",
+            );
+            return status;
+        }
+    }
 
 	/*
 		If the starting question fails, we should consider it as unanswered, giving it a chance to succeed on the next run.
