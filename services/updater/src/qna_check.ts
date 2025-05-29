@@ -68,6 +68,7 @@ export const doQnaCheck = async (
 		const currentOpenState = statesMap[program] ?? true;
 		let open: boolean;
 		if (currentOpenState || program.toLowerCase() === "judging") {
+            logger.info(`Forum for ${program} is open, checking readonly status.`);
 			const readonly = await checkIfReadOnly(program, season, {
 				client,
 				logger,
@@ -80,8 +81,11 @@ export const doQnaCheck = async (
 			}
 			open = !readonly;
 		} else {
+            logger.info(`Forum for ${program} is closed, checking availability of the next Q&A forum.`);
 			open = await pingQna(program, getNextSeason(season), { client, logger });
 		}
+
+		logger.info(`Forum state for ${program}: ${open}`);
 
 		newStates.push({ program, open });
 	}
