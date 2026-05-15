@@ -20,11 +20,7 @@ const ENV_VARIABLES = [
 type EnvVariable = (typeof ENV_VARIABLES)[number];
 
 const loadEnv = () => {
-	const { error } = config();
-	if (error) {
-		console.error(error);
-		throw Error("Environment variables could not be loaded, exiting");
-	}
+	config();
 	const loaded: Record<string, string> = {};
 	for (const v of ENV_VARIABLES) {
 		const value = process.env[v];

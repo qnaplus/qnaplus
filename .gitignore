@@ -39,8 +39,6 @@ dist
 # API keys and secrets
 .env*
 .flaskenv*
-!.env.project
-!.env.vault
 !.env.template
 
 .turbo

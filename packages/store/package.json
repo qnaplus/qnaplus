@@ -18,18 +18,18 @@
 		"db:gen": "drizzle-kit generate"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.750.0",
-		"@qnaplus/dotenv": "workspace:1.0.0",
+		"@aws-sdk/client-s3": "^3.1045.0",
+		"@qnaplus/dotenv": "workspace:*",
 		"@qnaplus/scraper": "catalog:",
-		"@qnaplus/utils": "workspace:1.0.0",
-		"drizzle-orm": "^0.39.1",
+		"@qnaplus/utils": "workspace:*",
+		"drizzle-orm": "^0.45.2",
 		"pino": "catalog:",
-		"postgres": "^3.4.5"
+		"postgres": "^3.4.9"
 	},
 	"devDependencies": {
 		"@qnaplus/scraper-strategies": "catalog:",
-		"@qnaplus/typescript-config": "workspace:1.0.0",
-		"drizzle-kit": "^0.30.4",
+		"@qnaplus/typescript-config": "workspace:*",
+		"drizzle-kit": "^0.31.10",
 		"pino-pretty": "catalog:"
 	},
 	"exports": {

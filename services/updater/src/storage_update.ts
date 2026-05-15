@@ -1,16 +1,16 @@
 import { getenv } from "@qnaplus/dotenv";
-import { getAllQuestions, upload } from "@qnaplus/store";
+import { getAllSeasonQuestions, upload } from "@qnaplus/store";
 import { trycatch } from "@qnaplus/utils";
 import type { Logger } from "pino";
 
 export const updateStorage = async (_logger: Logger) => {
 	const logger = _logger?.child({ label: "doStorageUpdate" });
 	logger.info("Starting storage update.");
-	const [questionsError, questions] = await getAllQuestions();
+	const [questionsError, questions] = await getAllSeasonQuestions();
 	if (questionsError) {
 		logger?.error(
 			{ error: questionsError },
-			"An error occurred while retreiving all questions from database.",
+			"An error occurred while retreiving season questions from database.",
 		);
 		return;
 	}
