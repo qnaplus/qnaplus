@@ -8,7 +8,7 @@ export class PinoLoggerAdapter implements ISapphireLogger {
 		this.pino = logger;
 	}
 
-	has(level: LogLevel): boolean {
+	has(_level: LogLevel): boolean {
 		return true;
 	}
 

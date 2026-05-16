@@ -5,12 +5,7 @@ import {
 	checkIfReadOnly,
 	pingQna,
 } from "@qnaplus/scraper";
-import {
-	getAllPrograms,
-	getForumStates,
-	getMetadata,
-	updateForumStates,
-} from "@qnaplus/store";
+import { getAllPrograms, getForumStates, getMetadata, updateForumStates } from "@qnaplus/store";
 import type { Logger } from "pino";
 
 type ProgramState = {
@@ -26,10 +21,7 @@ const getNextSeason = (season: Season) => {
 	return `${endYear}-${endYear + 1}`;
 };
 
-export const doQnaCheck = async (
-	client: FetchClient<FetchClientResponse>,
-	logger: Logger,
-) => {
+export const doQnaCheck = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
 	logger.info("Starting programs update.");
 	const [programsError, programs] = await getAllPrograms();
 	if (programsError) {
@@ -68,20 +60,20 @@ export const doQnaCheck = async (
 		const currentOpenState = statesMap[program] ?? true;
 		let open: boolean;
 		if (currentOpenState || program.toLowerCase() === "judging") {
-            logger.info(`Forum for ${program} is open, checking readonly status.`);
+			logger.info(`Forum for ${program} is open, checking readonly status.`);
 			const readonly = await checkIfReadOnly(program, season, {
 				client,
 				logger,
 			});
 			if (readonly === null) {
-				logger.warn(
-					`Unable to check state for ${program} (${season}), skipping.`,
-				);
+				logger.warn(`Unable to check state for ${program} (${season}), skipping.`);
 				continue;
 			}
 			open = !readonly;
 		} else {
-            logger.info(`Forum for ${program} is closed, checking availability of the next Q&A forum.`);
+			logger.info(
+				`Forum for ${program} is closed, checking availability of the next Q&A forum.`,
+			);
 			open = await pingQna(program, getNextSeason(season), { client, logger });
 		}
 

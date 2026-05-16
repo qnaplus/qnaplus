@@ -13,8 +13,7 @@ const client = new SapphireClient({
 		GatewayIntentBits.MessageContent,
 	],
 	logger: {
-		level:
-			getenv("NODE_ENV") === "development" ? LogLevel.Debug : LogLevel.Info,
+		level: getenv("NODE_ENV") === "development" ? LogLevel.Debug : LogLevel.Info,
 		instance: new PinoLoggerAdapter(pinoLogger),
 	},
 	partials: [Partials.Message, Partials.Channel],

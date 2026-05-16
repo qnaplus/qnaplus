@@ -7,13 +7,8 @@ import {
 } from "@qnaplus/store";
 import { chunk, entries, groupby, trycatch } from "@qnaplus/utils";
 import { container } from "@sapphire/framework";
-import Cron from "croner";
-import {
-	ChannelType,
-	type EmbedBuilder,
-	type NewsChannel,
-	channelMention,
-} from "discord.js";
+import { Cron } from "croner";
+import { ChannelType, type EmbedBuilder, type NewsChannel, channelMention } from "discord.js";
 import type { Logger } from "pino";
 import { buildEventEmbed } from "./formatting";
 import type { PinoLoggerAdapter } from "./utils/logger_adapter";
@@ -111,14 +106,10 @@ type IEventGroupMap = {
 };
 
 const EventGroupMap: IEventGroupMap = {
-	[EventQueueType.Answered]: (payloads) =>
-		groupby(payloads, (p) => p.payload.question.program),
-	[EventQueueType.AnswerEdited]: (payloads) =>
-		groupby(payloads, (p) => p.payload.after.program),
-	[EventQueueType.Replay]: (payloads) =>
-		groupby(payloads, (p) => p.payload.question.program),
-	[EventQueueType.ForumChange]: (payloads) =>
-		groupby(payloads, (p) => p.payload.after.program),
+	[EventQueueType.Answered]: (payloads) => groupby(payloads, (p) => p.payload.question.program),
+	[EventQueueType.AnswerEdited]: (payloads) => groupby(payloads, (p) => p.payload.after.program),
+	[EventQueueType.Replay]: (payloads) => groupby(payloads, (p) => p.payload.question.program),
+	[EventQueueType.ForumChange]: (payloads) => groupby(payloads, (p) => p.payload.after.program),
 };
 
 const broadcastEvent = async <T extends EventQueueType>(
@@ -172,19 +163,12 @@ const processEventQueue = async (logger: Logger) => {
 };
 
 export const start = (logger: Logger) => {
-	const job = Cron(
-		getenv("DATABASE_UPDATE_INTERVAL"),
-		() => processEventQueue(logger),
-		{
-			name: "event_queue_broadcaster",
-			protect: true,
-			catch(e) {
-				logger.error(
-					{ error: e },
-					"An error occurred while processing the event queue.",
-				);
-			},
+	const job = new Cron(getenv("DATABASE_UPDATE_INTERVAL"), () => processEventQueue(logger), {
+		name: "event_queue_broadcaster",
+		protect: true,
+		catch(e) {
+			logger.error({ error: e }, "An error occurred while processing the event queue.");
 		},
-	);
+	});
 	job.trigger();
 };

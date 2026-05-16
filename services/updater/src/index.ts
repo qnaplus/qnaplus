@@ -9,53 +9,37 @@ import { updateDatabase } from "./database_update";
 import { doQnaCheck } from "./qna_check";
 import { updateStorage } from "./storage_update";
 
-const update = async (
-    client: FetchClient<FetchClientResponse>,
-    logger: Logger,
-) => {
-    const status = await updateDatabase(client, logger);
-    if (status.updateStorage) {
-        updateStorage(logger);
-    }
-    await doQnaCheck(client, logger);
+const update = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
+	const status = await updateDatabase(client, logger);
+	if (status.updateStorage) {
+		updateStorage(logger);
+	}
+	await doQnaCheck(client, logger);
 };
 
-const start = async (
-    client: FetchClient<FetchClientResponse>,
-    logger: Logger,
-) => {
-    logger.info("Starting database update job");
-    const job = new Cron(
-        getenv("DATABASE_UPDATE_INTERVAL"),
-        () => update(client, logger),
-        {
-            name: "updater",
-            protect: true,
-            catch(e) {
-                logger.error(
-                    { error: e },
-                    "An error occurred while updating database.",
-                );
-            },
-        },
-    );
-    job.trigger();
+const start = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
+	logger.info("Starting database update job");
+	const job = new Cron(getenv("DATABASE_UPDATE_INTERVAL"), () => update(client, logger), {
+		name: "updater",
+		protect: true,
+		catch(e) {
+			logger.error({ error: e }, "An error occurred while updating database.");
+		},
+	});
+	job.trigger();
 };
 
 (async () => {
-    const logger = getLoggerInstance("qnaplus-updater");
-    logger.info("Starting updater service");
+	const logger = getLoggerInstance("qnaplus-updater");
+	logger.info("Starting updater service");
 
-    const [error] = await testConnection();
-    if (error) {
-        logger.error(
-            { error },
-            "Unable to establish database connection, exiting.",
-        );
-        process.exit(1);
-    }
+	const [error] = await testConnection();
+	if (error) {
+		logger.error({ error }, "Unable to establish database connection, exiting.");
+		process.exit(1);
+	}
 
-    const client = new CurlImpersonateScrapingClient(logger);
+	const client = new CurlImpersonateScrapingClient(logger);
 
-    start(client, logger);
+	start(client, logger);
 })();

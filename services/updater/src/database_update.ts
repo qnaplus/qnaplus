@@ -54,9 +54,7 @@ const handleFailureUpdate = async (
 		return { oldest: undefined, failures: [] };
 	}
 
-	const failureIds = currentFailures.map((failure) =>
-		Number.parseInt(failure.id),
-	);
+	const failureIds = currentFailures.map((failure) => Number.parseInt(failure.id));
 	const chunks = chunk(failureIds, ITERATIVE_BATCH_COUNT);
 	const questions: Question[] = [];
 	const failures: string[] = [];
@@ -75,22 +73,14 @@ const handleFailureUpdate = async (
 	}
 
 	const ids = questions.map((q) => q.id);
-	logger?.info(
-		{ questions: ids },
-		`${questions.length} new questions resolved from failures.`,
-	);
+	logger?.info({ questions: ids }, `${questions.length} new questions resolved from failures.`);
 
 	const [updateError] = await doFailureQuestionUpdate(questions);
 	if (updateError) {
-		logger?.error(
-			{ error: updateError },
-			"Unable to perform failure-question update.",
-		);
+		logger?.error({ error: updateError }, "Unable to perform failure-question update.");
 		return { oldest: undefined, failures };
 	}
-	logger?.info(
-		"Updated failure list. Removed new questions from failure list.",
-	);
+	logger?.info("Updated failure list. Removed new questions from failure list.");
 
 	const oldest = getOldestUnansweredQuestion(questions, season);
 	logger?.info("Successfully completed failure update.");
@@ -112,10 +102,7 @@ export const updateDatabase = async (
 	logger.info("Starting database update.");
 	const [metadataError, metadata] = await getMetadata();
 	if (metadataError) {
-		logger?.error(
-			{ error: metadataError },
-			"Error retrieving question metadata, exiting",
-		);
+		logger?.error({ error: metadataError }, "Error retrieving question metadata, exiting");
 		return status;
 	}
 	if (metadata === undefined) {
@@ -124,17 +111,9 @@ export const updateDatabase = async (
 	}
 
 	const { currentSeason, oldestUnansweredQuestion } = metadata;
-	const failureUpdateResult = await handleFailureUpdate(
-		client,
-		currentSeason as Season,
-		logger,
-	);
-	logger?.info(
-		`Oldest resolved question from failure update: ${failureUpdateResult.oldest}`,
-	);
-	logger?.info(
-		`Stored oldest unanswered question: ${oldestUnansweredQuestion}`,
-	);
+	const failureUpdateResult = await handleFailureUpdate(client, currentSeason as Season, logger);
+	logger?.info(`Oldest resolved question from failure update: ${failureUpdateResult.oldest}`);
+	logger?.info(`Stored oldest unanswered question: ${oldestUnansweredQuestion}`);
 
 	const start =
 		failureUpdateResult.oldest !== undefined
@@ -178,10 +157,7 @@ export const updateDatabase = async (
 	if (finalFailures.length > 0) {
 		const [failureError] = await updateFailures(finalFailures);
 		if (failureError) {
-			logger?.error(
-				{ error: failureError },
-				"Error while updating failures list.",
-			);
+			logger?.error({ error: failureError }, "Error while updating failures list.");
 			return status;
 		}
 	}
@@ -208,9 +184,7 @@ export const updateDatabase = async (
 	}
 
 	if (oldestUnansweredFromUpdate === undefined) {
-		logger?.info(
-			"Oldest unanswered question from update not found, skipping metadata update.",
-		);
+		logger?.info("Oldest unanswered question from update not found, skipping metadata update.");
 		return status;
 	}
 
@@ -222,9 +196,7 @@ export const updateDatabase = async (
 				)
 			: oldestUnansweredFromUpdate;
 	if (oldest === undefined) {
-		logger?.info(
-			"Unable to resolve an oldest unanswered question, skipping metadata update",
-		);
+		logger?.info("Unable to resolve an oldest unanswered question, skipping metadata update");
 		return status;
 	}
 

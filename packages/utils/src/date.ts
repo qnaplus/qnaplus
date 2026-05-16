@@ -1,29 +1,7 @@
-const months = [
-	"Jan",
-	"Feb",
-	"Mar",
-	"Apr",
-	"May",
-	"Jun",
-	"Jul",
-	"Aug",
-	"Sep",
-	"Oct",
-	"Nov",
-	"Dec",
-];
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-export const isValidDate = (
-	date: Date,
-	year: number,
-	month: number,
-	day: number,
-) => {
-	return (
-		date.getFullYear() === year &&
-		date.getMonth() + 1 === month &&
-		date.getDate() === day
-	);
+export const isValidDate = (date: Date, year: number, month: number, day: number) => {
+	return date.getFullYear() === year && date.getMonth() + 1 === month && date.getDate() === day;
 };
 
 export const mmmToMonthNumber = (mmm: string) => {

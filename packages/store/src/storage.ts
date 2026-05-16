@@ -30,10 +30,7 @@ export const upload = async (key: string, buffer: Buffer, logger: Logger) => {
 	});
 	const [error] = await trycatch(() => r2().send(command));
 	if (error) {
-		logger.error(
-			{ error },
-			"An error occurred while uploading questions to bucket.",
-		);
+		logger.error({ error }, "An error occurred while uploading questions to bucket.");
 		return;
 	}
 };
