@@ -1,4 +1,8 @@
-FROM node:22.14.0-alpine3.21 AS base
+FROM node:22.14.0-bookworm-slim AS base
+
+RUN apt-get update
+RUN apt-get -y install libnss3-dev ca-certificates python3
+RUN update-ca-certificates
 
 RUN npm i -g corepack@latest
 
@@ -6,7 +10,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable
-RUN corepack use pnpm@10.6.5
+RUN corepack use pnpm@11.1.2
 
 WORKDIR /app
 COPY . .
@@ -15,6 +19,9 @@ COPY . .
 
 FROM base AS build
 
+# Hoisted mode so pnpm physically copies platform-specific optional binaries
+# instead of leaving them as symlinks that break across the cache-mount boundary.
+RUN printf '\nnodeLinker: hoisted\n' >> pnpm-workspace.yaml
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i --frozen-lockfile
 RUN pnpm build
 
@@ -25,10 +32,6 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm --filter @qnaplus/updater
 # =======================================================
 
 FROM node:22.14.0-bookworm-slim AS prod
-
-RUN apt-get update
-RUN apt-get -y install libnss3-dev ca-certificates
-RUN update-ca-certificates
 
 # Pin to a specific Infisical CLI release in production.
 RUN npm install -g @infisical/cli@0.43.84
