@@ -6,7 +6,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable
-RUN corepack use pnpm@10.6.5
+RUN corepack use pnpm@11.1.2
 
 WORKDIR /app
 COPY . .

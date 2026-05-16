@@ -4,6 +4,9 @@ packages:
 allowBuilds:
   canvas: true
   esbuild: true
+injectWorkspacePackages: true
+syncInjectedDepsAfterScripts:
+  - build
 catalog:
   pino: ^10.3.1
   pino-pretty: ^13.1.3
