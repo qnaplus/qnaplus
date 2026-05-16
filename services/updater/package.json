@@ -12,22 +12,26 @@
 		"build": "tsc",
 		"build:production": "tsc --declaration false --noCheck true",
 		"check-types": "tsc --noEmit",
-		"clean": "rimraf dist tsconfig.tsbuildinfo",
-		"clean:modules": "rimraf node_modules",
+		"clean": "rm -rf dist tsconfig.tsbuildinfo",
+		"clean:modules": "rm -rf node_modules",
 		"clean:full": "pnpm clean && pnpm clean:modules",
+		"lint": "oxlint src",
+		"lint:fix": "oxlint --fix src",
+		"fmt": "oxfmt --check src",
+		"fmt:fix": "oxfmt src",
 		"update_storage": "tsx scripts/update_storage.ts | pino-pretty"
 	},
 	"dependencies": {
-		"@qnaplus/logger": "workspace:1.0.0",
+		"@qnaplus/dotenv": "workspace:*",
+		"@qnaplus/logger": "workspace:*",
 		"@qnaplus/scraper": "catalog:",
 		"@qnaplus/scraper-strategies": "catalog:",
-		"@qnaplus/store": "workspace:1.0.0",
-		"@qnaplus/dotenv": "workspace:1.0.0",
-		"@qnaplus/utils": "workspace:1.0.0",
+		"@qnaplus/store": "workspace:*",
+		"@qnaplus/utils": "workspace:*",
 		"croner": "catalog:"
 	},
 	"devDependencies": {
-		"@qnaplus/typescript-config": "workspace:1.0.0",
+		"@qnaplus/typescript-config": "workspace:*",
 		"pino": "catalog:",
 		"pino-pretty": "catalog:"
 	},

@@ -6,18 +6,22 @@
 	"author": "battlesqui_d",
 	"license": "GPL-3.0",
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
-		"rimraf": "^6.1.3",
-		"tsx": "^4.21.0",
-		"typescript": "^5.9.3"
+		"oxfmt": "^0.49.0",
+		"oxlint": "^1.64.0",
+		"tsx": "^4.22.0",
+		"typescript": "^6.0.3"
 	},
 	"scripts": {
 		"build": "tsc --build",
 		"check-types": "pnpm -r check-types",
 		"clean": "pnpm -r clean",
 		"clean:full": "pnpm -r clean:full",
-		"neat": "biome check .",
-		"neat:fix": "biome check . --write",
+		"lint": "pnpm -r lint",
+		"lint:fix": "pnpm -r lint:fix",
+		"fmt": "pnpm -r fmt",
+		"fmt:fix": "pnpm -r fmt:fix",
+		"neat": "pnpm lint && pnpm fmt",
+		"neat:fix": "pnpm lint:fix && pnpm fmt:fix",
 		"bot": "pnpm --filter=@qnaplus/bot run start",
 		"bot:dev": "pnpm --filter=@qnaplus/bot run dev",
 		"updater": "pnpm --filter=@qnaplus/updater run start",
@@ -27,8 +31,8 @@
 		"store:populate-metadata": "pnpm --filter=@qnaplus/store run populate_metadata"
 	},
 	"volta": {
-		"pnpm": "10.7.0",
+		"pnpm": "11.1.2",
 		"node": "22.14.0"
 	},
-	"packageManager": "pnpm@10.6.5"
+	"packageManager": "pnpm@11.1.2"
 }

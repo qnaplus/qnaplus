@@ -8,9 +8,13 @@
 	"scripts": {
 		"build": "tsc",
 		"build:production": "tsc --declaration false --noCheck true",
-		"clean": "rimraf dist tsconfig.tsbuildinfo",
-		"clean:modules": "rimraf node_modules",
+		"clean": "rm -rf dist tsconfig.tsbuildinfo",
+		"clean:modules": "rm -rf node_modules",
 		"clean:full": "pnpm clean && pnpm clean:modules",
+		"lint": "oxlint src",
+		"lint:fix": "oxlint --fix src",
+		"fmt": "oxfmt --check src",
+		"fmt:fix": "oxfmt src",
 		"populate": "tsx scripts/populate.ts | pino-pretty",
 		"populate_metadata": "tsx scripts/populate.ts --metadata | pino-pretty",
 		"check-types": "tsc --noEmit",
@@ -18,7 +22,7 @@
 		"db:gen": "drizzle-kit generate"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.1045.0",
+		"@aws-sdk/client-s3": "^3.1047.0",
 		"@qnaplus/dotenv": "workspace:*",
 		"@qnaplus/scraper": "catalog:",
 		"@qnaplus/utils": "workspace:*",
