@@ -24,16 +24,15 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm --filter @qnaplus/updater
 
 # =======================================================
 
-# Pin to a specific Infisical CLI release in production.
-FROM infisical/cli:0.43.84 AS infisical-cli
-
 FROM node:22.14.0-bookworm-slim AS prod
 
 RUN apt-get update
 RUN apt-get -y install libnss3-dev ca-certificates
 RUN update-ca-certificates
 
-COPY --from=infisical-cli /usr/bin/infisical /usr/local/bin/infisical
+# Pin to a specific Infisical CLI release in production.
+RUN npm install -g @infisical/cli@0.43.84
+
 COPY --from=build /app/out /app
 WORKDIR /app
 

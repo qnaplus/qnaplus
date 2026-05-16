@@ -25,11 +25,12 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm --filter @qnaplus/bot --p
 # =======================================================
 
 # Pin to a specific Infisical CLI release in production.
-FROM infisical/cli:0.43.84 AS infisical-cli
+FROM node:22.14.0-bookworm-slim AS infisical-cli
+RUN npm install -g @infisical/cli@0.43.84
 
 FROM gcr.io/distroless/nodejs22-debian12 AS prod
 
-COPY --from=infisical-cli /usr/bin/infisical /usr/local/bin/infisical
+COPY --from=infisical-cli /usr/local/bin/infisical /usr/local/bin/infisical
 COPY --from=build /app/out /app
 
 WORKDIR /app
