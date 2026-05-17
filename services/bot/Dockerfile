@@ -29,6 +29,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm --filter @qnaplus/bot --p
 FROM node:22.14.0-bookworm-slim AS infisical-cli
 RUN npm install -g @infisical/cli@0.43.84
 
+# =======================================================
+
 FROM gcr.io/distroless/nodejs22-debian12
 
 ARG NODE_ENV=production

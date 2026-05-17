@@ -1,7 +1,7 @@
 import { getenv } from "@qnaplus/dotenv";
 import type { Question } from "@qnaplus/scraper";
 import { lazy, trycatch } from "@qnaplus/utils";
-import { and, eq, gte, inArray, or, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, gte, inArray, or, sql } from "drizzle-orm";
 import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
@@ -37,14 +37,14 @@ export const getAllQuestions = async (d: PostgresJsDatabase<typeof schema> = db(
 export const getAllSeasonQuestions = async (d: PostgresJsDatabase<typeof schema> = db()) => {
 	const currentSeason = d.$with("current_season").as(
 		d
-			.select({ season: sql<string>`${schema.metadata.currentSeason}`.as("season") })
+			.select({ season: sql<string>`${schema.metadata.currentSeason}`.as("s") })
 			.from(schema.metadata)
 			.limit(1),
 	);
 	return trycatch(() =>
 		d
 			.with(currentSeason)
-			.select()
+			.select(getTableColumns(schema.questions))
 			.from(schema.questions)
 			.innerJoin(currentSeason, eq(schema.questions.season, currentSeason.season)),
 	);

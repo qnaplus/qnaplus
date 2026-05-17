@@ -24,7 +24,7 @@ export const updateStorage = async (_logger: Logger) => {
     }
     const json = JSON.stringify(questions);
     const buffer = Buffer.from(json, "utf-8");
-    const key = `questions-${getenv("NODE_ENV")}-${meta.currentSeason}.json`;
+    const key = `questions-${getenv("NODE_ENV")}.json`; // TODO: break out by season
     const [uploadError] = await trycatch(() => upload(key, buffer, logger));
     if (uploadError) {
         logger?.error({ error: uploadError }, "Error while updating storage json");

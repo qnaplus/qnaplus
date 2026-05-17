@@ -44,3 +44,5 @@ dist
 .turbo
 
 out/
+
+*.env
