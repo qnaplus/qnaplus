@@ -64,6 +64,27 @@
       "when": 1743022723221,
       "tag": "0008_freezing_wilson_fisk",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1778981610454,
+      "tag": "0009_happy_omega_red",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1778981739397,
+      "tag": "0010_keen_komodo",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1778984932778,
+      "tag": "0011_new_scarlet_witch",
+      "breakpoints": true
     }
   ]
 }

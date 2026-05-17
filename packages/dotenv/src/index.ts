@@ -1,5 +1,3 @@
-import { config } from "dotenv";
-
 const ENV_VARIABLES = [
 	"SUPABASE_TRANSACTION_URL",
 	"SUPABASE_SESSION_URL",
@@ -10,7 +8,6 @@ const ENV_VARIABLES = [
 	"LOKI_HOST",
 	"LOKI_USERNAME",
 	"LOKI_PASSWORD",
-	"CF_QUESTIONS_KEY",
 	"CF_ACCOUNT_ID",
 	"CF_ACCESS_KEY_ID",
 	"CF_SECRET_ACCESS_KEY",
@@ -20,7 +17,6 @@ const ENV_VARIABLES = [
 type EnvVariable = (typeof ENV_VARIABLES)[number];
 
 const loadEnv = () => {
-	config();
 	const loaded: Record<string, string> = {};
 	for (const v of ENV_VARIABLES) {
 		const value = process.env[v];

@@ -7,7 +7,7 @@
 	"license": "GPL-3.0",
 	"scripts": {
 		"build": "tsc",
-		"build:production": "tsc --declaration false --noCheck true",
+		"build:production": "tsc --declaration false",
 		"clean": "rm -rf dist tsconfig.tsbuildinfo",
 		"clean:modules": "rm -rf node_modules",
 		"clean:full": "pnpm clean && pnpm clean:modules",
@@ -15,11 +15,12 @@
 		"lint:fix": "oxlint --fix src",
 		"fmt": "oxfmt --check src",
 		"fmt:fix": "oxfmt src",
-		"populate": "tsx scripts/populate.ts | pino-pretty",
-		"populate_metadata": "tsx scripts/populate.ts --metadata | pino-pretty",
-		"check-types": "tsc --noEmit",
-		"db:push": "drizzle-kit push",
-		"db:gen": "drizzle-kit generate"
+		"init": "tsx scripts/populate.ts | pino-pretty",
+		"init:meta": "tsx scripts/populate.ts --metadata | pino-pretty",
+		"db:push": "infisical run --env=dev -- drizzle-kit push",
+		"db:push:prod": "infisical run --env=prod -- drizzle-kit push",
+		"db:gen": "infisical run --env=dev -- drizzle-kit generate",
+		"db:gen:prod": "infisical run --env=prod -- drizzle-kit generate"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.1047.0",

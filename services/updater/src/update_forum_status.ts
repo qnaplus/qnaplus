@@ -21,7 +21,7 @@ const getNextSeason = (season: Season) => {
 	return `${endYear}-${endYear + 1}`;
 };
 
-export const doQnaCheck = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
+export const updateForumStatus = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
 	logger.info("Starting programs update.");
 	const [programsError, programs] = await getAllPrograms();
 	if (programsError) {

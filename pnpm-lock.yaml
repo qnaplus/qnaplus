@@ -5,28 +5,13 @@ settings:
   excludeLinksFromLockfile: false
   injectWorkspacePackages: true
 
-catalogs:
-  default:
-    '@qnaplus/scraper':
-      specifier: ^3.1.4
-      version: 3.1.4
-    '@qnaplus/scraper-strategies':
-      specifier: ^3.1.4
-      version: 3.1.4
-    croner:
-      specifier: ^10.0.1
-      version: 10.0.1
-    pino:
-      specifier: ^10.3.1
-      version: 10.3.1
-    pino-pretty:
-      specifier: ^13.1.3
-      version: 13.1.3
-
 importers:
 
   .:
     devDependencies:
+      '@types/node':
+        specifier: ^25.8.0
+        version: 25.8.0
       oxfmt:
         specifier: ^0.49.0
         version: 0.49.0
@@ -41,10 +26,6 @@ importers:
         version: 6.0.3
 
   packages/dotenv:
-    dependencies:
-      dotenv:
-        specifier: ^16.3.1
-        version: 16.5.0
     devDependencies:
       '@qnaplus/typescript-config':
         specifier: workspace:1.0.0
@@ -1526,10 +1507,6 @@ packages:
   dot-prop@7.2.0:
     resolution: {integrity: sha512-Ol/IPXUARn9CSbkrdV4VJo7uCy1I3VuSiWCaFSg+8BdUOzF9n3jefIpcgAydvUZbTdEBZs2vEiTiS9m61ssiDA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
-  dotenv@16.5.0:
-    resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
-    engines: {node: '>=12'}
 
   drizzle-kit@0.31.10:
     resolution: {integrity: sha512-7OZcmQUrdGI+DUNNsKBn1aW8qSoKuTH7d0mYgSP8bAzdFzKoovxEFnoGQp2dVs82EOJeYycqRtciopszwUf8bw==}
@@ -3464,8 +3441,6 @@ snapshots:
   dot-prop@7.2.0:
     dependencies:
       type-fest: 2.19.0
-
-  dotenv@16.5.0: {}
 
   drizzle-kit@0.31.10:
     dependencies:

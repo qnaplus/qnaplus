@@ -1,0 +1,1 @@
+ALTER TABLE "metadata" ALTER COLUMN "start" SET DEFAULT 1;

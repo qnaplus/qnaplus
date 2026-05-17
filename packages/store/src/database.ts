@@ -172,30 +172,6 @@ export const updateMetadata = async (
 	);
 };
 
-export const getFailures = async (d: PostgresJsDatabase<typeof schema> = db()) => {
-	return trycatch(() => d.select().from(schema.failures));
-};
-
-export const updateFailures = async (
-	data: (typeof schema.failures.$inferInsert)[],
-	d: PostgresJsDatabase<typeof schema> = db(),
-) => {
-	return trycatch(() => d.insert(schema.failures).values(data).onConflictDoNothing());
-};
-
-export const doFailureQuestionUpdate = async (
-	questions: Question[],
-	d: PostgresJsDatabase<typeof schema> = db(),
-) => {
-	const oldFailures = questions.map((q) => q.id);
-	return trycatch(() =>
-		d.transaction(async (tx) => {
-			await updateQuestions(questions, tx);
-			await tx.delete(schema.failures).where(inArray(schema.failures.id, oldFailures));
-		}),
-	);
-};
-
 export const getReplayEvents = async (d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(() =>
 		d

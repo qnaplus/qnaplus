@@ -30,15 +30,17 @@ qnaplus is a project with the purpose of improving the quality of life for the V
 
 This project uses [PNPM Workspaces](https://pnpm.io/workspaces) to manage structure and builds.
 
-- `packages`: Internal packages that are used by services.
-  - `dotenv`: Type-safe library for accessing environment variables.
-  - `store`: Supabase-related abstractions.
-  - `logger`: For creating service-unique loggers.
-  - `typescript-config`: Shared config for all packages/services.
-  - `utils`: Library for shared utility functions.
-- `services`: Applications that tie together the functionality in `packages`
-  - `updater`: Service for continuously watching for updates on the Q&A.
-  - `bot`: Discord Bot for announcing new answers.
+| Path | Description |
+|------|-------------|
+| `packages/` | Internal packages used by services |
+| `packages/dotenv` | Type-safe library for accessing environment variables |
+| `packages/store` | Supabase-related abstractions |
+| `packages/logger` | For creating service-unique loggers |
+| `packages/typescript-config` | Shared config for all packages/services |
+| `packages/utils` | Library for shared utility functions |
+| `services/` | Applications that tie together the functionality in `packages` |
+| `services/updater` | Service for continuously watching for updates on the Q&A |
+| `services/bot` | Discord Bot for announcing new answers |
 
 ## Features and Bugs
 

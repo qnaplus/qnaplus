@@ -5,16 +5,16 @@ import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import { testConnection } from "@qnaplus/store";
 import { Cron } from "croner";
 import type { Logger } from "pino";
-import { updateDatabase } from "./database_update";
-import { doQnaCheck } from "./qna_check";
-import { updateStorage } from "./storage_update";
+import { updateDatabase } from "./update_database";
+import { updateForumStatus } from "./update_forum_status";
+import { updateStorage } from "./update_storage";
 
 const update = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
 	const status = await updateDatabase(client, logger);
 	if (status.updateStorage) {
 		updateStorage(logger);
 	}
-	await doQnaCheck(client, logger);
+	await updateForumStatus(client, logger);
 };
 
 const start = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
@@ -22,8 +22,8 @@ const start = async (client: FetchClient<FetchClientResponse>, logger: Logger) =
 	const job = new Cron(getenv("DATABASE_UPDATE_INTERVAL"), () => update(client, logger), {
 		name: "updater",
 		protect: true,
-		catch(e) {
-			logger.error({ error: e }, "An error occurred while updating database.");
+		catch(error) {
+			logger.error({ error }, "An error occurred while updating database.");
 		},
 	});
 	job.trigger();

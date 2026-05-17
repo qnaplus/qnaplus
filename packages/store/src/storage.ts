@@ -3,7 +3,8 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getenv } from "@qnaplus/dotenv";
 import { lazy, trycatch } from "@qnaplus/utils";
 import type { Logger } from "pino";
-import { QNAPLUS_BUCKET } from "./resources";
+
+const BUCKET = "qnaplus";
 
 const r2 = lazy(
 	() =>
@@ -22,7 +23,7 @@ const r2 = lazy(
 export const upload = async (key: string, buffer: Buffer, logger: Logger) => {
 	const command = new PutObjectCommand({
 		Key: key,
-		Bucket: QNAPLUS_BUCKET,
+		Bucket: BUCKET,
 		Body: buffer,
 		Metadata: {
 			version: randomUUID(),

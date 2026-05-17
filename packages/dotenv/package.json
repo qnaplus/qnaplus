@@ -12,13 +12,10 @@
 		"clean:modules": "rm -rf node_modules",
 		"clean:full": "pnpm clean && pnpm clean:modules",
 		"check-types": "tsc --noEmit",
-        "lint": "oxlint src",
+		"lint": "oxlint src",
 		"lint:fix": "oxlint --fix src",
 		"fmt": "oxfmt --check src",
 		"fmt:fix": "oxfmt src"
-	},
-	"dependencies": {
-		"dotenv": "^16.3.1"
 	},
 	"devDependencies": {
 		"@qnaplus/typescript-config": "workspace:1.0.0"

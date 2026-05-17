@@ -6,6 +6,7 @@
 	"author": "battlesqui_d",
 	"license": "GPL-3.0",
 	"devDependencies": {
+		"@types/node": "^25.8.0",
 		"oxfmt": "^0.49.0",
 		"oxlint": "^1.64.0",
 		"tsx": "^4.22.0",
@@ -27,8 +28,10 @@
 		"updater": "pnpm --filter=@qnaplus/updater run start",
 		"updater:dev": "pnpm --filter=@qnaplus/updater run dev",
 		"updater:storage": "pnpm --filter=@qnaplus/updater run update_storage",
-		"store:populate": "pnpm --filter=@qnaplus/store run populate",
-		"store:populate-metadata": "pnpm --filter=@qnaplus/store run populate_metadata"
+		"store:init": "pnpm --filter=@qnaplus/store run populate",
+		"store:init-meta": "pnpm --filter=@qnaplus/store run populate_metadata",
+        "docker:build-updater": "docker build --rm -t battlesquid0101/qnaplus-updater -f ./services/updater/Dockerfile .",
+        "docker:build-bot": "docker build --rm -t battlesquid0101/qnaplus-bot -f ./services/bot/Dockerfile ."
 	},
 	"volta": {
 		"pnpm": "11.1.2",
