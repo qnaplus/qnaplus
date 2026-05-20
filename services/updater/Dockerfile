@@ -16,13 +16,13 @@ COPY . .
 FROM base AS build
 
 ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
 # Hoisted mode so pnpm physically copies platform-specific optional binaries
 # instead of leaving them as symlinks that break across the cache-mount boundary.
 RUN printf '\nnodeLinker: hoisted\n' >> pnpm-workspace.yaml
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i --frozen-lockfile
 RUN pnpm build
 
-ENV NODE_ENV=$NODE_ENV
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm --filter @qnaplus/updater --prod deploy out \
 && mv /app/.npmrc out \
 && mv /app/services/start.sh out
