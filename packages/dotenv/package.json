@@ -28,5 +28,8 @@
 	},
 	"volta": {
 		"extends": "../../package.json"
+	},
+	"dependencies": {
+		"@infisical/sdk": "^5.0.2"
 	}
 }

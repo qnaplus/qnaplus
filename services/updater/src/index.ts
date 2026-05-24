@@ -1,4 +1,4 @@
-import { getenv } from "@qnaplus/dotenv";
+import { getenv, initializeEnv } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
 import type { FetchClient, FetchClientResponse } from "@qnaplus/scraper";
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
@@ -28,6 +28,8 @@ const start = async (client: FetchClient<FetchClientResponse>, logger: Logger) =
 };
 
 (async () => {
+    await initializeEnv();
+
     const logger = getLoggerInstance("qnaplus-updater");
     logger.info("Starting updater service");
 

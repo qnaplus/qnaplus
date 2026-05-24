@@ -22,13 +22,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i --frozen-lockfile
 RUN pnpm build
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm --filter @qnaplus/bot --prod deploy out \
-&& mv /app/.npmrc out \
-&& mv /app/services/start.sh out
-
-# =======================================================
-
-FROM node:22.14.0-bookworm-slim AS infisical-cli
-RUN npm install -g @infisical/cli@0.43.84
+&& mv /app/.npmrc out
 
 # =======================================================
 
@@ -37,10 +31,8 @@ FROM gcr.io/distroless/nodejs22-debian12
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
 
-COPY --from=infisical-cli /usr/local/bin/infisical /usr/local/bin/infisical
 COPY --from=build /app/out /app
 
 WORKDIR /app
-RUN chmod +x start.sh
 
-CMD ["./start.sh"]
+CMD ["node", "dist/index.js"]
