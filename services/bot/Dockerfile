@@ -16,10 +16,11 @@ COPY . .
 FROM base AS build
 
 ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
+RUN printf '\nnodeLinker: hoisted\n' >> pnpm-workspace.yaml
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i --frozen-lockfile
 RUN pnpm build
 
-ENV NODE_ENV=$NODE_ENV
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm --filter @qnaplus/bot --prod deploy out \
 && mv /app/.npmrc out \
 && mv /app/services/start.sh out
@@ -40,5 +41,6 @@ COPY --from=infisical-cli /usr/local/bin/infisical /usr/local/bin/infisical
 COPY --from=build /app/out /app
 
 WORKDIR /app
+RUN chmod +x start.sh
 
 CMD ["./start.sh"]
