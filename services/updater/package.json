@@ -35,8 +35,5 @@
 		"pino": "catalog:",
 		"pino-pretty": "catalog:"
 	},
-	"volta": {
-		"extends": "../../package.json"
-	},
-	"packageManager": "pnpm@11.1.2"
+	"packageManager": "pnpm@11.3.0"
 }

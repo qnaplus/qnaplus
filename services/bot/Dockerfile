@@ -1,4 +1,4 @@
-FROM node:22.14.0-alpine3.21 AS base
+FROM node:26.2.0-alpine3.22 AS base
 
 RUN npm i -g corepack@latest
 
@@ -6,27 +6,23 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable
-RUN corepack use pnpm@11.1.2
 
 WORKDIR /app
 COPY . .
 
-# =======================================================
-
-FROM base AS build
-
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
-RUN printf '\nnodeLinker: hoisted\n' >> pnpm-workspace.yaml
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i --frozen-lockfile
-RUN pnpm build
-
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm --filter @qnaplus/bot --prod deploy out \
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm i --frozen-lockfile \
+&& pnpm build --inlineSourceMap \
+&& pnpm clean \
+&& pnpm i --frozen-lockfile --prod \
+&& find . -name '*.d.ts' -delete \
+&& pnpm --filter @qnaplus/bot --prod deploy out \
 && mv /app/.npmrc out
 
 # =======================================================
 
-FROM gcr.io/distroless/nodejs22-debian12
+FROM gcr.io/distroless/nodejs26-debian13
 
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV

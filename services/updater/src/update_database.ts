@@ -17,7 +17,7 @@ export const updateDatabase = async (
     client: FetchClient<FetchClientResponse>,
     _logger: Logger,
 ): Promise<DatabaseUpdateStatus> => {
-    const logger = _logger?.child({ label: "doDatabaseUpdate" });
+    const logger = _logger?.child({ label: "update_database" });
     const status: DatabaseUpdateStatus = {
         updateStorage: false,
     };

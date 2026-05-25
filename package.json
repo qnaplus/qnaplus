@@ -15,8 +15,6 @@
 	"scripts": {
 		"build": "tsc --build",
 		"check-types": "pnpm -r check-types",
-		"clean": "pnpm -r clean",
-		"clean:full": "pnpm -r clean:full",
 		"lint": "pnpm -r lint",
 		"lint:fix": "pnpm -r lint:fix",
 		"fmt": "pnpm -r fmt",
@@ -30,12 +28,8 @@
 		"updater:storage": "pnpm --filter=@qnaplus/updater run update_storage",
 		"store:init": "pnpm --filter=@qnaplus/store run populate",
 		"store:init-meta": "pnpm --filter=@qnaplus/store run populate_metadata",
-        "docker:build-updater": "docker build --rm -t battlesquid0101/qnaplus-updater -f ./services/updater/Dockerfile .",
+        "docker:build-updater": "docker build --squash --rm -t battlesquid0101/qnaplus-updater -f ./services/updater/Dockerfile .",
         "docker:build-bot": "docker build --rm -t battlesquid0101/qnaplus-bot -f ./services/bot/Dockerfile ."
 	},
-	"volta": {
-		"pnpm": "11.1.2",
-		"node": "22.14.0"
-	},
-	"packageManager": "pnpm@11.1.2"
+	"packageManager": "pnpm@11.3.0"
 }

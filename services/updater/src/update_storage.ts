@@ -12,13 +12,12 @@ const update = async (logger: Logger, data: Question[], key: string) => {
         logger?.error({ error: uploadError }, "Error while updating storage json");
         return;
     }
-    logger.info("Successfully completed storage update.");
 }
 
 export const updateStorage = async (_logger: Logger) => {
-    const logger = _logger?.child({ label: "doStorageUpdate" });
+    const logger = _logger?.child({ label: "update_storage" });
     logger.info("Starting storage update.");
-
+    
     // push all questions
     const [questionsError, questions] = await getAllQuestions();
     if (questionsError) {
@@ -29,7 +28,7 @@ export const updateStorage = async (_logger: Logger) => {
         return;
     }
     await update(logger, questions, `questions-${getenv("NODE_ENV")}.json`);
-
+    
     // push current season questions
     const [seasonQuestionsError, seasonQuestions] = await getAllSeasonQuestions();
     if (seasonQuestionsError) {
@@ -49,5 +48,5 @@ export const updateStorage = async (_logger: Logger) => {
     }
     await update(logger, seasonQuestions, `questions-${getenv("NODE_ENV")}-${meta.currentSeason}.json`);
 
-    logger.info("Successfully completed storage update.");
+    logger.info("Completed storage update.");
 };
