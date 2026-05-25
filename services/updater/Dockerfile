@@ -30,7 +30,7 @@ RUN apt-get update \
 
 # =======================================================
 
-FROM gcr.io/distroless/nodejs26-debian13:debug
+FROM gcr.io/distroless/nodejs26-debian13
 
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
