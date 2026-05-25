@@ -1,11 +1,24 @@
+name: qnaplus
+
 services:
-  updater:
-    build:
-      dockerfile: ./services/updater/Dockerfile
-    environment:
-      - DOTENV_KEY=${DOTENV_KEY}
   bot:
-    build:
-      dockerfile: ./services/bot/Dockerfile
+    image: battlesquid0101/qnaplus-bot:${QNAPLUS_TAG:-latest}
+    restart: unless-stopped
     environment:
-      - DOTENV_KEY=${DOTENV_KEY}
+      NODE_ENV: ${NODE_ENV:-production}
+      INFISICAL_MACHINE_CLIENT_ID: ${INFISICAL_MACHINE_CLIENT_ID}
+      INFISICAL_MACHINE_CLIENT_SECRET: ${INFISICAL_MACHINE_CLIENT_SECRET}
+      INFISICAL_SECRET_ENV: ${INFISICAL_SECRET_ENV:-prod}
+    labels:
+      dockhand.order: "1"
+
+  updater:
+    image: battlesquid0101/qnaplus-updater:${QNAPLUS_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      INFISICAL_MACHINE_CLIENT_ID: ${INFISICAL_MACHINE_CLIENT_ID}
+      INFISICAL_MACHINE_CLIENT_SECRET: ${INFISICAL_MACHINE_CLIENT_SECRET}
+      INFISICAL_SECRET_ENV: ${INFISICAL_SECRET_ENV:-prod}
+    labels:
+      dockhand.order: "2"
