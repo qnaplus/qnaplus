@@ -1,4 +1,4 @@
-FROM node:26.2.0-alpine3.22 AS base
+FROM node:26.2.0-alpine3.22 AS build
 
 RUN npm i -g corepack@latest
 
