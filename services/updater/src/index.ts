@@ -10,7 +10,7 @@ import { updateForumStatus } from "./update_forum_status";
 import { updateStorage } from "./update_storage";
 
 const update = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
-    const status = await updateDatabase(client, logger);
+    await updateDatabase(client, logger);
     await updateStorage(logger);
     await updateForumStatus(client, logger);
 };
