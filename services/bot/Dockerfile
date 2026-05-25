@@ -35,4 +35,4 @@ COPY --from=build /app/out /app
 
 WORKDIR /app
 
-CMD ["node", "dist/index.js"]
+CMD ["dist/index.js"]
