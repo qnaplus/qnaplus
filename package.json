@@ -28,7 +28,7 @@
 		"updater:storage": "pnpm --filter=@qnaplus/updater run update_storage",
 		"store:init": "pnpm --filter=@qnaplus/store run populate",
 		"store:init-meta": "pnpm --filter=@qnaplus/store run populate_metadata",
-        "docker:build-updater": "docker build --squash --rm -t battlesquid0101/qnaplus-updater -f ./services/updater/Dockerfile .",
+        "docker:build-updater": "docker build --rm -t battlesquid0101/qnaplus-updater -f ./services/updater/Dockerfile .",
         "docker:build-bot": "docker build --rm -t battlesquid0101/qnaplus-bot -f ./services/bot/Dockerfile ."
 	},
 	"packageManager": "pnpm@11.3.0"

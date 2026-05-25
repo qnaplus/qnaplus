@@ -82,6 +82,10 @@ export const updateForumStatus = async (client: FetchClient<FetchClientResponse>
 
         newStates.push({ program, open });
     }
+    if (newStates.length === 0) {
+        logger.warn("Unable to update program statings.")
+        return;
+    }
     const [updatedError] = await updateForumStates(newStates);
     if (updatedError) {
         logger.error(
@@ -90,5 +94,5 @@ export const updateForumStatus = async (client: FetchClient<FetchClientResponse>
         );
         return;
     }
-    logger.info("Successfully completed programs update.");
+    logger.info("Completed programs update.");
 };
