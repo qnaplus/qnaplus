@@ -4,14 +4,7 @@ import type { EventQueueItem, EventQueueType } from "@qnaplus/store";
 import { chunk } from "@qnaplus/utils";
 import { capitalizeFirstLetter } from "@sapphire/utilities";
 import { diffSentences } from "diff";
-import {
-	type ColorResolvable,
-	Colors,
-	EmbedBuilder,
-	bold,
-	codeBlock,
-	hyperlink,
-} from "discord.js";
+import { type ColorResolvable, Colors, EmbedBuilder, bold, codeBlock, hyperlink } from "discord.js";
 
 const colors: Record<string, ColorResolvable> = {
 	V5RC: "#f54242",
@@ -25,12 +18,7 @@ export const buildQuestionUrl = (id: string) => {
 	return `${getenv("QNA_WEBSITE")}/${id}`;
 };
 
-const baseEmbedDescription = ({
-	author,
-	askedTimestamp,
-	title,
-	id,
-}: Question) => {
+const baseEmbedDescription = ({ author, askedTimestamp, title, id }: Question) => {
 	return `Asked by ${author} on ${askedTimestamp}\n${bold("Question")}: ${hyperlink(title, buildQuestionUrl(id))}`;
 };
 
@@ -43,10 +31,7 @@ const formats: ChangeFormatMap = {
 		return new EmbedBuilder()
 			.setColor(colors[question.program])
 			.setFooter({
-				text:
-					question.tags.length > 0
-						? `🏷️ ${question.tags.join(", ")}`
-						: "No tags",
+				text: question.tags.length > 0 ? `🏷️ ${question.tags.join(", ")}` : "No tags",
 			})
 			.setTitle(`New ${capitalizeFirstLetter(question.program)} Q&A response`)
 			.setDescription(baseEmbedDescription(question));
@@ -55,10 +40,7 @@ const formats: ChangeFormatMap = {
 		return new EmbedBuilder()
 			.setColor(colors[question.program])
 			.setFooter({
-				text:
-					question.tags.length > 0
-						? `🏷️ ${question.tags.join(", ")}`
-						: "No tags",
+				text: question.tags.length > 0 ? `🏷️ ${question.tags.join(", ")}` : "No tags",
 			})
 			.setTitle(`New ${capitalizeFirstLetter(question.program)} Q&A response`)
 			.setDescription(baseEmbedDescription(question));
@@ -101,9 +83,6 @@ const formats: ChangeFormatMap = {
 	},
 } as const;
 
-export const buildEventEmbed = <T extends EventQueueType>(
-	event: T,
-	data: EventQueueItem<T>,
-) => {
+export const buildEventEmbed = <T extends EventQueueType>(event: T, data: EventQueueItem<T>) => {
 	return formats[event](data.payload);
 };

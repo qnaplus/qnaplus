@@ -8,18 +8,22 @@
 	"scripts": {
 		"build": "tsc",
 		"build:production": "tsc --declaration false --noCheck true",
-		"clean": "rimraf dist tsconfig.tsbuildinfo",
-		"clean:modules": "rimraf node_modules",
+		"clean": "rm -rf dist tsconfig.tsbuildinfo",
+		"clean:modules": "rm -rf node_modules",
 		"clean:full": "pnpm clean && pnpm clean:modules",
+		"lint": "oxlint src",
+		"lint:fix": "oxlint --fix src",
+		"fmt": "oxfmt --check src",
+		"fmt:fix": "oxfmt src",
 		"check-types": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@qnaplus/dotenv": "workspace:1.0.0",
+		"@qnaplus/dotenv": "workspace:*",
 		"pino": "catalog:",
-		"pino-loki": "^2.5.0"
+		"pino-loki": "^3.0.0"
 	},
 	"devDependencies": {
-		"@qnaplus/typescript-config": "workspace:1.0.0"
+		"@qnaplus/typescript-config": "workspace:*"
 	},
 	"exports": {
 		".": {

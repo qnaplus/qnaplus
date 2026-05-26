@@ -11,6 +11,7 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 import { EventQueueType } from "./schema_types";
+import { numeric } from "drizzle-orm/pg-core";
 
 export const questions = pgTable("questions", {
 	id: text().primaryKey(),
@@ -34,11 +35,7 @@ export const questions = pgTable("questions", {
 export const metadata = pgTable("metadata", {
 	id: integer().primaryKey(),
 	currentSeason: text().$type<Season>().notNull(),
-	oldestUnansweredQuestion: text().notNull(),
-}).enableRLS();
-
-export const failures = pgTable("failures", {
-	id: text().primaryKey(),
+	start: numeric({ mode: "number" }).notNull().default(1),
 }).enableRLS();
 
 export const event_queue = pgTable("event_queue", {

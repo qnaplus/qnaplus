@@ -8,13 +8,14 @@
 	"scripts": {
 		"build": "tsc",
 		"build:production": "tsc --declaration false --noCheck true",
-		"clean": "rimraf dist tsconfig.tsbuildinfo",
-		"clean:modules": "rimraf node_modules",
+		"clean": "rm -rf dist tsconfig.tsbuildinfo",
+		"clean:modules": "rm -rf node_modules",
 		"clean:full": "pnpm clean && pnpm clean:modules",
-		"check-types": "tsc --noEmit"
-	},
-	"dependencies": {
-		"dotenv": "^16.3.1"
+		"check-types": "tsc --noEmit",
+		"lint": "oxlint src",
+		"lint:fix": "oxlint --fix src",
+		"fmt": "oxfmt --check src",
+		"fmt:fix": "oxfmt src"
 	},
 	"devDependencies": {
 		"@qnaplus/typescript-config": "workspace:1.0.0"
@@ -27,5 +28,8 @@
 	},
 	"volta": {
 		"extends": "../../package.json"
+	},
+	"dependencies": {
+		"@infisical/sdk": "^5.0.2"
 	}
 }

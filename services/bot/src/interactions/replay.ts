@@ -9,29 +9,19 @@ const id = new SlashCommandSubcommandBuilder()
 	.setName("id")
 	.setDescription("Rollback the question with the given id.")
 	.addStringOption((opt) =>
-		opt
-			.setName("id")
-			.setDescription("The id of the question")
-			.setRequired(true),
+		opt.setName("id").setDescription("The id of the question").setRequired(true),
 	);
 
 const bulkId = new SlashCommandSubcommandBuilder()
 	.setName("bulk_id")
-	.setDescription(
-		"Queue questions from the given id to the present for renotification.",
-	)
+	.setDescription("Queue questions from the given id to the present for renotification.")
 	.addStringOption((opt) =>
-		opt
-			.setName("id")
-			.setDescription("The id of the question to start from.")
-			.setRequired(true),
+		opt.setName("id").setDescription("The id of the question to start from.").setRequired(true),
 	);
 
 const bulkDate = new SlashCommandSubcommandBuilder()
 	.setName("bulk_date")
-	.setDescription(
-		"Queue all questions from the given date to the present for renotification.",
-	)
+	.setDescription("Queue all questions from the given date to the present for renotification.")
 	.addStringOption((opt) =>
 		opt
 			.setName("date")

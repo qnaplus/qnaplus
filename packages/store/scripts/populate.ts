@@ -52,7 +52,7 @@ export const populateWithMetadata = async (
 			? oldestUnansweredQuestion.id
 			: oldestQuestion.id;
 
-	const [error] = await trycatch(
+	const [error] = await trycatch(() =>
 		db().transaction(async (tx) => {
 			if (questions.length !== 0) {
 				await insertQuestions(questions, tx);
@@ -60,7 +60,7 @@ export const populateWithMetadata = async (
 			await tx.insert(schema.metadata).values({
 				id: METADATA_ROW_ID,
 				currentSeason,
-				oldestUnansweredQuestion: oldestQuestionId,
+				start: Number.parseInt(oldestQuestionId),
 			});
 		}),
 	);

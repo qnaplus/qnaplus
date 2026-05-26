@@ -5,12 +5,7 @@ import {
 	checkIfReadOnly,
 	pingQna,
 } from "@qnaplus/scraper";
-import {
-	getAllPrograms,
-	getForumStates,
-	getMetadata,
-	updateForumStates,
-} from "@qnaplus/store";
+import { getAllPrograms, getForumStates, getMetadata, updateForumStates } from "@qnaplus/store";
 import type { Logger } from "pino";
 
 type ProgramState = {
@@ -26,10 +21,11 @@ const getNextSeason = (season: Season) => {
 	return `${endYear}-${endYear + 1}`;
 };
 
-export const doQnaCheck = async (
+export const updateForumStatus = async (
 	client: FetchClient<FetchClientResponse>,
-	logger: Logger,
+	logger_: Logger,
 ) => {
+	const logger = logger_.child({ label: "update_forum_status" });
 	logger.info("Starting programs update.");
 	const [programsError, programs] = await getAllPrograms();
 	if (programsError) {
@@ -68,22 +64,30 @@ export const doQnaCheck = async (
 		const currentOpenState = statesMap[program] ?? true;
 		let open: boolean;
 		if (currentOpenState || program.toLowerCase() === "judging") {
+			logger.info(`Forum for ${program} is open, checking readonly status.`);
 			const readonly = await checkIfReadOnly(program, season, {
 				client,
 				logger,
 			});
 			if (readonly === null) {
-				logger.warn(
-					`Unable to check state for ${program} (${season}), skipping.`,
-				);
+				logger.warn(`Unable to check state for ${program} (${season}), skipping.`);
 				continue;
 			}
 			open = !readonly;
 		} else {
+			logger.info(
+				`Forum for ${program} is closed, checking availability of the next Q&A forum.`,
+			);
 			open = await pingQna(program, getNextSeason(season), { client, logger });
 		}
 
+		logger.info(`Forum state for ${program}: ${open}`);
+
 		newStates.push({ program, open });
+	}
+	if (newStates.length === 0) {
+		logger.warn("Unable to update program statings.");
+		return;
 	}
 	const [updatedError] = await updateForumStates(newStates);
 	if (updatedError) {
@@ -93,5 +97,5 @@ export const doQnaCheck = async (
 		);
 		return;
 	}
-	logger.info("Successfully completed programs update.");
+	logger.info("Completed programs update.");
 };

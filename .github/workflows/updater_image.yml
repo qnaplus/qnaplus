@@ -17,7 +17,6 @@ on:
       - '!services/bot/**'
       - services/updater/**
       - packages/**
-      - .env.vault
       - package.json
       - turbo.json
       - pnpm-lock.yaml
@@ -70,6 +69,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
+        name: Set NODE_ENV
+        id: node_env
+        run: |
+          if [[ "${{ github.ref_name }}" == "master" ]]; then
+            echo "value=production" >> $GITHUB_OUTPUT
+          else
+            echo "value=development" >> $GITHUB_OUTPUT
+          fi
+      -
         name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -77,3 +85,5 @@ jobs:
           file: services/updater/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NODE_ENV=${{ steps.node_env.outputs.value }}

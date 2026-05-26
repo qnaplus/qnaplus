@@ -1,7 +1,4 @@
-import type {
-	SlashCommandSubcommandBuilder,
-	SlashCommandSubcommandsOnlyBuilder,
-} from "discord.js";
+import type { SlashCommandSubcommandBuilder, SlashCommandSubcommandsOnlyBuilder } from "discord.js";
 
 export interface SubcommandBundle {
 	interaction: SlashCommandSubcommandsOnlyBuilder;

@@ -1,4 +1,6 @@
-import { config } from "dotenv";
+import { InfisicalSDK } from "@infisical/sdk";
+
+const INFISICAL_PROJECT_ID = "1e4a9be2-aaf8-4e0b-be53-185dac145515";
 
 const ENV_VARIABLES = [
 	"SUPABASE_TRANSACTION_URL",
@@ -10,21 +12,15 @@ const ENV_VARIABLES = [
 	"LOKI_HOST",
 	"LOKI_USERNAME",
 	"LOKI_PASSWORD",
-	"CF_QUESTIONS_KEY",
 	"CF_ACCOUNT_ID",
 	"CF_ACCESS_KEY_ID",
 	"CF_SECRET_ACCESS_KEY",
 	"QNA_WEBSITE",
 ] as const;
 
-type EnvVariable = (typeof ENV_VARIABLES)[number];
+export type EnvVariable = (typeof ENV_VARIABLES)[number];
 
 const loadEnv = () => {
-	const { error } = config();
-	if (error) {
-		console.error(error);
-		throw Error("Environment variables could not be loaded, exiting");
-	}
 	const loaded: Record<string, string> = {};
 	for (const v of ENV_VARIABLES) {
 		const value = process.env[v];
@@ -37,6 +33,30 @@ const loadEnv = () => {
 };
 
 let ENV: Record<string, string> | null = null;
+
+export const initializeEnv = async () => {
+	const clientId = process.env.INFISICAL_MACHINE_CLIENT_ID;
+	const clientSecret = process.env.INFISICAL_MACHINE_CLIENT_SECRET;
+	if (!clientId || !clientSecret) {
+		throw new Error(
+			"Missing Infisical credentials: INFISICAL_MACHINE_CLIENT_ID and INFISICAL_MACHINE_CLIENT_SECRET are required",
+		);
+	}
+
+	const environment =
+		process.env.INFISICAL_SECRET_ENV ??
+		(process.env.NODE_ENV === "production" ? "prod" : "dev");
+
+	const client = new InfisicalSDK();
+	await client.auth().universalAuth.login({ clientId, clientSecret });
+
+	const { secrets } = await client.secrets().listSecrets({
+		projectId: INFISICAL_PROJECT_ID,
+		environment,
+	});
+
+	ENV = Object.fromEntries(secrets.map((s) => [s.secretKey, s.secretValue]));
+};
 
 export const getenv = (key: EnvVariable) => {
 	if (ENV === null) {

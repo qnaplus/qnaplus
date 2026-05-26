@@ -11,7 +11,7 @@ import { formatDDMMMYYYY, isValidDate, mmmToMonthNumber } from "@qnaplus/utils";
 import { ApplyOptions } from "@sapphire/decorators";
 import { PaginatedFieldMessageEmbed } from "@sapphire/discord.js-utilities";
 import type { Subcommand } from "@sapphire/plugin-subcommands";
-import Cron from "croner";
+import { Cron } from "croner";
 import { EmbedBuilder, hyperlink, inlineCode } from "discord.js";
 import { buildQuestionUrl } from "../formatting";
 import replay from "../interactions";
@@ -47,17 +47,12 @@ import { LoggerSubcommand } from "../utils/logger_subcommand";
 	],
 })
 export class Replay extends LoggerSubcommand {
-	private static readonly CHAT_INPUT_DEVELOPMENT_ID: string =
-		"1255678004143849493";
-	private static readonly CHAT_INPUT_PRODUCTION_ID: string =
-		"1257270022372593694";
+	private static readonly CHAT_INPUT_DEVELOPMENT_ID: string = "1255678004143849493";
+	private static readonly CHAT_INPUT_PRODUCTION_ID: string = "1257270022372593694";
 
 	public override registerApplicationCommands(registry: Subcommand.Registry) {
 		registry.registerChatInputCommand(replay.interaction, {
-			idHints: [
-				Replay.CHAT_INPUT_DEVELOPMENT_ID,
-				Replay.CHAT_INPUT_PRODUCTION_ID,
-			],
+			idHints: [Replay.CHAT_INPUT_DEVELOPMENT_ID, Replay.CHAT_INPUT_PRODUCTION_ID],
 		});
 	}
 
@@ -103,9 +98,7 @@ export class Replay extends LoggerSubcommand {
 		);
 	}
 
-	public async replayBulkId(
-		interaction: Subcommand.ChatInputCommandInteraction,
-	) {
+	public async replayBulkId(interaction: Subcommand.ChatInputCommandInteraction) {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
 			label: "replayBulkId",
 		});
@@ -136,24 +129,16 @@ export class Replay extends LoggerSubcommand {
 				`Successfully queued ${count} questions for renotification.${this.getNextRuntimeString()} Cancel anytime using /replay cancel.`,
 			);
 		} catch (e) {
-			this.logErrorAndReply(
-				logger,
-				interaction,
-				"An error occurred",
-				e as object,
-			);
+			this.logErrorAndReply(logger, interaction, "An error occurred", e as object);
 		}
 	}
 
-	public async replayBulkDate(
-		interaction: Subcommand.ChatInputCommandInteraction,
-	) {
+	public async replayBulkDate(interaction: Subcommand.ChatInputCommandInteraction) {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
 			label: "replayBulkDate",
 		});
 		const date = interaction.options.getString("date", true);
-		const regex =
-			/(\d{2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{4})/;
+		const regex = /(\d{2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{4})/;
 		const match = date.match(regex);
 		if (match === null) {
 			this.logErrorAndReply(
@@ -166,14 +151,7 @@ export class Replay extends LoggerSubcommand {
 		const computedDate = new Date(date);
 		const [, day, mmm, year] = match;
 		const month = mmmToMonthNumber(mmm);
-		if (
-			!isValidDate(
-				new Date(date),
-				Number.parseInt(year),
-				month,
-				Number.parseInt(day),
-			)
-		) {
+		if (!isValidDate(new Date(date), Number.parseInt(year), month, Number.parseInt(day))) {
 			this.logErrorAndReply(
 				logger,
 				interaction,
@@ -189,12 +167,7 @@ export class Replay extends LoggerSubcommand {
 				`Successfully queued ${count} questions for renotification.${this.getNextRuntimeString()} Cancel anytime using /replay cancel.`,
 			);
 		} catch (e) {
-			this.logErrorAndReply(
-				logger,
-				interaction,
-				"An error occurred",
-				e as object,
-			);
+			this.logErrorAndReply(logger, interaction, "An error occurred", e as object);
 		}
 	}
 
@@ -204,29 +177,19 @@ export class Replay extends LoggerSubcommand {
 		});
 		const [replayError, replayEvents] = await getReplayEvents();
 		if (replayError) {
-			this.logErrorAndReply(
-				logger,
-				interaction,
-				"Error retreiving replay queue.",
-				{ error: replayError },
-			);
+			this.logErrorAndReply(logger, interaction, "Error retreiving replay queue.", {
+				error: replayError,
+			});
 			return;
 		}
 		const questions = replayEvents.map((r) => r.question);
 		if (questions.length === 0) {
-			this.logInfoAndReply(
-				logger,
-				interaction,
-				"No questioned queued for renotification.",
-			);
+			this.logInfoAndReply(logger, interaction, "No questioned queued for renotification.");
 			return;
 		}
 
 		const template = new EmbedBuilder().setColor("Blurple");
-		const formatter = (
-			{ author, askedTimestamp, title, id }: Question,
-			index: number,
-		) => {
+		const formatter = ({ author, askedTimestamp, title, id }: Question, index: number) => {
 			const num = ` #${index + 1} `;
 			return `${inlineCode(num)} ${hyperlink(title, buildQuestionUrl(id))}\nAsked by ${author} on ${askedTimestamp}\n`;
 		};
@@ -241,9 +204,7 @@ export class Replay extends LoggerSubcommand {
 			.run(interaction);
 	}
 
-	public async replayCancel(
-		interaction: Subcommand.ChatInputCommandInteraction,
-	) {
+	public async replayCancel(interaction: Subcommand.ChatInputCommandInteraction) {
 		const logger = (this.container.logger as PinoLoggerAdapter).child({
 			label: "replayCancel",
 		});
@@ -265,8 +226,7 @@ export class Replay extends LoggerSubcommand {
 	}
 
 	private async doReplayBulkDate(dateMs: number) {
-		const [questionsError, questions] =
-			await getAnsweredQuestionsNewerThanDate(dateMs);
+		const [questionsError, questions] = await getAnsweredQuestionsNewerThanDate(dateMs);
 		if (questionsError) {
 			throw questionsError;
 		}
@@ -281,7 +241,7 @@ export class Replay extends LoggerSubcommand {
 	}
 
 	private getNextRuntimeString() {
-		const nextRuntime = Cron(getenv("DATABASE_UPDATE_INTERVAL")).msToNext();
+		const nextRuntime = new Cron(getenv("DATABASE_UPDATE_INTERVAL")).msToNext();
 		if (nextRuntime === null) {
 			return "";
 		}

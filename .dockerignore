@@ -2,10 +2,8 @@ dist
 node_modules
 README.md
 tsconfig.tsbuildinfo
-.env*
+*.env*
 .flaskenv*
-!.env.project
-!.env.vault
 .turbo
 .idea
 .devcontainer
