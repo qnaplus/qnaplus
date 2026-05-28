@@ -189,7 +189,7 @@ export const insertReplayEvents = async (
 		event: EventQueueType.Replay,
 		payload: { question },
 	}));
-	return trycatch(() => d.insert(schema.event_queue).values(events).onConflictDoNothing());
+	return trycatch(() => d.insert(schema.event_queue).values(events).onConflictDoNothing().returning());
 };
 
 export const clearReplayEvents = async (d: PostgresJsDatabase<typeof schema> = db()) => {
