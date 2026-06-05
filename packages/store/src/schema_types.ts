@@ -1,7 +1,9 @@
 import type { Question } from "@qnaplus/scraper";
-import type { forum_state } from "./schema";
+import type { forum_state, metadata } from "./schema";
 
 export type ForumState = typeof forum_state.$inferSelect;
+
+export type Metadata = typeof metadata.$inferSelect;
 
 export type AnsweredPayload = {
 	question: Question;
