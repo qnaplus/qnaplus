@@ -160,10 +160,6 @@ export const getMetadata = async (d: PostgresJsDatabase<typeof schema> = db()) =
     return trycatch(() => d.query.metadata.findFirst());
 };
 
-export const getMetadataCurrentSeason = async (d: PostgresJsDatabase<typeof schema> = db()) => {
-    return trycatch(() => d.query.metadata.findFirst({ columns: { currentSeason: true } }));
-};
-
 export const updateMetadata = async (
     data: Partial<Omit<typeof schema.metadata.$inferInsert, "id">>,
     d: PostgresJsDatabase<typeof schema> = db(),
