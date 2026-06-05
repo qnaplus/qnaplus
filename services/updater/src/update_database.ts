@@ -7,7 +7,7 @@ import { getMetadata, updateQuestions } from "@qnaplus/store";
 import type { Logger } from "pino";
 
 export interface DatabaseUpdateStatus {
-	updateStorage: boolean;
+	hasUpdates: boolean;
 }
 
 export const updateDatabase = async (
@@ -16,7 +16,7 @@ export const updateDatabase = async (
 ): Promise<DatabaseUpdateStatus> => {
 	const logger = _logger?.child({ label: "update_database" });
 	const status: DatabaseUpdateStatus = {
-		updateStorage: false,
+		hasUpdates: false,
 	};
 	logger.info("Starting database update.");
 	const [metadataError, metadata] = await getMetadata();
@@ -50,7 +50,7 @@ export const updateDatabase = async (
 		);
 		return status;
 	}
-	status.updateStorage = updates.length !== 0;
+	status.hasUpdates = updates.length !== 0;
 	logger.info(`${updates.length} new updates detected.`);
 
 	return status;

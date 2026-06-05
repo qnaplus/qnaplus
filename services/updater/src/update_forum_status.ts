@@ -86,16 +86,16 @@ export const updateForumStatus = async (
 		newStates.push({ program, open });
 	}
 	if (newStates.length === 0) {
-		logger.warn("Unable to update program statings.");
+		logger.warn("Unable to update forum states.");
 		return;
 	}
 	const [updatedError] = await updateForumStates(newStates);
 	if (updatedError) {
 		logger.error(
 			{ error: updatedError },
-			"An error occurred while updating program states, exiting.",
+			"An error occurred while updating forum states, exiting.",
 		);
 		return;
 	}
-	logger.info("Completed programs update.");
+	logger.info("Completed forum states update.");
 };
