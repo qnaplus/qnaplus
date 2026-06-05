@@ -2,6 +2,7 @@ import {
     type FetchClient,
     type FetchClientResponse,
     fetchQuestionsIterative,
+    Question,
 } from "@qnaplus/scraper";
 import { Metadata, updateQuestions } from "@qnaplus/store";
 import type { Logger } from "pino";
@@ -14,7 +15,7 @@ export const updateDatabase = async (
     client: FetchClient<FetchClientResponse>,
     { start }: Metadata,
     _logger: Logger,
-): Promise<boolean> => {
+): Promise<Question[]> => {
     const logger = _logger?.child({ label: "update_database" });
     logger.info("Starting database update.");
 
@@ -25,7 +26,7 @@ export const updateDatabase = async (
     });
     if (questions.length === 0) {
         logger.info("No new questions to insert, returning.");
-        return false;
+        return [];
     }
 
     const [updateError, updates] = await updateQuestions(questions);
@@ -34,9 +35,9 @@ export const updateDatabase = async (
             { error: updateError },
             `Failed to upsert ${questions.length} questions, retrying on next run.`,
         );
-        return false;
+        return [];
     }
     logger.info(`${updates.length} new updates detected.`);
 
-    return updates.length !== 0;
+    return updates;
 };

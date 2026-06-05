@@ -16,9 +16,9 @@ const update = async (client: FetchClient<FetchClientResponse>, logger: Logger) 
         logger?.error({ error: metadataError, meta }, "Error retrieving question metadata, exiting");
         return;
     }
-    const hasUpdates = await updateDatabase(client, meta, logger);
-    if (hasUpdates) {
-        await updateStorage(meta, logger);
+    const updates = await updateDatabase(client, meta, logger);
+    if (updates.length > 0) {
+        await updateStorage(updates, meta, logger);
     }
     await updateForumStatus(client, meta, logger);
 };
