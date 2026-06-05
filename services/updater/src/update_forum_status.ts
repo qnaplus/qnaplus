@@ -5,7 +5,7 @@ import {
     checkIfReadOnly,
     pingQna,
 } from "@qnaplus/scraper";
-import { getAllPrograms, getForumStates, getMetadata, Metadata, updateForumStates } from "@qnaplus/store";
+import { getAllPrograms, getForumStates, Metadata, updateForumStates } from "@qnaplus/store";
 import type { Logger } from "pino";
 
 type ProgramState = {

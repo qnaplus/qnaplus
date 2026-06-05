@@ -3,7 +3,7 @@ import {
     type FetchClientResponse,
     fetchQuestionsIterative,
 } from "@qnaplus/scraper";
-import { getMetadata, Metadata, updateQuestions } from "@qnaplus/store";
+import { Metadata, updateQuestions } from "@qnaplus/store";
 import type { Logger } from "pino";
 
 export interface DatabaseUpdateStatus {
