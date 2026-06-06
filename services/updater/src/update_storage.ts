@@ -33,8 +33,6 @@ const get = async (key: string, logger: Logger): Promise<Question[] | null> => {
     return parsedData;
 }
 
-const ALL_QUESTIONS_KEY = `questions-${getenv("NODE_ENV")}.json`;
-
 export const updateStorage = async (
     updates: Question[],
     { currentSeason }: Metadata,
@@ -43,7 +41,9 @@ export const updateStorage = async (
     const logger = _logger.child({ label: "update_storage" });
     logger.info("Starting storage update.");
 
+    const ALL_QUESTIONS_KEY = `questions-${getenv("NODE_ENV")}.json`;
     const SEASON_QUESTIONS_KEY = `questions-${getenv("NODE_ENV")}-${currentSeason}.json`;
+
     const seasonQuestions = await get(SEASON_QUESTIONS_KEY, logger);
     if (seasonQuestions === null) {
         return;
