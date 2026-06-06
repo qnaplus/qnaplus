@@ -48,7 +48,8 @@ export const updateStorage = async (
     if (seasonQuestions === null) {
         return;
     }
-    const updatedSeasonQuestions = mergeByKey("id", updates, seasonQuestions);
+    const updatedSeasonQuestions = mergeByKey("id", updates, seasonQuestions)
+        .toSorted((a, b) => Number.parseInt(b.id) - Number.parseInt(a.id));
     await update(
         logger,
         updatedSeasonQuestions,
@@ -59,7 +60,8 @@ export const updateStorage = async (
     if (questions === null) {
         return;
     }
-    const updatedQuestions = mergeByKey("id", updatedSeasonQuestions, questions);
+    const updatedQuestions = mergeByKey("id", updatedSeasonQuestions, questions)
+        .toSorted((a, b) => Number.parseInt(b.id) - Number.parseInt(a.id));
     await update(
         logger,
         updatedQuestions,
