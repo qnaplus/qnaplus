@@ -39,16 +39,19 @@ export const uploadObject = async (key: string, buffer: Buffer, logger: Logger) 
 export const getObject = async (key: string, logger: Logger): Promise<string | null> => {
 	const command = new GetObjectCommand({
 		Key: key,
-		Bucket: BUCKET
+		Bucket: BUCKET,
 	});
 	const [responseError, response] = await trycatch(() => r2().send(command));
 	if (responseError) {
-		logger.error({ error: responseError }, "An error occurred while getting object from bucket.");
+		logger.error(
+			{ error: responseError },
+			"An error occurred while getting object from bucket.",
+		);
 		return null;
 	}
 	if (response.Body === undefined) {
 		logger.error("Body is not present on response.");
-		return null
+		return null;
 	}
 	const [dataError, data] = await trycatch(() => response.Body!.transformToString());
 	if (dataError) {
@@ -56,4 +59,4 @@ export const getObject = async (key: string, logger: Logger): Promise<string | n
 		return null;
 	}
 	return data;
-}
+};
