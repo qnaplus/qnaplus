@@ -2,8 +2,9 @@ import {
 	type FetchClient,
 	type FetchClientResponse,
 	fetchQuestionsIterative,
+	Question,
 } from "@qnaplus/scraper";
-import { getMetadata, updateQuestions } from "@qnaplus/store";
+import { Metadata, updateQuestions } from "@qnaplus/store";
 import type { Logger } from "pino";
 
 export interface DatabaseUpdateStatus {
@@ -12,26 +13,12 @@ export interface DatabaseUpdateStatus {
 
 export const updateDatabase = async (
 	client: FetchClient<FetchClientResponse>,
+	{ start }: Metadata,
 	_logger: Logger,
-): Promise<DatabaseUpdateStatus> => {
+): Promise<Question[]> => {
 	const logger = _logger?.child({ label: "update_database" });
-	const status: DatabaseUpdateStatus = {
-		updateStorage: false,
-	};
 	logger.info("Starting database update.");
-	const [metadataError, metadata] = await getMetadata();
-	if (metadataError) {
-		logger?.error({ error: metadataError }, "Error retrieving question metadata, exiting");
-		return status;
-	}
-	if (metadata === undefined) {
-		logger?.error("Unable to fetch metadata, exiting.");
-		return status;
-	}
 
-	const { start } = metadata;
-
-	logger?.info(`Starting update from Q&A ${start}`);
 	const { questions } = await fetchQuestionsIterative({
 		client,
 		logger,
@@ -39,7 +26,7 @@ export const updateDatabase = async (
 	});
 	if (questions.length === 0) {
 		logger.info("No new questions to insert, returning.");
-		return status;
+		return [];
 	}
 
 	const [updateError, updates] = await updateQuestions(questions);
@@ -48,10 +35,9 @@ export const updateDatabase = async (
 			{ error: updateError },
 			`Failed to upsert ${questions.length} questions, retrying on next run.`,
 		);
-		return status;
+		return [];
 	}
-	status.updateStorage = updates.length !== 0;
 	logger.info(`${updates.length} new updates detected.`);
 
-	return status;
+	return updates;
 };

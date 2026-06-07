@@ -2,17 +2,28 @@ import { getenv, initializeEnv } from "@qnaplus/dotenv";
 import { getLoggerInstance } from "@qnaplus/logger";
 import type { FetchClient, FetchClientResponse } from "@qnaplus/scraper";
 import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
-import { testConnection } from "@qnaplus/store";
+import { getMetadata, testConnection } from "@qnaplus/store";
 import { Cron } from "croner";
 import type { Logger } from "pino";
 import { updateDatabase } from "./update_database";
 import { updateForumStatus } from "./update_forum_status";
 import { updateStorage } from "./update_storage";
+import { isNullish } from "@qnaplus/utils";
 
 const update = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {
-	await updateDatabase(client, logger);
-	await updateStorage(logger);
-	await updateForumStatus(client, logger);
+	const [metadataError, meta] = await getMetadata();
+	if (metadataError || isNullish(meta)) {
+		logger?.error(
+			{ error: metadataError, meta },
+			"Error retrieving question metadata, exiting",
+		);
+		return;
+	}
+	const updates = await updateDatabase(client, meta, logger);
+	if (updates.length > 0) {
+		await updateStorage(updates, meta, logger);
+	}
+	await updateForumStatus(client, meta, logger);
 };
 
 const start = async (client: FetchClient<FetchClientResponse>, logger: Logger) => {

@@ -29,3 +29,23 @@ export const entries = <T extends object>(obj: T): Entries<T> => {
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	return Object.entries(obj) as any;
 };
+
+export const mergeByKey = <
+	K extends string,
+	A extends Record<K, PropertyKey>,
+	B extends Record<K, PropertyKey>,
+>(
+	key: K,
+	a: A[],
+	b: B[],
+): (A | B | (A & B))[] => {
+	const map = new Map<PropertyKey, A | B | (A & B)>();
+	for (const item of a) {
+		map.set(item[key], item);
+	}
+	for (const item of b) {
+		const existing = map.get(item[key]);
+		map.set(item[key], existing ? { ...existing, ...item } : item);
+	}
+	return [...map.values()];
+};

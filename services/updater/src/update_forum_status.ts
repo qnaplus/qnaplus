@@ -5,7 +5,7 @@ import {
 	checkIfReadOnly,
 	pingQna,
 } from "@qnaplus/scraper";
-import { getAllPrograms, getForumStates, getMetadata, updateForumStates } from "@qnaplus/store";
+import { getAllPrograms, getForumStates, Metadata, updateForumStates } from "@qnaplus/store";
 import type { Logger } from "pino";
 
 type ProgramState = {
@@ -23,6 +23,7 @@ const getNextSeason = (season: Season) => {
 
 export const updateForumStatus = async (
 	client: FetchClient<FetchClientResponse>,
+	{ currentSeason: season }: Metadata,
 	logger_: Logger,
 ) => {
 	const logger = logger_.child({ label: "update_forum_status" });
@@ -32,14 +33,6 @@ export const updateForumStatus = async (
 		logger.error(
 			{ error: programsError },
 			"An error occurred while trying to aggregate all programs, exiting.",
-		);
-		return;
-	}
-	const [metadataError, metadata] = await getMetadata();
-	if (metadataError || metadata === undefined) {
-		logger.error(
-			{ error: metadataError },
-			"An error occurred while retrieving metadata, exiting.",
 		);
 		return;
 	}
@@ -56,7 +49,6 @@ export const updateForumStatus = async (
 		return map;
 	}, {});
 
-	const season = metadata.currentSeason;
 	const newStates: ProgramState[] = [];
 	for (const { program } of programs) {
 		// get the 'open' state for a given program
@@ -86,16 +78,16 @@ export const updateForumStatus = async (
 		newStates.push({ program, open });
 	}
 	if (newStates.length === 0) {
-		logger.warn("Unable to update program statings.");
+		logger.warn("Unable to update forum states.");
 		return;
 	}
 	const [updatedError] = await updateForumStates(newStates);
 	if (updatedError) {
 		logger.error(
 			{ error: updatedError },
-			"An error occurred while updating program states, exiting.",
+			"An error occurred while updating forum states, exiting.",
 		);
 		return;
 	}
-	logger.info("Completed programs update.");
+	logger.info("Completed forum states update.");
 };
