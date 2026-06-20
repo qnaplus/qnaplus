@@ -36,14 +36,14 @@ export const mergeByKey = <
 	B extends Record<K, PropertyKey>,
 >(
 	key: K,
-	a: A[],
-	b: B[],
+	current: A[],
+	updated: B[],
 ): (A | B | (A & B))[] => {
 	const map = new Map<PropertyKey, A | B | (A & B)>();
-	for (const item of a) {
+	for (const item of current) {
 		map.set(item[key], item);
 	}
-	for (const item of b) {
+	for (const item of updated) {
 		const existing = map.get(item[key]);
 		map.set(item[key], existing ? { ...existing, ...item } : item);
 	}
