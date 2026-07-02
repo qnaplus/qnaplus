@@ -5,6 +5,7 @@ import { CurlImpersonateScrapingClient } from "@qnaplus/scraper-strategies";
 import { getMetadata, testConnection } from "@qnaplus/store";
 import { Cron } from "croner";
 import type { Logger } from "pino";
+import { updateRecfDatabase } from "./recf/update_database";
 import { updateDatabase } from "./update_database";
 import { updateForumStatus } from "./update_forum_status";
 import { updateStorage } from "./update_storage";
@@ -20,6 +21,9 @@ const update = async (client: FetchClient<FetchClientResponse>, logger: Logger) 
 		return;
 	}
 	const updates = await updateDatabase(client, meta, logger);
+	// RECF questions are kept out of storage until the webapp supports them;
+	// their updates still reach the bot through the database event triggers
+	await updateRecfDatabase(logger);
 	if (updates.length > 0) {
 		await updateStorage(updates, meta, logger);
 	}

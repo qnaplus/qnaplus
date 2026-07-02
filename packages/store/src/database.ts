@@ -5,7 +5,12 @@ import { and, eq, getTableColumns, gte, inArray, or, sql } from "drizzle-orm";
 import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
-import { type EventQueueAggregation, EventQueueType } from "./schema_types";
+import {
+	type EventQueueAggregation,
+	EventQueueType,
+	type QuestionSource,
+	type StoredQuestion,
+} from "./schema_types";
 
 const pg = lazy(() => postgres(getenv("SUPABASE_TRANSACTION_URL")));
 export const db = lazy(() => drizzle({ schema, client: pg() }));
@@ -67,8 +72,17 @@ export const getAnsweredQuestionsNewerThanDate = async (
 	);
 };
 
+export const getQuestionsByProgram = async (
+	program: string,
+	d: PostgresJsDatabase<typeof schema> = db(),
+) => {
+	return trycatch(() =>
+		d.select().from(schema.questions).where(eq(schema.questions.program, program)),
+	);
+};
+
 export const insertQuestions = async (
-	data: Question[],
+	data: StoredQuestion[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
 	return trycatch(() => d.insert(schema.questions).values(data));
@@ -91,6 +105,7 @@ const EXCLUDED_QUESTION = {
 	answeredTimestampMs: sql`excluded."answeredTimestampMs"`,
 	answered: sql`excluded.answered`,
 	tags: sql`excluded.tags`,
+	source: sql`excluded.source`,
 };
 
 const QUESTION_UPDATED_QUERY = or(
@@ -100,7 +115,7 @@ const QUESTION_UPDATED_QUERY = or(
 );
 
 export const updateQuestions = async (
-	data: Question[],
+	data: StoredQuestion[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
 	return trycatch(() =>
@@ -182,7 +197,7 @@ export const getReplayEvents = async (d: PostgresJsDatabase<typeof schema> = db(
 };
 
 export const insertReplayEvents = async (
-	questions: Question[],
+	questions: StoredQuestion[],
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
 	const events = questions.map((question) => ({
@@ -200,14 +215,49 @@ export const clearReplayEvents = async (d: PostgresJsDatabase<typeof schema> = d
 	);
 };
 
-export const getAllPrograms = async (d: PostgresJsDatabase<typeof schema> = db()) => {
+export const getAllPrograms = async (
+	source: QuestionSource,
+	d: PostgresJsDatabase<typeof schema> = db(),
+) => {
 	return trycatch(() =>
-		d.selectDistinct({ program: schema.questions.program }).from(schema.questions),
+		d
+			.selectDistinct({ program: schema.questions.program })
+			.from(schema.questions)
+			.where(eq(schema.questions.source, source)),
 	);
 };
 
 export const getForumStates = async (d: PostgresJsDatabase<typeof schema> = db()) => {
 	return trycatch(() => d.select().from(schema.forum_state));
+};
+
+/**
+ * Retrieves the last known ETag for the given resource (e.g., a request URL),
+ * or `null` if the resource has never been fetched.
+ */
+export const getEtag = async (resource: string, d: PostgresJsDatabase<typeof schema> = db()) => {
+	return trycatch(async () => {
+		const row = await d.query.etag_cache.findFirst({
+			where: eq(schema.etag_cache.resource, resource),
+		});
+		return row?.etag ?? null;
+	});
+};
+
+export const upsertEtag = async (
+	resource: string,
+	etag: string,
+	d: PostgresJsDatabase<typeof schema> = db(),
+) => {
+	return trycatch(() =>
+		d
+			.insert(schema.etag_cache)
+			.values({ resource, etag })
+			.onConflictDoUpdate({
+				target: schema.etag_cache.resource,
+				set: { etag, updatedAt: sql`now()` },
+			}),
+	);
 };
 
 export const updateForumStates = async (

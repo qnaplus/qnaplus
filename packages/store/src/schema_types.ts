@@ -1,17 +1,39 @@
 import type { Question } from "@qnaplus/scraper";
 import type { forum_state, metadata } from "./schema";
 
+/**
+ * The Q&A system a question originates from.
+ */
+export enum QuestionSource {
+	/**
+	 * The VEX Robotics Q&A (collected by scraping the forum).
+	 */
+	VEX = "vex",
+	/**
+	 * The RECF Q&A (collected through the RECF developer API).
+	 */
+	RECF = "recf",
+}
+
+/**
+ * A {@link Question} as it is stored in the database, along with
+ * qnaplus-specific metadata.
+ */
+export type StoredQuestion = Question & {
+	source: QuestionSource;
+};
+
 export type ForumState = typeof forum_state.$inferSelect;
 
 export type Metadata = typeof metadata.$inferSelect;
 
 export type AnsweredPayload = {
-	question: Question;
+	question: StoredQuestion;
 };
 
 export type AnswerEditedPayload = {
-	before: Question;
-	after: Question;
+	before: StoredQuestion;
+	after: StoredQuestion;
 };
 
 export type ReplayPayload = AnsweredPayload;

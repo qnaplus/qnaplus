@@ -5,7 +5,13 @@ import {
 	checkIfReadOnly,
 	pingQna,
 } from "@qnaplus/scraper";
-import { getAllPrograms, getForumStates, Metadata, updateForumStates } from "@qnaplus/store";
+import {
+	getAllPrograms,
+	getForumStates,
+	Metadata,
+	QuestionSource,
+	updateForumStates,
+} from "@qnaplus/store";
 import type { Logger } from "pino";
 
 type ProgramState = {
@@ -28,7 +34,9 @@ export const updateForumStatus = async (
 ) => {
 	const logger = logger_.child({ label: "update_forum_status" });
 	logger.info("Starting programs update.");
-	const [programsError, programs] = await getAllPrograms();
+	// forum states only exist for the VEX Q&A; the RECF Q&A has no
+	// equivalent open/closed concept
+	const [programsError, programs] = await getAllPrograms(QuestionSource.VEX);
 	if (programsError) {
 		logger.error(
 			{ error: programsError },

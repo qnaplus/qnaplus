@@ -10,7 +10,7 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
-import { EventQueueType } from "./schema_types";
+import { EventQueueType, QuestionSource } from "./schema_types";
 import { numeric } from "drizzle-orm/pg-core";
 
 export const questions = pgTable("questions", {
@@ -30,6 +30,7 @@ export const questions = pgTable("questions", {
 	answeredTimestampMs: bigint({ mode: "number" }),
 	answered: boolean().notNull(),
 	tags: text().array().notNull(),
+	source: text().$type<QuestionSource>().notNull().default(QuestionSource.VEX),
 }).enableRLS();
 
 export const metadata = pgTable("metadata", {
@@ -48,4 +49,10 @@ export const event_queue = pgTable("event_queue", {
 export const forum_state = pgTable("forum_state", {
 	program: text().primaryKey(),
 	open: boolean().notNull().default(true),
+}).enableRLS();
+
+export const etag_cache = pgTable("etag_cache", {
+	resource: text().primaryKey(),
+	etag: text().notNull(),
+	updatedAt: timestamp().notNull().defaultNow(),
 }).enableRLS();

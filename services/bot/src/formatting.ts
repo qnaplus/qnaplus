@@ -12,6 +12,9 @@ const colors: Record<string, ColorResolvable> = {
 	VAIRC: "#42f569",
 	VIQRC: "#4290f5",
 	judging: "#f5ad42",
+	inspire: "#42d7f5",
+	achieve: "#f5428a",
+	engage: "#7df542",
 };
 
 export const buildQuestionUrl = (id: string) => {

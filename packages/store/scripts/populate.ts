@@ -1,6 +1,7 @@
 import {
 	type FetchClient,
 	type FetchClientResponse,
+	type Question,
 	getAllQuestions as archiverGetAllQuestions,
 	fetchCurrentSeason,
 	getOldestQuestion,
@@ -17,13 +18,18 @@ import {
 	testConnection,
 } from "../src/database";
 import * as schema from "../src/schema";
+import { QuestionSource, type StoredQuestion } from "../src/schema_types";
+
+const asVexQuestions = (questions: Question[]): StoredQuestion[] => {
+	return questions.map((question) => ({ ...question, source: QuestionSource.VEX }));
+};
 
 export const populate = async (
 	client: FetchClient<FetchClientResponse>,
 	logger?: Logger,
 ) => {
 	const { questions } = await archiverGetAllQuestions({ client, logger });
-	return insertQuestions(questions);
+	return insertQuestions(asVexQuestions(questions));
 };
 
 export const populateWithMetadata = async (
@@ -55,7 +61,7 @@ export const populateWithMetadata = async (
 	const [error] = await trycatch(() =>
 		db().transaction(async (tx) => {
 			if (questions.length !== 0) {
-				await insertQuestions(questions, tx);
+				await insertQuestions(asVexQuestions(questions), tx);
 			}
 			await tx.insert(schema.metadata).values({
 				id: METADATA_ROW_ID,
