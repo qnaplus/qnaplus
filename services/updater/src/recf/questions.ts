@@ -14,22 +14,6 @@ export type RecfProgram = (typeof RECF_PROGRAMS)[number];
 
 const RECF_GAMES_URL = "https://games.recf.org";
 
-/**
- * Builds the unique question id used to store an RECF question. Namespacing
- * by program slug keeps ids unique across programs and guarantees no
- * collision with the (purely numeric) VEX question ids.
- */
-export const buildRecfQuestionId = (slug: RecfProgram, qnaNumber: number) => {
-	return `${slug}-${qnaNumber}`;
-};
-
-/**
- * Recovers the Q&A number from an id produced by {@link buildRecfQuestionId}.
- */
-export const parseRecfQnaNumber = (slug: RecfProgram, id: string) => {
-	return Number.parseInt(id.slice(slug.length + 1), 10);
-};
-
 export const buildRecfQuestionUrl = (slug: RecfProgram, qnaNumber: number) => {
 	return `${RECF_GAMES_URL}/${slug}/qa/${qnaNumber}`;
 };
@@ -91,7 +75,7 @@ export const toStoredQuestion = (
 				};
 
 	return {
-		id: buildRecfQuestionId(slug, qnaNumber),
+		id: `${qnaNumber}`,
 		url: buildRecfQuestionUrl(slug, qnaNumber),
 		program: slug,
 		season: detail.season?.name ?? detail.season?.slug ?? "unknown",

@@ -8,7 +8,7 @@ import * as schema from "./schema";
 import {
 	type EventQueueAggregation,
 	EventQueueType,
-	type QuestionSource,
+	QuestionSource,
 	type StoredQuestion,
 } from "./schema_types";
 
@@ -30,9 +30,14 @@ export const testConnection = async (d: PostgresJsDatabase<typeof schema> = db()
 
 export const getQuestion = async (
 	id: Question["id"],
+	source: QuestionSource = QuestionSource.VEX,
 	d: PostgresJsDatabase<typeof schema> = db(),
 ) => {
-	return trycatch(() => d.query.questions.findFirst({ where: eq(schema.questions.id, id) }));
+	return trycatch(() =>
+		d.query.questions.findFirst({
+			where: and(eq(schema.questions.id, id), eq(schema.questions.source, source)),
+		}),
+	);
 };
 
 export const getAllQuestions = async (d: PostgresJsDatabase<typeof schema> = db()) => {
@@ -69,15 +74,6 @@ export const getAnsweredQuestionsNewerThanDate = async (
 					eq(schema.questions.answered, true),
 				),
 			),
-	);
-};
-
-export const getQuestionsByProgram = async (
-	program: string,
-	d: PostgresJsDatabase<typeof schema> = db(),
-) => {
-	return trycatch(() =>
-		d.select().from(schema.questions).where(eq(schema.questions.program, program)),
 	);
 };
 
@@ -123,7 +119,7 @@ export const updateQuestions = async (
 			.insert(schema.questions)
 			.values(data)
 			.onConflictDoUpdate({
-				target: schema.questions.id,
+				target: [schema.questions.program, schema.questions.id],
 				set: EXCLUDED_QUESTION,
 				setWhere: QUESTION_UPDATED_QUERY,
 			})
@@ -231,17 +227,8 @@ export const getForumStates = async (d: PostgresJsDatabase<typeof schema> = db()
 	return trycatch(() => d.select().from(schema.forum_state));
 };
 
-/**
- * Retrieves the last known ETag for the given resource (e.g., a request URL),
- * or `null` if the resource has never been fetched.
- */
-export const getEtag = async (resource: string, d: PostgresJsDatabase<typeof schema> = db()) => {
-	return trycatch(async () => {
-		const row = await d.query.etag_cache.findFirst({
-			where: eq(schema.etag_cache.resource, resource),
-		});
-		return row?.etag ?? null;
-	});
+export const getAllEtags = async (d: PostgresJsDatabase<typeof schema> = db()) => {
+	return trycatch(() => d.select().from(schema.etag_cache));
 };
 
 export const upsertEtag = async (
@@ -258,6 +245,24 @@ export const upsertEtag = async (
 				set: { etag, updatedAt: sql`now()` },
 			}),
 	);
+};
+
+/**
+ * Retrieves the question number the given RECF program's update should start
+ * iterating from, defaulting to 1 when the program has no metadata row. Like
+ * {@link Metadata.start}, this is a manually managed lever for skipping
+ * questions from previous seasons.
+ */
+export const getRecfStart = async (
+	program: string,
+	d: PostgresJsDatabase<typeof schema> = db(),
+) => {
+	return trycatch(async () => {
+		const row = await d.query.recf_metadata.findFirst({
+			where: eq(schema.recf_metadata.program, program),
+		});
+		return row?.start ?? 1;
+	});
 };
 
 export const updateForumStates = async (

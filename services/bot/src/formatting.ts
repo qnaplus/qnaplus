@@ -1,6 +1,10 @@
 import { getenv } from "@qnaplus/dotenv";
-import type { Question } from "@qnaplus/scraper";
-import type { EventQueueItem, EventQueueType } from "@qnaplus/store";
+import {
+	type EventQueueItem,
+	type EventQueueType,
+	QuestionSource,
+	type StoredQuestion,
+} from "@qnaplus/store";
 import { chunk } from "@qnaplus/utils";
 import { capitalizeFirstLetter } from "@sapphire/utilities";
 import { diffSentences } from "diff";
@@ -21,8 +25,18 @@ export const buildQuestionUrl = (id: string) => {
 	return `${getenv("QNA_WEBSITE")}/${id}`;
 };
 
-const baseEmbedDescription = ({ author, askedTimestamp, title, id }: Question) => {
-	return `Asked by ${author} on ${askedTimestamp}\n${bold("Question")}: ${hyperlink(title, buildQuestionUrl(id))}`;
+/**
+ * The link a broadcast should point readers to. The qnaplus website only
+ * renders VEX questions (and routes them by their VEX question number), so
+ * RECF questions link to their page on the RECF site instead.
+ */
+export const getQuestionLink = (question: StoredQuestion) => {
+	return question.source === QuestionSource.RECF ? question.url : buildQuestionUrl(question.id);
+};
+
+const baseEmbedDescription = (question: StoredQuestion) => {
+	const { author, askedTimestamp, title } = question;
+	return `Asked by ${author} on ${askedTimestamp}\n${bold("Question")}: ${hyperlink(title, getQuestionLink(question))}`;
 };
 
 type ChangeFormatMap = {

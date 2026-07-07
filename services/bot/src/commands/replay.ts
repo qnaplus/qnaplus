@@ -1,6 +1,6 @@
 import { getenv } from "@qnaplus/dotenv";
-import type { Question } from "@qnaplus/scraper";
 import {
+	type StoredQuestion,
 	clearReplayEvents,
 	getAnsweredQuestionsNewerThanDate,
 	getQuestion,
@@ -13,7 +13,7 @@ import { PaginatedFieldMessageEmbed } from "@sapphire/discord.js-utilities";
 import type { Subcommand } from "@sapphire/plugin-subcommands";
 import { Cron } from "croner";
 import { EmbedBuilder, hyperlink, inlineCode } from "discord.js";
-import { buildQuestionUrl } from "../formatting";
+import { getQuestionLink } from "../formatting";
 import replay from "../interactions";
 import type { PinoLoggerAdapter } from "../utils/logger_adapter";
 import { LoggerSubcommand } from "../utils/logger_subcommand";
@@ -189,12 +189,13 @@ export class Replay extends LoggerSubcommand {
 		}
 
 		const template = new EmbedBuilder().setColor("Blurple");
-		const formatter = ({ author, askedTimestamp, title, id }: Question, index: number) => {
+		const formatter = (question: StoredQuestion, index: number) => {
 			const num = ` #${index + 1} `;
-			return `${inlineCode(num)} ${hyperlink(title, buildQuestionUrl(id))}\nAsked by ${author} on ${askedTimestamp}\n`;
+			const { author, askedTimestamp, title } = question;
+			return `${inlineCode(num)} ${hyperlink(title, getQuestionLink(question))}\nAsked by ${author} on ${askedTimestamp}\n`;
 		};
 
-		new PaginatedFieldMessageEmbed<Question>()
+		new PaginatedFieldMessageEmbed<StoredQuestion>()
 			.setTitleField("Replay Queue")
 			.setTemplate(template)
 			.setItems(questions)
